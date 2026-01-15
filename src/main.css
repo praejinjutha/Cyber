@@ -1,0 +1,1542 @@
+/* main.css - refreshed layout for LearnSecure
+   Notes:
+   - Neutral, clean, easy-to-scan UI
+   - Mobile-first, responsive grid
+*/
+
+:root{
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+
+  --primary: #2563eb;
+  --primary-ink: #ffffff;
+
+  --danger: #ef4444;
+  --danger-ink: #ffffff;
+
+  --shadow: 0 10px 30px rgba(17,24,39,.08);
+  --radius: 16px;
+  --radius-sm: 12px;
+}
+
+*{ box-sizing: border-box; }
+html, body{ height: 100%; }
+body{
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans Thai", "Noto Sans", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+button{ font: inherit; }
+
+/* App shell */
+.edu-app{
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Topbar */
+.edu-topbar{
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255,255,255,0.4);
+}
+
+
+.edu-topbar__inner{
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.edu-topbar__brand{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 220px;
+}
+
+.edu-brandmark{
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(17,24,39,.08);
+  background: #fff;
+}
+
+.edu-brandtext__title{
+  font-weight: 800;
+  letter-spacing: .2px;
+  line-height: 1.1;
+}
+.edu-brandtext__subtitle{
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.1;
+}
+
+.edu-topbar__right{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* User chip */
+.edu-userchip{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.edu-userchip__avatar{
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #f3f4f6;
+  border: 1px solid var(--line);
+  color: #374151;
+}
+
+.edu-userchip__name{
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.1;
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.edu-userchip__role{
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.1;
+}
+
+/* Layout container */
+.edu-layout{
+  flex: 1;
+  max-width: 1120px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 18px 16px 42px;
+}
+
+/* Buttons */
+.edu-btn{
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform .06s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+  white-space: nowrap;
+}
+
+.edu-btn:active{ transform: translateY(1px); }
+.edu-btn:focus-visible{
+  outline: 3px solid rgba(37,99,235,.25);
+  outline-offset: 2px;
+}
+
+.edu-btn--primary{
+  background: var(--primary);
+  border-color: rgba(37,99,235,.35);
+  color: var(--primary-ink);
+  box-shadow: 0 12px 24px rgba(37,99,235,.16);
+}
+.edu-btn--primary:hover{
+  box-shadow: 0 16px 34px rgba(37,99,235,.22);
+}
+
+/* ปุ่มกลับหน้าหลัก */
+.edu-btn--ghost {
+  background: linear-gradient(
+    135deg,
+    #166534 0%,   /* เขียวเข้ม */
+    #064e3b 100%  /* เขียวเข้มมาก */
+  );
+  color: #ffffff;
+  box-shadow: 0 16px 34px rgba(6, 78, 59, 0.55);
+  border: 1px solid rgba(6, 95, 70, 0.9);
+}
+
+/* hover */
+.edu-btn--ghost:hover {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+  box-shadow: 0 22px 44px rgba(6, 78, 59, 0.7);
+}
+
+
+.edu-btn--back {
+  background: #808080; /* สีเทา */
+  color: #ffffff; /* ตัวอักษรเป็นสีขาว */
+  box-shadow: 0 16px 34px rgba(128, 128, 128, 0.55); /* เงาสีเทา */
+  border: 1px solid rgba(128, 128, 128, 0.9); /* ขอบสีเทา */
+}
+
+
+
+.edu-btn--danger{
+  background: var(--danger);
+  border-color: rgba(239,68,68,.35);
+  color: var(--danger-ink);
+  box-shadow: 0 10px 20px rgba(239,68,68,.12);
+}
+.edu-btn--danger:hover{
+  box-shadow: 0 14px 28px rgba(239,68,68,.18);
+}
+
+/* Hero */
+.edu-hero{
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+
+.edu-hero__card{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.edu-hero__row{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.edu-hero__headline{
+  min-width: 220px;
+  flex: 1 1 420px;
+}
+.edu-hero__title{
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+.edu-hero__sub{
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.edu-inlineSpinner{
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  display: inline-block;
+  border: 2px solid #e5e7eb;
+  border-top-color: #9ca3af;
+  margin-right: 8px;
+  animation: spin .9s linear infinite;
+  vertical-align: -2px;
+}
+@keyframes spin{ to{ transform: rotate(360deg); } }
+
+/* Mode cards */
+.edu-modes{
+  flex: 0 1 520px;
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.edu-mode{
+  width: 100%;
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform .06s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+}
+
+.edu-mode:hover{
+  background: rgba(255,255,255,.9);
+  box-shadow: 0 14px 30px rgba(17,24,39,.10);
+}
+
+.edu-mode:active{ transform: translateY(1px); }
+.edu-mode:focus-visible{
+  outline: 3px solid rgba(37,99,235,.25);
+  outline-offset: 2px;
+}
+
+.edu-mode__left{
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.edu-mode__icon{
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: #f3f4f6;
+  color: #374151;
+  flex: 0 0 auto;
+}
+
+.edu-mode__title{
+  font-weight: 900;
+  font-size: 15px;
+  line-height: 1.25;
+}
+.edu-mode__desc{
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.edu-mode__right{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.edu-badge{
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: #374151;
+  background: #f9fafb;
+}
+
+.edu-badge--primary{
+  color: var(--primary-ink);
+  background: rgba(37,99,235,.95);
+  border-color: rgba(37,99,235,.35);
+}
+
+.edu-mode--primary{
+  border-color: rgba(37,99,235,.35);
+  background: linear-gradient(0deg, rgba(37,99,235,.06), rgba(37,99,235,.06)), #fff;
+}
+
+.edu-mode--primary .edu-mode__icon{
+  border-color: rgba(37,99,235,.25);
+  background: rgba(37,99,235,.10);
+  color: #1d4ed8;
+}
+
+/* Grid layout */
+.edu-grid{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 980px){
+  .edu-grid{
+    grid-template-columns: 1.2fr .8fr;
+    align-items: start;
+  }
+}
+
+/* Panels */
+.edu-panel{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 26px rgba(17,24,39,.06);
+  padding: 14px;
+}
+
+.edu-panel + .edu-panel{ margin-top: 14px; }
+
+.edu-panel__head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.edu-panel__title{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+.edu-linkbtn{
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 800;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+.edu-linkbtn:hover{ background: rgba(37,99,235,.08); }
+.edu-linkbtn:focus-visible{
+  outline: 3px solid rgba(37,99,235,.25);
+  outline-offset: 2px;
+}
+
+/* Stats */
+.edu-stats{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+@media (min-width: 680px){
+  .edu-stats{ grid-template-columns: repeat(3, 1fr); }
+}
+
+.edu-stat{
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  background: #fbfbfd;
+}
+.edu-stat__label{
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+.edu-stat__value{
+  margin-top: 8px;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+.edu-stat__hint{
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Courses */
+.edu-courses{
+  display: grid;
+  gap: 10px;
+}
+
+.edu-course{
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform .06s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.edu-course:hover{
+  box-shadow: 0 14px 30px rgba(17,24,39,.10);
+}
+.edu-course:active{ transform: translateY(1px); }
+
+.edu-course__badge{
+  font-weight: 900;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #f9fafb;
+  white-space: nowrap;
+}
+.edu-course__badge--alt{ background: rgba(37,99,235,.08); border-color: rgba(37,99,235,.18); }
+
+.edu-course__meta{ flex: 1; min-width: 0; }
+.edu-course__title{ font-weight: 900; }
+.edu-course__desc{
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.edu-course__progress{
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.edu-meter{
+  height: 8px;
+  width: 100%;
+  background: #eef2ff;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(37,99,235,.12);
+}
+.edu-meter__bar{
+  height: 100%;
+  width: 0%;
+  background: rgba(37,99,235,.9);
+  border-radius: 999px;
+}
+.edu-course__pct{ font-size: 12px; color: var(--muted); font-weight: 800; }
+
+/* Actions list */
+.edu-actions{
+  display: grid;
+  gap: 10px;
+}
+
+.edu-action{
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform .06s ease, box-shadow .12s ease;
+}
+.edu-action:hover{ box-shadow: 0 14px 30px rgba(17,24,39,.10); }
+.edu-action:active{ transform: translateY(1px); }
+
+.edu-action__icon{
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: #f3f4f6;
+  color: #374151;
+  flex: 0 0 auto;
+}
+
+.edu-action__text{ flex: 1; min-width: 0; }
+.edu-action__title{ font-weight: 900; display: block; }
+.edu-action__desc{
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  display: block;
+}
+
+.edu-action__arrow,
+.edu-course__arrow{
+  color: #9ca3af;
+  flex: 0 0 auto;
+}
+
+/* Todo */
+.edu-todo{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.edu-todo__item{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 10px;
+  background: #fff;
+}
+
+.edu-todo__item--muted{
+  background: #fbfbfd;
+  opacity: .92;
+}
+
+.edu-dot{
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(37,99,235,.85);
+  display: inline-block;
+  margin-right: 6px;
+  flex: 0 0 auto;
+}
+.edu-dot--muted{ background: #9ca3af; }
+
+.edu-mini{
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  color: #374151;
+}
+.edu-mini:hover{ background: #f9fafb; }
+.edu-mini:focus-visible{
+  outline: 3px solid rgba(37,99,235,.25);
+  outline-offset: 2px;
+}
+
+.edu-note{
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+
+.edu-panel,
+.edu-hero__card,
+.edu-mode,
+.edu-course,
+.edu-action {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(10px);
+}
+
+.edu-app {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.edu-app::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("./assets/bg2.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(2px);
+  transform: scale(1.03);   /* แทบไม่รู้สึกว่าซูม */
+  z-index: -1;
+}
+
+
+
+
+
+/* ===== Lessons / LessonDetail additions ===== */
+
+.edu-lessons__toolbar{
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.edu-seg{
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255,255,255,.75);
+}
+
+.edu-segWrap{
+  display: flex;
+  justify-content: center; /* ✅ กลางเป๊ะ */
+  margin: 15px 0;
+}
+
+
+.edu-seg__btn{
+  border: 0;
+  background: transparent;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 900;
+  color: #374151;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.edu-seg__btn:hover{ background: rgba(37,99,235,.08); }
+.edu-seg__btn.is-active{
+  background: rgba(37,99,235,.12);
+  color: #1d4ed8;
+}
+
+.edu-lessons__meta{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.edu-miniStat{
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: #ffffff;
+  min-width: 150px;
+}
+.edu-miniStat__label{ color: var(--muted); font-size: 12px; font-weight: 900; }
+.edu-miniStat__value{ margin-top: 6px; font-size: 16px; font-weight: 900; }
+
+.edu-lessons{
+  display: grid;
+  gap: 10px;
+}
+
+.edu-lessonCard{
+  width: 100%;
+  height: 100%;              /* สำคัญ: ให้เต็มช่อง grid */
+  text-align: left;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;   /* จาก center -> top จะดูเป็นการ์ด */
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform .06s ease, box-shadow .12s ease;
+}
+.edu-lessonCard:hover{ box-shadow: 0 14px 30px rgba(17,24,39,.10); }
+.edu-lessonCard:active{ transform: translateY(1px); }
+
+.edu-lessonCard__left{
+  display: flex;
+  align-items: flex-start;   /* จาก center -> top */
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.edu-lessonNo{
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(37,99,235,.10);
+  border: 1px solid rgba(37,99,235,.20);
+  color: #1d4ed8;
+  font-weight: 900;
+  flex: 0 0 auto;
+}
+
+.edu-lessonCard__meta{ min-width: 0; }
+.edu-lessonCard__title{ font-weight: 900; }
+.edu-lessonCard__desc{
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.edu-lessonCard__tags{
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.edu-lessonCard__meta{
+  min-width: 0;
+  flex: 1;                   /* ให้พื้นที่ข้อความขยาย */
+}
+
+.edu-lessonCard__arrow{
+  flex: 0 0 auto;
+  opacity: .6;
+  margin-top: 4px;
+}
+
+.edu-lessons{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 4 ต่อแถว */
+  gap: 14px;
+}
+
+/* จอกลางเหลือ 3 ต่อแถว */
+@media (max-width: 1024px){
+  .edu-lessons{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* แท็บเล็ต/มือถือใหญ่เหลือ 2 ต่อแถว */
+@media (max-width: 768px){
+  .edu-lessons{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* มือถือเล็ก 1 ต่อแถว */
+@media (max-width: 420px){
+  .edu-lessons{
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.edu-pill{
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #f9fafb;
+  color: #374151;
+}
+.edu-pill--muted{
+  color: var(--muted);
+  background: #fbfbfd;
+}
+
+.edu-lessonCard__arrow{
+  color: #9ca3af;
+  flex: 0 0 auto;
+}
+
+.edu-lessonNav{
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.edu-lessonNav__right{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.edu-lessonContent h2{
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 900;
+}
+.edu-lessonContent p, .edu-lessonContent li{
+  color: #374151;
+  line-height: 1.55;
+}
+.edu-lessonContent ul{ margin-top: 0; }
+
+.edu-callout{
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(37,99,235,.20);
+  background: rgba(37,99,235,.06);
+}
+
+.edu-lessonActions{
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ===== DashScore layout (match screenshot) ===== */
+
+.dash--score {
+  padding-top: 12px;
+}
+
+.dash__grid--score {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+/* Desktop layout */
+@media (min-width: 980px) {
+  .dash__grid--score {
+    grid-template-columns: 2fr 1.1fr;
+    grid-template-areas:
+      "pre  pre"
+      "post final"
+      "cta  .";
+    align-items: start;
+  }
+
+  .dashCard--pre   { grid-area: pre; }
+  .dashCard--post  { grid-area: post; }
+  .dashCard--final { grid-area: final; }
+  .dashCard--cta   { grid-area: cta; }
+
+  /* ให้ Final ลอยเหมือนภาพ (ถ้าไม่อยากให้ sticky ลบออกได้) */
+  .dashCard--final {
+    position: sticky;
+    top: 92px;
+  }
+}
+
+
+/* ===== Home background logo (โล่ง ไม่ชน content) ===== */
+
+.edu-hero--home{
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== Home background logo (โล่งใน card และไม่ทับ content) ===== */
+
+.edu-hero__card--home{
+  position: relative;
+  overflow: hidden;
+}
+
+/* โลโก้อยู่ “ในพื้นที่โล่งฝั่งซ้าย” ของ card */
+.edu-hero__card--home::before{
+  content: "";
+  position: absolute;
+  left: 60px;
+  top: 74%;
+  transform: translateY(-50%);
+  width: 420px;
+  height: 420px;
+
+  background-image: url("./assets/home.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+
+  opacity: 0.10;          /* เดิม 0.08 */
+  filter: saturate(1.1); /* ดึงสีขึ้นนิดเดียว */
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+
+/* ดันเนื้อหาทั้งหมดให้อยู่เหนือโลโก้ */
+.edu-hero__card--home .edu-hero__row{
+  position: relative;
+  z-index: 1;
+}
+
+
+/* 🔴 ปุ่มทำ Pretest: สีแดง + วิ้งๆ กระพริบ */
+.edu-btn--pretestBlink {
+  background: #e11d48;            /* แดง */
+  border: 1px solid #fb7185;      /* แดงอ่อน */
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+
+  animation: eduPretestPulse 1s infinite;
+  box-shadow: 0 10px 24px rgba(225, 29, 72, 0.35);
+}
+
+.edu-btn--pretestBlink:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+/* วิ้งเป็นแถบกวาด */
+.edu-btn--pretestBlink::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -40%;
+  width: 40%;
+  height: 140%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  animation: eduPretestShine 1.2s infinite;
+  pointer-events: none;
+}
+
+/* ตอน disabled ให้หยุดวิ้ง/กระพริบ */
+.edu-btn--pretestBlink:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  animation: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.edu-btn--pretestBlink:disabled::after {
+  animation: none;
+  display: none;
+}
+
+@keyframes eduPretestPulse {
+  0%   { box-shadow: 0 10px 24px rgba(225, 29, 72, 0.25); }
+  50%  { box-shadow: 0 10px 30px rgba(225, 29, 72, 0.55); }
+  100% { box-shadow: 0 10px 24px rgba(225, 29, 72, 0.25); }
+}
+
+@keyframes eduPretestShine {
+  0%   { left: -50%; opacity: 0; }
+  20%  { opacity: 1; }
+  60%  { opacity: 1; }
+  100% { left: 120%; opacity: 0; }
+}
+
+
+/* ====== LOCKED STATE ====== */
+.edu-lessonCard.is-locked{
+  opacity: .55;
+  filter: grayscale(.25);
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.edu-lessonCard.is-locked:hover{
+  box-shadow: none;
+}
+
+.edu-lessonCard.is-locked .edu-lessonNo{
+  background: rgba(148,163,184,.18);
+  border: 1px solid rgba(148,163,184,.35);
+  color: #64748b;
+}
+
+.edu-lessonCard.is-locked .edu-lessonCard__arrow{
+  opacity: .25;
+}
+
+/* pill สำหรับ lock/ok */
+.edu-pill{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid rgba(15,23,42,.08);
+  background: rgba(15,23,42,.04);
+}
+
+.edu-pill--muted{
+  opacity: .7;
+}
+
+.edu-pill--lock{
+  background: rgba(239,68,68,.08);
+  border-color: rgba(239,68,68,.20);
+  color: #b91c1c;
+}
+
+.edu-pill--ok{
+  background: rgba(34,197,94,.10);
+  border-color: rgba(34,197,94,.22);
+  color: #166534;
+}
+
+
+.edu-lockNotice{
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(239,68,68,.22);
+  background: rgba(239,68,68,.08);
+  color: #b91c1c;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+
+/* ====== OPTIONAL: ทำการ์ดแนะนำ/บทถัดไปให้เด่นขึ้นนิด ====== */
+.edu-lessonCard.is-recommended{
+  outline: 2px solid rgba(59,130,246,.18);
+}
+
+.edu-lessonCard.is-next{
+  outline: 2px solid rgba(34,197,94,.18);
+}
+
+/* ====== pill เพิ่มใหม่ ====== */
+.edu-pill--rec{
+  background: rgba(59,130,246,.10);
+  border-color: rgba(59,130,246,.22);
+  color: #1d4ed8;
+}
+
+.edu-pill--next{
+  background: rgba(34,197,94,.10);
+  border-color: rgba(34,197,94,.22);
+  color: #166534;
+}
+
+
+/* ===== Adaptive ===== */
+.edu-adaptive__section {
+  margin-bottom: 28px;
+}
+
+.edu-adaptivePassed {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.edu-passChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(34,197,94,.25);
+  background: rgba(34,197,94,.10);
+  font-weight: 700;
+}
+
+/* ===== Path ===== */
+.edu-adaptivePath {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edu-pathItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.edu-pathItem.is-locked {
+  opacity: .5;
+}
+
+.edu-pathStep {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(59,130,246,.12);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+}
+
+.edu-pathLock {
+  font-size: 13px;
+  color: #b91c1c;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ===== Adaptive layout ===== */
+.edu-adaptiveGrid{
+  display: grid;
+  grid-template-columns: 1.4fr .9fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 980px){
+  .edu-adaptiveGrid{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* card base (ถ้ามีอยู่แล้วข้ามได้) */
+.edu-card{
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+/* header */
+.edu-adaptiveBlock__head{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.edu-adaptiveBlock__title{
+  font-weight: 900;
+  font-size: 15px;
+}
+
+.edu-adaptiveBlock__sub{
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* badges */
+.edu-badge{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(15,23,42,.04);
+}
+
+.edu-badge--ok{
+  background: rgba(34,197,94,.10);
+  border-color: rgba(34,197,94,.22);
+  color: #166534;
+}
+
+.edu-badge--yellow {
+  background: rgba(255, 193, 7, 0.1); /* สีพื้นหลังเหลือง */
+  border-color: rgba(255, 193, 7, 0.22); /* ขอบของปุ่ม */
+  color: #FF8F00; /* สีตัวอักษร */
+}
+
+
+.edu-badge--lock{
+  background: rgba(239,68,68,.08);
+  border-color: rgba(239,68,68,.22);
+  color: #b91c1c;
+}
+
+.edu-badge--info{
+  background: rgba(59,130,246,.10);
+  border-color: rgba(59,130,246,.22);
+  color: #1d4ed8;
+}
+
+.edu-badge--muted{
+  opacity: .75;
+}
+
+/* ✅ ทำหัวการ์ดให้จัด layout แบบซ้าย-ขวา */
+.edu-feedbackCard__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ✅ ดัน badge/status ไปท้ายสุดของแถว */
+.edu-feedbackCard__status {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.edu-filter {
+  display: flex;
+  justify-content: center; /* จัดกลาง */
+  margin-bottom: 20px; /* เพิ่มช่องว่างด้านล่าง */
+  
+}
+
+.edu-filter select {
+  padding: 8px 16px; /* เพิ่ม padding ให้ดูสะดวกขึ้น */
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans Thai", "Noto Sans", sans-serif;
+}
+
+
+
+/* ===== Path list (สวยแบบ stepper) ===== */
+.edu-pathList{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edu-pathRow{
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(15,23,42,.08);
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 44px 1fr 22px;
+  gap: 12px;
+  align-items: center;
+  transition: transform .06s ease, box-shadow .12s ease;
+}
+
+.edu-pathRow:hover{
+  box-shadow: 0 14px 30px rgba(17,24,39,.10);
+}
+
+.edu-pathRow:active{
+  transform: translateY(1px);
+}
+
+.edu-pathRow__step{
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  background: rgba(59,130,246,.10);
+  border: 1px solid rgba(59,130,246,.20);
+  color: #1d4ed8;
+}
+
+.edu-pathRow__title{
+  font-weight: 900;
+}
+
+.edu-pathRow__desc{
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.edu-pathRow__tags{
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.edu-pathRow__arrow{
+  opacity: .6;
+}
+
+/* locked row */
+.edu-pathRow.is-locked{
+  opacity: .55;
+  filter: grayscale(.2);
+  cursor: not-allowed;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.edu-pathRow.is-locked:hover{
+  box-shadow: none;
+}
+
+.edu-pathRow.is-locked .edu-pathRow__arrow{
+  opacity: .25;
+}
+
+.edu-pathRow.is-locked .edu-pathRow__step{
+  background: rgba(148,163,184,.18);
+  border-color: rgba(148,163,184,.35);
+  color: #64748b;
+}
+
+/* ===== Passed sidebar ===== */
+.edu-passGrid{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 980px){
+  .edu-passGrid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 520px){
+  .edu-passGrid{
+    grid-template-columns: 1fr;
+  }
+}
+
+.edu-passCard{
+  text-align: left;
+  border: 1px solid rgba(34,197,94,.22);
+  background: rgba(34,197,94,.06);
+  border-radius: 14px;
+  padding: 12px;
+  transition: transform .06s ease, box-shadow .12s ease;
+}
+
+.edu-passCard:hover{
+  box-shadow: 0 14px 30px rgba(17,24,39,.10);
+}
+
+.edu-passCard:active{
+  transform: translateY(1px);
+}
+
+.edu-passCard__top{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+}
+
+.edu-passCard__no{
+  font-size: 12px;
+  opacity: .8;
+}
+
+.edu-passCard__title{
+  margin-top: 8px;
+  font-weight: 900;
+}
+
+.edu-passCard__hint{
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+
+/* =========================
+   ADAPTIVE LAYOUT (make Path primary)
+   ========================= */
+
+.edu-adaptiveGrid{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 14px;
+  align-items: start;
+}
+
+@media (max-width: 980px){
+  .edu-adaptiveGrid{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Make blocks feel consistent */
+.edu-adaptiveBlock{
+  padding: 14px;
+}
+
+/* Path block: stronger emphasis */
+.edu-adaptiveBlock:first-child{
+  border: 1px solid rgba(59,130,246,.18);
+  box-shadow: 0 10px 24px rgba(17,24,39,.06);
+}
+
+/* Passed block: quieter / secondary */
+.edu-adaptiveBlock:last-child{
+  opacity: .95;
+  border: 1px solid rgba(15,23,42,.08);
+}
+
+/* =========================
+   Path list (stepper improvements)
+   ========================= */
+
+.edu-pathRow{
+  position: relative;
+}
+
+/* vertical connector line (stepper feel) */
+.edu-pathRow::before{
+  content:"";
+  position:absolute;
+  left: 30px;              /* center-ish under step */
+  top: -10px;
+  bottom: -10px;
+  width: 2px;
+  background: rgba(15,23,42,.06);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+/* don't draw connector for the last one */
+.edu-pathList .edu-pathRow:last-child::before{
+  display:none;
+}
+
+/* keep the step above the connector */
+.edu-pathRow__step{
+  position: relative;
+  z-index: 1;
+}
+
+/* hover only when not locked */
+.edu-pathRow:not(.is-locked):hover{
+  box-shadow: 0 14px 30px rgba(17,24,39,.10);
+  border-color: rgba(59,130,246,.22);
+}
+
+/* locked row: keep readable */
+.edu-pathRow.is-locked{
+  opacity: .60;
+  filter: grayscale(.15);
+}
+
+/* =========================
+   Passed cards (more compact + clearly optional)
+   ========================= */
+
+.edu-passCard{
+  border-radius: 14px;
+}
+
+/* Make "passed" look like optional review */
+.edu-passCard__hint{
+  opacity: .85;
+}
+
+/* =========================
+   Empty/complete state (optional)
+   If you add a div with class .edu-empty inside a block
+   ========================= */
+
+.edu-empty{
+  border: 1px dashed rgba(15,23,42,.14);
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(15,23,42,.02);
+}
+
+.edu-empty__title{
+  font-weight: 900;
+}
+
+.edu-empty__sub{
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+

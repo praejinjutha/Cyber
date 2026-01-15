@@ -1,0 +1,581 @@
+:root {
+  /* ======================================================
+     🌿 Base surface (สว่าง ไม่ครึ้ม)
+  ====================================================== */
+  --pt-bg-0: #f4fbf8;   /* lightest background */
+  --pt-bg-1: #eaf6f1;   /* page base */
+  --pt-bg-2: #dff1ea;   /* section background */
+
+  --pt-ink: #0f2f25;        /* main text */
+  --pt-ink-soft: #2f5f50;   /* secondary text */
+  --pt-muted: #5f8f80;      /* hint / helper */
+
+  /* ======================================================
+     🧊 Glass surfaces (ใสแบบสว่าง)
+  ====================================================== */
+  --pt-glass: rgba(255, 255, 255, 0.55);
+  --pt-glass-2: rgba(255, 255, 255, 0.68);
+  --pt-glass-3: rgba(255, 255, 255, 0.80);
+
+  /* ======================================================
+     ─ Lines / borders (เขียวอ่อน)
+  ====================================================== */
+  --pt-line: rgba(30, 150, 120, 0.18);
+  --pt-line-strong: rgba(30, 150, 120, 0.30);
+
+  /* ======================================================
+     🌫 Shadow (นุ่ม ไม่ดำ)
+  ====================================================== */
+  --pt-shadow: 0 18px 40px rgba(20, 120, 90, 0.12);
+  --pt-shadow-soft: 0 10px 24px rgba(20, 120, 90, 0.08);
+
+  /* ======================================================
+     🍃 Accent colors (เขียวเป็นหลัก)
+  ====================================================== */
+  --pt-green: #2fd6a2;   /* primary */
+  --pt-green-soft: #7cebd0;
+  --pt-teal: #1fbfa5;
+  --pt-mint: #a8f3df;
+
+  /* ======================================================
+     🎯 Status
+  ====================================================== */
+  --pt-success: #2fd6a2;
+  --pt-warning: #f6c177;
+  --pt-danger: #ef6b6b;
+
+  /* ======================================================
+     🧩 Controls / chips
+  ====================================================== */
+  --pt-chip: rgba(47, 214, 162, 0.14);
+  --pt-chip-2: rgba(255, 255, 255, 0.65);
+
+  /* ======================================================
+     📐 Radius
+  ====================================================== */
+  --pt-r-lg: 20px;
+  --pt-r-md: 16px;
+  --pt-r-sm: 12px;
+
+  /* ======================================================
+     🔍 Focus ring
+  ====================================================== */
+  --pt-ring: 0 0 0 4px rgba(47, 214, 162, 0.30);
+
+  /* ======================================================
+     🌈 Primary gradient (เขียวล้วน)
+  ====================================================== */
+  --pt-grad: linear-gradient(
+    90deg,
+    var(--pt-green),
+    var(--pt-teal)
+  );
+}
+
+
+/* =========================================================
+   ✅ Page background (สว่างขึ้น + มี “หมอก” มากขึ้น)
+========================================================= */
+.pt-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(1100px 680px at 12% 12%, rgba(120, 120, 255, 0.22), transparent 60%),
+    radial-gradient(950px 580px at 92% 22%, rgba(0, 255, 200, 0.14), transparent 55%),
+    radial-gradient(900px 600px at 38% 96%, rgba(255, 170, 60, 0.10), transparent 55%),
+    linear-gradient(180deg, var(--pt-bg-1) 0%, var(--pt-bg-0) 100%);
+  color: var(--pt-ink);
+}
+
+/* =========================================================
+   ✅ Topbar
+========================================================= */
+.pt-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.08); /* ✅ สว่างขึ้น */
+  border-bottom: 1px solid var(--pt-line);
+}
+
+.pt-topbar__inner {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* =========================================================
+   ✅ Title
+========================================================= */
+.pt-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pt-title__icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--pt-r-sm);
+  background: var(--pt-glass-2);
+  border: 1px solid var(--pt-line);
+  box-shadow: var(--pt-shadow-soft);
+}
+
+.pt-title__h {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+}
+
+.pt-title__sub {
+  margin-top: 2px;
+  font-size: 12px;
+  opacity: 0.78;
+}
+
+/* =========================================================
+   ✅ Container
+========================================================= */
+.pt-container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 18px 16px 110px; /* เผื่อ footer sticky */
+}
+
+/* =========================================================
+   ✅ Card base
+========================================================= */
+.pt-card {
+  border-radius: var(--pt-r-lg);
+  background: var(--pt-glass);
+  border: 1px solid var(--pt-line);
+  box-shadow: var(--pt-shadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* =========================================================
+   ✅ Summary card
+========================================================= */
+.pt-card--summary {
+  padding: 14px 14px;
+  margin-bottom: 14px;
+}
+
+.pt-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.92;
+}
+
+.pt-loading__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  animation: ptPulse 1.1s ease-in-out infinite;
+}
+
+@keyframes ptPulse {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+.pt-empty {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 6px;
+  opacity: 0.98;
+}
+
+.pt-empty__h {
+  font-weight: 900;
+  margin-bottom: 2px;
+}
+
+.pt-empty__p {
+  font-size: 12px;
+  opacity: 0.78;
+}
+
+.pt-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.pt-summary__h {
+  font-weight: 900;
+  letter-spacing: 0.2px;
+}
+
+.pt-summary__p {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.84;
+}
+
+.pt-summary__progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 190px;
+  justify-content: flex-end;
+}
+
+.pt-progress {
+  height: 10px;
+  width: 140px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.10); /* ✅ สว่างขึ้น */
+  border: 1px solid var(--pt-line);
+  overflow: hidden;
+}
+
+.pt-progress__bar {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--pt-grad);
+}
+
+.pt-progress__label {
+  font-size: 12px;
+  opacity: 0.86;
+  min-width: 44px;
+  text-align: right;
+}
+
+/* =========================================================
+   ✅ Questions
+========================================================= */
+.pt-questions {
+  display: grid;
+  gap: 12px;
+}
+
+.pt-q {
+  padding: 16px;
+}
+
+.pt-q__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.pt-q__badge {
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--pt-glass-2);
+  border: 1px solid var(--pt-line);
+}
+
+.pt-q__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pt-q__type,
+.pt-q__pts {
+  font-size: 11px;
+  opacity: 0.80;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08); /* ✅ แทนดำ */
+  border: 1px solid var(--pt-line);
+}
+
+.pt-q__prompt {
+  font-size: 14px;
+  line-height: 1.55;
+  font-weight: 800;
+  letter-spacing: 0.1px;
+  margin-bottom: 12px;
+}
+
+/* =========================================================
+   ✅ Options
+========================================================= */
+.pt-options {
+  display: grid;
+  gap: 10px;
+}
+
+.pt-opt {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 12px;
+  border-radius: var(--pt-r-md);
+  cursor: pointer;
+  user-select: none;
+
+  /* ✅ จากเดิมดำทึบ -> เปลี่ยนเป็น glass อ่อน */
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--pt-line);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.10);
+
+  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.pt-opt:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--pt-line-strong);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+.pt-opt.is-selected {
+  background: rgba(120, 120, 255, 0.18);
+  border-color: rgba(120, 120, 255, 0.42);
+  box-shadow: 0 14px 34px rgba(120, 120, 255, 0.12);
+}
+
+.pt-opt__control {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+}
+
+.pt-opt__input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.pt-opt__fake {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.10);
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.18);
+}
+
+.pt-opt.is-selected .pt-opt__fake {
+  background: rgba(0, 255, 200, 0.24);
+  border-color: rgba(0, 255, 200, 0.44);
+}
+
+.pt-opt__label {
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 0.94;
+}
+
+/* =========================================================
+   ✅ Ordering
+========================================================= */
+.pt-order {
+  display: grid;
+  gap: 10px;
+}
+
+.pt-orderRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px;
+  border-radius: var(--pt-r-md);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--pt-line);
+}
+
+.pt-orderRow__index {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--pt-r-sm);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--pt-line);
+  opacity: 0.95;
+}
+
+.pt-orderRow__label {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.pt-orderRow__actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* =========================================================
+   ✅ Short answer
+========================================================= */
+.pt-short {
+  display: grid;
+  gap: 8px;
+}
+
+.pt-textarea {
+  width: 100%;
+  border-radius: var(--pt-r-md);
+  padding: 12px 12px;
+
+  /* ✅ สว่างขึ้น */
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid var(--pt-line);
+  color: var(--pt-ink);
+
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.pt-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.pt-textarea:focus {
+  border-color: rgba(120, 120, 255, 0.50);
+  box-shadow: var(--pt-ring);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.pt-short__hint {
+  font-size: 12px;
+  opacity: 0.78;
+}
+
+/* =========================================================
+   ✅ Buttons
+========================================================= */
+.pt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--pt-r-md);
+  padding: 10px 12px;
+
+  border: 1px solid var(--pt-line);
+  background: rgba(255, 255, 255, 0.10); /* ✅ สว่างขึ้น */
+  color: var(--pt-ink);
+
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.pt-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: var(--pt-line-strong);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+.pt-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.pt-btn--ghost {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pt-btn--primary {
+  background: var(--pt-grad);
+  color: rgba(0, 0, 0, 0.88);
+  font-weight: 900;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 14px 32px rgba(0, 255, 200, 0.10);
+}
+
+.pt-btn--primary:hover {
+  box-shadow: 0 18px 40px rgba(120, 120, 255, 0.12);
+}
+
+.pt-btn--mini {
+  padding: 8px 10px;
+  border-radius: var(--pt-r-sm);
+  background: rgba(255, 255, 255, 0.10);
+}
+
+/* =========================================================
+   ✅ Footer sticky submit
+========================================================= */
+.pt-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 35;
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  /* ✅ สว่างขึ้น */
+  background: rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--pt-line);
+}
+
+.pt-footer__inner {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pt-footer__note {
+  font-size: 12px;
+  opacity: 0.82;
+}
+
+/* =========================================================
+   ✅ Responsive
+========================================================= */
+@media (max-width: 640px) {
+  .pt-summary {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pt-summary__progress {
+    justify-content: space-between;
+    min-width: auto;
+  }
+
+  .pt-footer__inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pt-btn--primary {
+    justify-content: center;
+  }
+}

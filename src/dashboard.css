@@ -1,0 +1,597 @@
+/* =========================
+   Dashboard (layout v2)
+   ========================= */
+
+/* Theme */
+:root{
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+
+  --primary: #2563eb;
+  --primary-ink: #ffffff;
+
+  --danger: #ef4444;
+  --danger-ink: #ffffff;
+
+  --shadow: 0 10px 30px rgba(17,24,39,.08);
+  --radius: 16px;
+  --radius-sm: 12px;
+
+  --ring: 0 0 0 4px rgba(37,99,235,.12);
+}
+
+/* Base (ตามที่คุณให้) */
+*{ box-sizing: border-box; }
+html, body{ height: 100%; }
+body{
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans Thai", "Noto Sans", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* Container */
+.dash{
+  width: min(1180px, calc(100% - 32px));
+  margin: 22px auto 48px;
+}
+
+/* ===== Header (จัดใหม่ให้เป็นแถบบน) ===== */
+.dash__header{
+  display:flex;
+  align-items:stretch;
+  justify-content:space-between;
+  gap: 14px;
+  padding: 14px;
+  border-radius: var(--radius);
+  background: rgba(255,255,255,.85);
+  border: 1px solid rgba(229,231,235,.9);
+  box-shadow: var(--shadow);
+}
+
+.dash__title{
+  margin:0;
+  font-size: clamp(22px, 2.2vw, 30px);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.dash__subtitle{
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 70ch;
+  font-size: 13.5px;
+}
+
+.dash__user{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap: 10px;
+  min-width: 320px;
+}
+
+.dash__userBadge{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(246,247,251,.9);
+  border: 1px solid rgba(229,231,235,.95);
+}
+
+.dash__avatar{
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background:
+    radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.9), transparent 60%),
+    linear-gradient(135deg, rgba(37,99,235,.95), rgba(99,102,241,.95));
+  box-shadow: 0 10px 22px rgba(37,99,235,.18);
+}
+
+.dash__userText{ min-width:0; }
+.dash__userName{
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  font-size: 14.5px;
+}
+.dash__userMeta{
+  color: var(--muted);
+  font-size: 12.5px;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash__links{
+  width:100%;
+  display:flex;
+  gap: 10px;
+  justify-content:flex-end;
+}
+
+.dash__link{
+  text-decoration:none;
+  color: var(--text);
+  background: #fff;
+  border: 1px solid rgba(229,231,235,.95);
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 800;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  box-shadow: 0 10px 20px rgba(17,24,39,.06);
+}
+.dash__link:hover{
+  transform: translateY(-1px);
+  border-color: rgba(37,99,235,.25);
+  box-shadow: 0 14px 26px rgba(17,24,39,.10);
+}
+
+/* ===== Grid layout (ซ้าย/ขวาแบบ dashboard จริง) ===== */
+.dash__grid{
+  display:grid;
+  grid-template-columns: 1.35fr .75fr;
+  gap: 14px;
+  margin-top: 14px;
+  align-items:start;
+}
+
+/* จัดตำแหน่งการ์ด “wide” ให้ไปอยู่ฝั่งซ้ายอย่างเดียว (ไม่กินเต็มจอ) */
+.dashCard--wide{
+  grid-column: 1 / 2;
+}
+
+/* บนจอเล็ก: เรียงเป็นคอลัมน์เดียว และ wide กินเต็ม */
+@media (max-width: 980px){
+  .dash{
+    width: min(1180px, calc(100% - 22px));
+    margin-top: 16px;
+  }
+  .dash__header{
+    flex-direction:column;
+    padding: 12px;
+  }
+  .dash__user{
+    min-width: 0;
+    align-items: stretch;
+  }
+  .dash__links{ justify-content:flex-start; }
+  .dash__grid{
+    grid-template-columns: 1fr;
+  }
+  .dashCard--wide{
+    grid-column: 1 / -1;
+  }
+}
+
+/* ===== Card base ===== */
+.dashCard{
+  background: var(--card);
+  border: 1px solid rgba(229,231,235,.95);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.dashCard__head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.dashCard__title{
+  margin:0;
+  font-size: 15.5px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.dashCard__desc{
+  margin: 0 0 12px;
+  color: var(--muted);
+  line-height:1.6;
+  font-size: 13.5px;
+}
+
+/* ===== Primary card (ฝั่งขวาให้เด่น) ===== */
+.dashCard--primary{
+  position: sticky;
+  top: 14px;
+  border-color: rgba(37,99,235,.22);
+  box-shadow: 0 18px 50px rgba(37,99,235,.14);
+  background:
+    radial-gradient(700px 200px at 15% 0%, rgba(37,99,235,.10), transparent 60%),
+    radial-gradient(700px 260px at 100% 20%, rgba(99,102,241,.08), transparent 60%),
+    var(--card);
+}
+
+@media (max-width: 980px){
+  .dashCard--primary{
+    position: static;
+  }
+}
+
+/* Pill */
+.dashPill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12.5px;
+  color: var(--primary);
+  background: rgba(37,99,235,.10);
+  border: 1px solid rgba(37,99,235,.18);
+}
+
+/* ===== Progress bar ===== */
+.dashBar{ margin-top: 8px; }
+.dashBar__track{
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(229,231,235,.8);
+  overflow:hidden;
+  border: 1px solid rgba(229,231,235,.95);
+}
+.dashBar__fill{
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(37,99,235,.95), rgba(99,102,241,.95));
+}
+
+/* KSA */
+.dashKSA{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+@media (max-width: 520px){
+  .dashKSA{ grid-template-columns: 1fr; }
+}
+
+.dashKSA__item{
+  border: 1px solid rgba(229,231,235,.95);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  background: rgba(246,247,251,.75);
+}
+.dashKSA__label{
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.dashKSA__value{
+  margin-top: 4px;
+  font-weight: 950;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+/* ===== Buttons ===== */
+.dashActions{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.dashBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  font-weight: 900;
+  font-size: 13px;
+  border-radius: 999px;
+  padding: 10px 12px;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+  user-select:none;
+}
+.dashBtn:focus-visible{
+  outline:none;
+  box-shadow: var(--ring);
+}
+
+.dashBtn--solid{
+  color: var(--primary-ink);
+  background: linear-gradient(135deg, rgba(37,99,235,.98), rgba(99,102,241,.98));
+  border: 1px solid rgba(37,99,235,.10);
+  box-shadow: 0 14px 30px rgba(37,99,235,.22);
+}
+.dashBtn--solid:hover{ transform: translateY(-1px); }
+
+.dashBtn--ghost{
+  color: var(--text);
+  background: #fff;
+  border: 1px solid rgba(229,231,235,.95);
+  box-shadow: 0 10px 22px rgba(17,24,39,.08);
+}
+.dashBtn--ghost:hover{
+  transform: translateY(-1px);
+  border-color: rgba(37,99,235,.22);
+}
+
+/* Note */
+.dashNote{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed rgba(37,99,235,.25);
+  background: rgba(37,99,235,.06);
+  color: rgba(17,24,39,.86);
+  font-size: 12.5px;
+  line-height:1.6;
+}
+
+/* ===== Steps (จัดใหม่เป็น “กล่องเล็ก” ดูเป็น flow) ===== */
+.dashSteps{
+  list-style:none;
+  padding:0;
+  margin: 6px 0 0;
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+@media (max-width: 720px){
+  .dashSteps{ grid-template-columns: 1fr; }
+}
+
+.dashStep{
+  display:flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(229,231,235,.95);
+  background: #fff;
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.dashStep:hover{
+  transform: translateY(-1px);
+  border-color: rgba(37,99,235,.20);
+  box-shadow: 0 14px 26px rgba(17,24,39,.08);
+}
+
+.dashStep__num{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 950;
+  font-size: 13px;
+  background: rgba(17,24,39,.06);
+  border: 1px solid rgba(229,231,235,.95);
+}
+
+.dashStep__title{
+  font-weight: 900;
+  font-size: 13.5px;
+  line-height:1.25;
+}
+.dashStep__meta{
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Done state */
+.dashStep.is-done{
+  border-color: rgba(34,197,94,.22);
+  background: rgba(34,197,94,.06);
+}
+.dashStep.is-done .dashStep__num{
+  background: rgba(34,197,94,.12);
+  border-color: rgba(34,197,94,.18);
+}
+.dashStep.is-done .dashStep__meta{
+  color: rgba(22,101,52,.9);
+}
+
+/* ===== List rows ===== */
+.dashList{
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.dashList__row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(229,231,235,.95);
+  background: rgba(246,247,251,.55);
+}
+
+.dashList__title{
+  font-weight: 900;
+  font-size: 13.5px;
+}
+.dashList__desc{
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height:1.5;
+}
+
+.dashMiniLink{
+  text-decoration:none;
+  font-weight: 900;
+  font-size: 12.5px;
+  color: white;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(37,99,235,.18);
+  background: var(--primary);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  white-space:nowrap;
+}
+.dashMiniLink:hover{
+  transform: translateY(-1px);
+  background: rgba(37,99,235,.12);
+  box-shadow: 0 12px 22px rgba(37,99,235,.12);
+  color: var(--primary)
+}
+
+.dashList__desc span {
+  display: block;
+}
+
+
+/* Bullets */
+.dashBullets{
+  margin: 6px 0 0;
+  padding-left: 16px;
+}
+.dashBullets li{
+  margin: 8px 0;
+  line-height:1.7;
+  color: rgba(17,24,39,.88);
+  font-size: 13.5px;
+}
+.dashBullets li::marker{
+  color: rgba(37,99,235,.9);
+}
+
+/* =========================
+   DashScore: grid layout (score)
+   ========================= */
+.dash--score{
+  margin-top: 0;
+}
+
+/* 3 การ์ดบน: Pre เต็มแถว, แล้ว Post ซ้าย / Final ขวา, แถวล่างเพิ่ม Compare */
+.dash__grid--score{
+  display: grid;
+  grid-template-columns: 1.35fr .75fr;
+  gap: 14px;
+  margin-top: 14px;
+  align-items: start;
+}
+
+/* Pretest เต็มแถวบน */
+.dash__grid--score .dashCard--pre{
+  grid-column: 1 / -1;
+}
+
+/* Post ซ้าย */
+.dash__grid--score .dashCard--post{
+  grid-column: 1 / 2;
+}
+
+/* Final ขวา */
+.dash__grid--score .dashCard--final{
+  grid-column: 2 / 3;
+}
+
+/* Compare เต็มแถวล่าง */
+.dash__grid--score .dashCard--compare{
+  grid-column: 1 / -1;
+}
+
+/* responsive */
+@media (max-width: 980px){
+  .dash__grid--score{
+    grid-template-columns: 1fr;
+  }
+  .dash__grid--score .dashCard--final{
+    grid-column: 1 / -1;
+  }
+}
+
+/* =========================
+   Compare card styles
+   ========================= */
+.dashCompare{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.dashCompare__row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(229,231,235,.95);
+  background: rgba(246,247,251,.55);
+}
+
+.dashCompare__label{
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 12.5px;
+}
+
+.dashCompare__value{
+  font-weight: 950;
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+}
+
+.dashCompare__divider{
+  height: 1px;
+  background: rgba(229,231,235,.95);
+  margin: 2px 0;
+}
+
+.dashDelta{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 950;
+  font-size: 12.5px;
+  border: 1px solid rgba(229,231,235,.95);
+  background: #fff;
+}
+
+.dashDelta.is-up{
+  border-color: rgba(34,197,94,.22);
+  background: rgba(34,197,94,.10);
+  color: rgba(22,101,52,.95);
+}
+
+.dashDelta.is-down{
+  border-color: rgba(239,68,68,.22);
+  background: rgba(239,68,68,.10);
+  color: rgba(153,27,27,.95);
+}
+
+/* pill muted */
+.dashPill--muted{
+  color: rgba(17,24,39,.68);
+  background: rgba(17,24,39,.06);
+  border-color: rgba(17,24,39,.10);
+}
+
+/* locked state (ยังไม่มีคะแนน Final) */
+.dashCard--compare.is-locked{
+  opacity: .95;
+}
+
+.dashCard--compare.is-locked .dashCompare__row{
+  filter: saturate(.9);
+}
+

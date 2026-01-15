@@ -1,0 +1,527 @@
+/* =========================================================
+   DataAdmin - Table + Top summary row + Pagination + Modal
+   Paste at END of main.css
+   ========================================================= */
+
+/* small input improve */
+.edu-input{
+  border: 1px solid rgba(15,23,42,.12);
+  background: rgba(255,255,255,.92);
+  padding: 10px 12px;
+  border-radius: 12px;
+  min-width: 240px;
+}
+.edu-input:focus{
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(37,99,235,.12);
+  border-color: rgba(37,99,235,.35);
+}
+
+/* ---------------------------------------------------------
+   Top row (ย้ายกล่องขวาขึ้นบน)
+--------------------------------------------------------- */
+.edu-adminTopRow{
+  align-items: stretch;
+}
+
+/* ทำให้ panel ภายในยืดเต็มความสูง */
+.edu-adminTopRow > .edu-panel{
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ให้เนื้อหากลางกินพื้นที่ เหลือท้ายกล่อง (note) ชิดล่าง */
+.edu-adminTopRow > .edu-panel .edu-todo{
+  flex: 1;
+  min-height: 0;
+}
+
+/* กัน note ด้านล่างให้ไม่ดัน layout แปลก ๆ */
+.edu-adminTopRow > .edu-panel .edu-note{
+  margin-top: auto;
+}
+
+@media (max-width: 980px){
+  .edu-adminTopRow{ grid-template-columns: 1fr; }
+}
+
+/* ---------------------------------------------------------
+   Table container
+--------------------------------------------------------- */
+.edu-tableWrap{
+  border: 1px solid rgba(15,23,42,.08);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 10px 28px rgba(2,6,23,.06);
+}
+
+/* Header row */
+.edu-tableHead{
+  display: grid;
+  grid-template-columns: 120px minmax(260px,1.2fr) 110px 110px minmax(240px,1.2fr) 110px 140px;
+  gap: 10px;
+  padding: 12px 12px;
+  background: rgba(246,247,251,.88);
+  border-bottom: 1px solid rgba(15,23,42,.08);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  backdrop-filter: blur(10px);
+}
+.edu-th{
+  font-size: 12px;
+  color: rgba(71,85,105,.9);
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+.edu-th--act{ text-align: right; }
+
+/* Rows */
+.edu-tableBody{ display: grid; }
+
+.edu-tr{
+  display: grid;
+  grid-template-columns: 120px minmax(260px,1.2fr) 110px 110px minmax(240px,1.2fr) 110px 140px;
+  gap: 10px;
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(15,23,42,.06);
+  align-items: center;
+  transition: background .12s ease, transform .06s ease;
+}
+.edu-tr:hover{ background: rgba(37,99,235,.045); }
+.edu-tr:last-child{ border-bottom: 0; }
+
+.edu-td{
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.edu-td--act{ justify-content: flex-end; }
+
+/* Empty row */
+.edu-emptyRow{
+  padding: 14px 12px;
+  color: rgba(71,85,105,.95);
+  font-weight: 850;
+  background: rgba(15,23,42,.02);
+}
+
+/* responsive collapse columns */
+@media (max-width: 980px){
+  .edu-tableHead,
+  .edu-tr{
+    grid-template-columns: 110px minmax(220px,1fr) 90px 90px minmax(220px,1fr) 100px;
+  }
+  .edu-th--act,
+  .edu-td--act{ display: none; }
+}
+@media (max-width: 720px){
+  .edu-tableHead,
+  .edu-tr{
+    grid-template-columns: 110px minmax(220px,1fr) 90px 90px 110px;
+  }
+  .edu-th--wide,
+  .edu-td--wide{ display: none; }
+}
+
+/* ---------------------------------------------------------
+   ID pill / avatar / name
+--------------------------------------------------------- */
+.edu-idPill{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 950;
+  font-size: 12px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,.12);
+  background: rgba(15,23,42,.04);
+}
+
+.edu-stu{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+.edu-avatar{
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(15,23,42,.12);
+  background: rgba(37,99,235,.10);
+  color: #1d4ed8;
+  font-weight: 950;
+  flex: 0 0 auto;
+}
+.edu-stu__meta{ min-width: 0; }
+.edu-stu__name{
+  font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.edu-stu__sub{
+  margin-top: 4px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------
+   Chips / badges / buttons (เฉพาะที่ใช้ในตาราง + modal)
+--------------------------------------------------------- */
+.edu-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  border: 1px solid rgba(15,23,42,.12);
+  background: rgba(15,23,42,.04);
+  color: rgba(17,24,39,.86);
+}
+.edu-chip.is-muted{ opacity: .78; }
+.edu-chip.is-up{
+  border-color: rgba(34,197,94,.22);
+  background: rgba(34,197,94,.10);
+  color: #166534;
+}
+.edu-chip.is-down{
+  border-color: rgba(239,68,68,.22);
+  background: rgba(239,68,68,.10);
+  color: #991b1b;
+}
+.edu-chip.is-ok{
+  border-color: rgba(34,197,94,.22);
+  background: rgba(34,197,94,.10);
+  color: #166534;
+}
+
+/* “ดูรายละเอียด” ให้ดูเป็นปุ่มจริง */
+.edu-mini--solid{
+  background: rgba(37,99,235,.10);
+  border: 1px solid rgba(37,99,235,.18);
+  color: #1d4ed8;
+  font-weight: 950;
+  border-radius: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: transform .06s ease, background .12s ease;
+}
+.edu-mini--solid:hover{ background: rgba(37,99,235,.14); }
+.edu-mini--solid:active{ transform: translateY(1px); }
+
+/* ---------------------------------------------------------
+   Sum progress (คะแนนรวม 8 บท)
+--------------------------------------------------------- */
+.edu-sum{ width: 100%; min-width: 0; }
+
+.edu-meter--thin{ height: 10px; }
+
+.edu-sum__meta{
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.edu-sum__num{
+  font-weight: 900;
+  color: rgba(17,24,39,.88);
+  font-size: 13px;
+}
+
+/* ---------------------------------------------------------
+   Pagination
+--------------------------------------------------------- */
+.edu-pager{
+  margin-top: 12px;
+  padding: 10px 2px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.edu-pager__right{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.edu-pagerBtn{
+  border: 1px solid rgba(15,23,42,.12);
+  background: rgba(255,255,255,.78);
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform .06s ease, background .12s ease;
+}
+.edu-pagerBtn:hover{ background: rgba(37,99,235,.06); }
+.edu-pagerBtn:active{ transform: translateY(1px); }
+.edu-pagerBtn:disabled{ opacity: .45; cursor: not-allowed; }
+
+.edu-pagerNums{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.edu-pagerNum{
+  width: 36px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(15,23,42,.12);
+  background: rgba(255,255,255,.70);
+  font-weight: 950;
+  cursor: pointer;
+}
+.edu-pagerNum:hover{ background: rgba(37,99,235,.06); }
+.edu-pagerNum.is-active{
+  background: rgba(37,99,235,.12);
+  border-color: rgba(37,99,235,.22);
+  color: #1d4ed8;
+}
+
+.edu-pagerEll{
+  color: rgba(17,24,39,.55);
+  font-weight: 900;
+  padding: 0 2px;
+}
+
+/* ---------------------------------------------------------
+   Modal (Popup รายละเอียด)
+--------------------------------------------------------- */
+.edu-modalOverlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(2,6,23,.55);
+  backdrop-filter: blur(10px);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  z-index: 999;
+}
+
+.edu-modal{
+  width: min(980px, 100%);
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(229,231,235,.95);
+  border-radius: 18px;
+  box-shadow: 0 30px 90px rgba(2,6,23,.35);
+  overflow: hidden;
+}
+
+.edu-modal__head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 14px;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+  background: rgba(246,247,251,.75);
+}
+
+.edu-modal__title{
+  font-weight: 950;
+  letter-spacing: .2px;
+}
+
+.edu-modal__sub{
+  padding: 12px 14px 0;
+}
+.edu-modal__name{
+  font-weight: 950;
+  font-size: 14px;
+}
+.edu-modal__chips{
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.edu-modal__grid{
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 12px;
+}
+@media (max-width: 980px){
+  .edu-modal__grid{ grid-template-columns: 1fr; }
+}
+
+.edu-modalCard{
+  border: 1px solid rgba(15,23,42,.08);
+  border-radius: 16px;
+  background: rgba(255,255,255,.75);
+  padding: 12px;
+}
+
+.edu-modalCard__head{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.edu-modalCard__title{
+  font-weight: 950;
+}
+.edu-modalCard__right{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* lesson rows in modal */
+.edu-lessonList{
+  display: grid;
+  gap: 10px;
+}
+.edu-lessonRow{
+  border: 1px solid rgba(15,23,42,.08);
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(246,247,251,.55);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.edu-lessonRow__left{
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+.edu-lessonTag{
+  font-weight: 950;
+  font-size: 13px;
+}
+.edu-meter--mini{ height: 10px; }
+
+.edu-scorePill{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 950;
+  font-size: 12px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,.12);
+  background: #fff;
+  white-space: nowrap;
+}
+
+/* subtle tone */
+.edu-lessonRow.is-high{
+  border-color: rgba(34,197,94,.22);
+  background: rgba(34,197,94,.06);
+}
+.edu-lessonRow.is-mid{
+  border-color: rgba(59,130,246,.18);
+  background: rgba(59,130,246,.05);
+}
+.edu-lessonRow.is-low{
+  border-color: rgba(239,68,68,.18);
+  background: rgba(239,68,68,.05);
+}
+
+/* survey block */
+.edu-survey{
+  display: grid;
+  gap: 10px;
+}
+.edu-survey__kpis{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 520px){
+  .edu-survey__kpis{ grid-template-columns: 1fr; }
+}
+.edu-surveyKpi{
+  border: 1px solid rgba(15,23,42,.08);
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(246,247,251,.55);
+}
+.edu-surveyKpi__label{
+  color: rgba(71,85,105,.92);
+  font-weight: 900;
+  font-size: 12px;
+}
+.edu-surveyKpi__value{
+  margin-top: 6px;
+  font-weight: 950;
+  font-size: 18px;
+}
+
+.edu-survey__comment{
+  border: 1px dashed rgba(37,99,235,.25);
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(37,99,235,.06);
+}
+.edu-survey__label{
+  font-weight: 950;
+  font-size: 12px;
+  color: rgba(17,24,39,.82);
+}
+.edu-survey__text{
+  margin-top: 6px;
+  font-weight: 900;
+  line-height: 1.55;
+}
+
+.edu-emptyBox{
+  border: 1px dashed rgba(15,23,42,.18);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(15,23,42,.02);
+  color: rgba(17,24,39,.78);
+  font-weight: 900;
+}
+
+.edu-modal__foot{
+  padding: 12px 14px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid rgba(15,23,42,.08);
+  background: rgba(246,247,251,.65);
+}
+
+
+/* Badge สีเขียวอ่อนสำหรับ p-value ที่มีนัยสำคัญ */
+.edu-badge--success {
+  background-color: #d4edda; /* สีเขียวอ่อน */
+  color: #155724; /* ฟอนต์สีเขียวเข้ม */
+  border-radius: 5px;
+  padding: 0.2em 0.5em;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+/* Badge สีแดงสำหรับ p-value ที่ไม่ผ่าน */
+.edu-badge--danger {
+  background-color: #f8d7da; /* สีแดงอ่อน */
+  color: #721c24; /* ฟอนต์สีแดงเข้ม */
+  border-radius: 5px;
+  padding: 0.2em 0.5em;
+  font-weight: bold;
+  font-size: 1rem;
+}

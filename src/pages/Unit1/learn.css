@@ -1,0 +1,1207 @@
+:root{
+  /* =========================
+     Text (อ่านสบายแบบเว็บเรียน)
+  ========================= */
+  --ls-text: #0f172a;          /* slate-900 */
+  --ls-muted: #334155;         /* slate-700 */
+  --ls-dim: #64748b;           /* slate-500 */
+
+  /* =========================
+     Border / Divider
+  ========================= */
+  --ls-border: rgba(15,23,42,.12);
+  --ls-border-strong: rgba(15,23,42,.18);
+
+  /* =========================
+     Surface (หัวใจหลัก)
+  ========================= */
+  --ls-surface: rgba(248,250,252,.88);   /* almost white แต่ไม่จ้า */
+  --ls-surface-2: rgba(241,245,249,.92); /* กล่องซ้อน */
+
+  /* =========================
+     Glass (บางมาก แค่ฟีล)
+  ========================= */
+  --ls-glass: rgba(255,255,255,.65);
+  --ls-glass-2: rgba(255,255,255,.75);
+
+  /* =========================
+     Shadow (ยกเลเยอร์)
+  ========================= */
+  --ls-shadow: 
+    0 10px 30px rgba(15,23,42,.12),
+    inset 0 1px 0 rgba(255,255,255,.6);
+
+  --ls-shadow-soft:
+    0 6px 18px rgba(15,23,42,.10);
+
+  /* =========================
+     Radius
+  ========================= */
+  --ls-radius-lg: 18px;
+  --ls-radius-md: 16px;
+  --ls-radius-sm: 14px;
+
+  /* =========================
+     Accent / Focus
+  ========================= */
+  --ls-focus: #2563eb; /* blue-600 */
+  --ls-focus-ring: 0 0 0 3px rgba(37,99,235,.25);
+
+  /* =========================
+     Feedback
+  ========================= */
+  --ls-ok: #16a34a;
+  --ls-ok-bg: rgba(22,163,74,.12);
+
+  --ls-bad: #dc2626;
+  --ls-bad-bg: rgba(220,38,38,.12);
+}
+
+
+/* =========================================================
+   CONTENT WRAPPER (แทนที่ชื่อเดิมที่ซ้ำ)
+   ใช้กับ <section className="edu-panel1">
+========================================================= */
+.edu-panel1{
+  border: 1px solid var(--ls-border);
+  background: var(--ls-surface);
+  backdrop-filter: blur(14px);
+  border-radius: var(--ls-radius-lg);
+  box-shadow: var(--ls-shadow);
+  padding: 14px 14px 16px;
+  color: var(--ls-text);
+}
+
+/* ทำให้ข้อความทั่วไป inherit สีอ่านชัด แต่ไม่ไปทับปุ่มของระบบ */
+.edu-panel1 :where(p, span, small, li, h1, h2, h3, h4, h5, h6){
+  color: inherit;
+}
+
+/* Header ของ content */
+.edu-panel1__head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 6px 4px 12px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  margin-bottom: 12px;
+}
+
+.edu-panel1__title{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  color: var(--ls-text);
+}
+
+/* =========================================================
+   VIDEO STAGE
+========================================================= */
+.edu-videoStage{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap: 12px;
+  padding: 6px 0 4px;
+}
+
+.edu-video{
+  width: min(900px, 100%);
+  aspect-ratio: 16/9;
+  border-radius: var(--ls-radius-md);
+  border: 1px solid var(--ls-border);
+  background: rgba(0,0,0,.22);
+  box-shadow: var(--ls-shadow-soft);
+  overflow:hidden;
+}
+
+.edu-videoActions{
+  display:flex;
+  gap: 10px;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+}
+
+/* ข้อความบอกสถานะ */
+.edu-note1{
+  color: var(--ls-muted);
+  line-height: 1.6;
+}
+
+/* =========================================================
+   TASK: Classification (1.2)
+========================================================= */
+.edu-u1task{
+  display:grid;
+  gap: 14px;
+
+  border: 1px solid var(--ls-border);
+  background: var(--ls-glass);
+  backdrop-filter: blur(14px);
+
+  border-radius: var(--ls-radius-lg);
+  padding: 16px;
+
+  box-shadow: var(--ls-shadow-soft);
+}
+
+/* Head */
+.edu-u1task__head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  flex-wrap:wrap;
+}
+
+.edu-u1task__title{
+  display:inline-flex;
+  align-items:center;
+  gap: 10px;
+  font-weight: 950;
+  color: var(--ls-text);
+}
+
+.edu-u1task__meta{
+  display:inline-flex;
+  gap: 10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.edu-u1task__hint{
+  margin: 0;
+  color: var(--ls-muted);
+  line-height: 1.65;
+}
+
+/* =========================================================
+   Cards grid
+========================================================= */
+.edu-u1task__cards{
+  display:grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 980px){
+  .edu-u1task__cards{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px){
+  .edu-u1task__cards{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Card */
+.edu-u1card{
+  background: var(--ls-surface-2);
+  border: 1px solid var(--ls-border);
+  border-radius: var(--ls-radius-sm);
+  padding: 12px;
+
+  cursor: grab;
+  user-select:none;
+
+  transition:
+    transform .14s ease,
+    border-color .14s ease,
+    background .14s ease,
+    box-shadow .14s ease,
+    opacity .14s ease;
+
+  position: relative;
+  min-height: 64px;
+}
+
+.edu-u1card:hover{
+  transform: translateY(-2px);
+  border-color: var(--ls-border-strong);
+  background: rgba(255,255,255,.08);
+  box-shadow: 0 10px 24px rgba(0,0,0,.22);
+}
+
+.edu-u1card:active{
+  cursor: grabbing;
+  transform: translateY(-1px) scale(.99);
+}
+
+/* Selected card */
+.edu-u1card.is-selected{
+  border-color: var(--ls-focus);
+  box-shadow: var(--ls-focus-ring);
+  background: rgba(56,189,248,.10);
+}
+
+/* Dragging state */
+.edu-u1card.is-dragging{
+  opacity: .72;
+  filter: saturate(1.05);
+}
+
+.edu-u1card__label{
+  font-weight: 950;
+  color: var(--ls-text);
+  letter-spacing: .15px;
+}
+
+.edu-u1card__sub{
+  font-size: 12px;
+  color: var(--ls-dim);
+  margin-top: 6px;
+}
+
+/* Keyboard focus */
+.edu-u1card:focus-visible{
+  outline: none;
+  border-color: var(--ls-focus);
+  box-shadow: var(--ls-focus-ring);
+}
+
+/* =========================================================
+   Drop zones
+========================================================= */
+.edu-u1task__zones{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 820px){
+  .edu-u1task__zones{
+    grid-template-columns: 1fr;
+  }
+}
+
+.edu-u1zone{
+  border: 1px dashed rgba(255,255,255,.22);
+  background: rgba(255,255,255,.04);
+  border-radius: var(--ls-radius-md);
+  padding: 14px;
+
+  display:grid;
+  gap: 10px;
+  min-height: 175px;
+
+  transition: border-color .14s ease, background .14s ease, transform .14s ease;
+}
+
+.edu-u1zone:hover{
+  border-color: rgba(255,255,255,.32);
+  background: rgba(255,255,255,.055);
+}
+
+/* Danger zone */
+.edu-u1zone--safe{
+  border-color: rgba(8, 30, 229, 0.38);
+  background: rgba(68, 88, 239, 0.1);
+}
+
+.edu-u1zone--danger{
+  border-color: rgba(239,68,68,.38);
+  background: rgba(239,68,68,.10);
+}
+
+.edu-u1zone__title{
+  font-weight: 950;
+  color: var(--ls-text);
+  letter-spacing: .2px;
+}
+
+.edu-u1zone__desc{
+  font-size: 13px;
+  color: var(--ls-muted);
+  line-height: 1.55;
+}
+
+/* ปุ่มในโซน (ให้กินเต็มความกว้าง ดูใช้ง่าย) */
+.edu-u1zone__btn{
+  justify-self: stretch;
+  width: 100%;
+}
+
+/* =========================================================
+   Feedback box
+========================================================= */
+.edu-u1fb{
+  border-radius: var(--ls-radius-md);
+  padding: 14px;
+  border: 1px solid var(--ls-border);
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 10px 22px rgba(0,0,0,.20);
+}
+
+.edu-u1fb.is-ok{
+  border-color: var(--ls-ok);
+  background: var(--ls-ok-bg);
+}
+
+.edu-u1fb.is-bad{
+  border-color: var(--ls-bad);
+  background: var(--ls-bad-bg);
+}
+
+.edu-u1fb__top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: 10px;
+  flex-wrap:wrap;
+}
+
+.edu-u1fb__title{
+  font-weight: 950;
+  display:inline-flex;
+  gap: 8px;
+  align-items:center;
+  color: var(--ls-text);
+}
+
+.edu-u1fb__chip{
+  font-size: 13px;
+  color: var(--ls-muted);
+}
+
+.edu-u1fb__body{
+  margin-top: 10px;
+  display:grid;
+  gap: 10px;
+}
+
+.edu-u1fb__line{
+  color: var(--ls-muted);
+  line-height: 1.55;
+}
+
+.edu-u1fb__why{
+  color: var(--ls-text);
+  line-height: 1.65;
+}
+
+/* =========================================================
+   Footer
+========================================================= */
+.edu-u1task__footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: 12px;
+  flex-wrap:wrap;
+}
+
+/* =========================================================
+   Optional polish: pills (ถ้ามีอยู่แล้วก็จะสวยขึ้น)
+========================================================= */
+.edu-pill{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color: var(--ls-text);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+
+/* ===== Fix UI for Unit 1.2 (ClassificationTask) ===== */
+
+.edu-taskStage{
+  padding: 16px;
+}
+
+.edu-taskIntro{
+  margin-bottom: 12px;
+}
+
+.edu-taskIntro__title{
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.edu-taskIntro__desc{
+  margin-top: 6px;
+  opacity: 0.8;
+  font-size: 13px;
+}
+
+.edu-taskIntro__meta{
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.edu-taskGrid{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 768px){
+  .edu-taskGrid{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.edu-taskCard{
+  border-radius: 16px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+.edu-taskCard__body{
+  padding: 14px 16px;
+}
+
+.edu-taskCard__label{
+  font-weight: 800;
+  color: #111827;
+}
+
+.edu-taskCard__example{
+  margin-top: 6px;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.edu-taskCard__actions{
+  display: flex;
+  gap: 10px;
+  padding: 0 16px 14px 16px;
+  flex-wrap: wrap;
+}
+
+.edu-pill{
+  border: 1px solid rgba(0,0,0,0.10);
+  background: rgba(255,255,255,0.7);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.edu-pill:hover{
+  background: rgba(0,0,0,0.04);
+}
+
+.edu-pill.is-active{
+  border-color: rgba(34,197,94,0.35);
+  background: rgba(34,197,94,0.12);
+}
+
+.edu-taskCard__feedback{
+  border-top: 1px solid rgba(0,0,0,0.06);
+  padding: 12px 16px;
+}
+
+.edu-taskCard__feedbackRow{
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.edu-taskCard__feedback.ok{
+  background: rgba(16,185,129,0.10);
+}
+
+.edu-taskCard__feedback.warn{
+  background: rgba(245,158,11,0.10);
+}
+
+.edu-taskCard__feedbackMsg{
+  font-weight: 800;
+  font-size: 13px;
+  color: #111827;
+}
+
+.edu-taskCard__feedbackReason{
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.edu-taskFooter{
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+
+/* ===== Matching table only (Unit 1.2.2) ===== */
+
+.edu-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+.edu-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 820px;
+}
+
+.edu-table th {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.04);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+.edu-table td {
+  padding: 12px;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.edu-table__row:hover td {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+/* ===== Cell content ===== */
+
+.edu-cell-title {
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.edu-cell-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* ===== Select ===== */
+
+.edu-select {
+  width: 100%;
+  min-height: 38px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.2);
+  font-weight: 600;
+  background: #fff;
+}
+
+.edu-select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ===== Feedback (after submit) ===== */
+
+.edu-feedback {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.edu-feedback__ok {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.edu-feedback__bad {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.edu-feedback__hint {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #475569;
+}
+
+/* ===== Result summary ===== */
+
+.edu-result {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.edu-result__text {
+  font-weight: 600;
+}
+
+
+/* แยกปุ่มซ้าย / ขวาใน footer */
+.edu-actions {
+  display: flex;
+  align-items: center;
+}
+
+.edu-taskFooter1 {
+  margin-top: 25px;
+  margin-left: auto; /* 👈 ดันไปชิดขวา */
+}
+
+
+
+/* ✅ การ์ดครอบโซน (ใช้กับซ้าย/ขวา) */
+.edu-u1zoneCard {
+  border-radius: 18px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+/* ✅ ซ้าย: โทนเขียว */
+.edu-u1zoneCard--left {
+  border: 1px solid rgba(34, 197, 94, 0.35);          /* green border */
+  background: linear-gradient(
+    180deg,
+    rgba(34, 197, 94, 0.14),
+    rgba(34, 197, 94, 0.06)
+  );
+}
+
+/* ✅ ขวา: โทนแดง */
+.edu-u1zoneCard--right {
+  border: 1px solid rgba(239, 68, 68, 0.35);          /* red border */
+  background: linear-gradient(
+    180deg,
+    rgba(239, 68, 68, 0.14),
+    rgba(239, 68, 68, 0.06)
+  );
+}
+
+
+/* ✅ กัน “กล่องใหญ่” ไปชนการ์ดย่อยด้านในมากเกินไป */
+.edu-u1zoneCard .edu-u1zone__desc {
+  opacity: 0.9;
+}
+
+/* ✅ ถ้าหน้าเล็ก ให้ช่องว่างระหว่างซ้าย/ขวาชัดขึ้น */
+@media (max-width: 860px) {
+  .edu-u1zoneCard {
+    padding: 12px;
+  }
+}
+
+
+/* =========================================================
+   ✅ Add-ons for Unit 1 - Learn4 (Unit1_4_2 / Unit1_4_3)
+   เติมคลาสที่ยังไม่มีใน learn.css
+========================================================= */
+
+/* ---------- Card wrapper ---------- */
+.edu-card{
+  border: 1px solid var(--ls-border);
+  background: var(--ls-glass);
+  backdrop-filter: blur(14px);
+  border-radius: var(--ls-radius-lg);
+  box-shadow: var(--ls-shadow-soft);
+  overflow: hidden;
+}
+
+.edu-card__body{
+  padding: 14px 16px 16px;
+}
+
+/* ---------- Hint / info strip ---------- */
+.edu-hint{
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  border: 1px solid rgba(37,99,235,.22);
+  background: rgba(37,99,235,.08);
+
+  border-radius: 14px;
+  padding: 10px 12px;
+
+  color: var(--ls-text);
+  line-height: 1.55;
+  font-size: 13px;
+}
+
+/* ---------- Grid helpers ---------- */
+.edu-grid{
+  display: grid;
+  gap: 10px;
+}
+
+/* 2 columns on desktop, 1 column on mobile when used for choices */
+@media (min-width: 860px){
+  .edu-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Choice buttons (box-style) ---------- */
+.edu-choice{
+  width: 100%;
+  text-align: left;
+
+  border: 1px solid var(--ls-border);
+  background: rgba(255,255,255,.70);
+
+  border-radius: 16px;
+  padding: 12px 12px;
+
+  font-weight: 850;
+  color: var(--ls-text);
+
+  cursor: pointer;
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, background .14s ease;
+}
+
+.edu-choice:hover{
+  transform: translateY(-1px);
+  border-color: var(--ls-border-strong);
+  box-shadow: 0 12px 26px rgba(0,0,0,.12);
+  background: rgba(255,255,255,.82);
+}
+
+.edu-choice:active{
+  transform: translateY(0) scale(.99);
+}
+
+.edu-choice.is-selected{
+  border-color: var(--ls-focus);
+  box-shadow: var(--ls-focus-ring);
+  background: rgba(56,189,248,.12);
+}
+
+/* ---------- Box sections ---------- */
+.edu-box{
+  border: 1px solid var(--ls-border);
+  background: rgba(255,255,255,.66);
+  border-radius: var(--ls-radius-md);
+  padding: 12px 12px;
+
+  box-shadow: 0 10px 22px rgba(0,0,0,.10);
+}
+
+.edu-box__title{
+  font-weight: 950;
+  letter-spacing: .2px;
+  color: var(--ls-text);
+}
+
+.edu-box__row{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 860px){
+  .edu-box__row{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.edu-box__col{
+  border: 1px dashed rgba(15,23,42,.18);
+  background: rgba(255,255,255,.55);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+/* ---------- Labels / lists / notes ---------- */
+.edu-label{
+  font-weight: 900;
+  color: var(--ls-text);
+  font-size: 13px;
+  letter-spacing: .15px;
+}
+
+.edu-list{
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--ls-muted);
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+.edu-note{
+  color: var(--ls-muted);
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+/* ---------- Textarea ---------- */
+.edu-textarea{
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,.18);
+  background: rgba(255,255,255,.85);
+
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ls-text);
+
+  outline: none;
+  transition: box-shadow .14s ease, border-color .14s ease, background .14s ease;
+}
+
+.edu-textarea:focus{
+  border-color: var(--ls-focus);
+  box-shadow: var(--ls-focus-ring);
+  background: #fff;
+}
+
+/* ---------- Feedback (Learn4 uses warn + ok) ---------- */
+.edu-feedback{
+  border-radius: 14px;
+  border: 1px solid var(--ls-border);
+  background: rgba(255,255,255,.82);
+
+  padding: 10px 12px;
+  box-shadow: 0 10px 20px rgba(0,0,0,.10);
+}
+
+.edu-feedback__ok{
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+
+  color: var(--ls-ok);
+  font-weight: 850;
+  line-height: 1.55;
+  font-size: 13px;
+}
+
+.edu-feedback__warn{
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+
+  color: #b45309; /* amber-700 */
+  font-weight: 850;
+  line-height: 1.55;
+  font-size: 13px;
+}
+
+/* ---------- Actions row (used in Unit1_4_2/4_3) ---------- */
+.edu-actions{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ---------- Simulation card ---------- */
+.edu-simCard{
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+
+  border: 1px solid rgba(15,23,42,.14);
+  background: rgba(255,255,255,.78);
+  border-radius: 16px;
+  padding: 12px;
+
+  box-shadow: 0 12px 24px rgba(0,0,0,.10);
+}
+
+.edu-simIcon{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+
+  border: 1px solid rgba(15,23,42,.12);
+  background: rgba(15,23,42,.04);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edu-simIcon svg{
+  width: 18px;
+  height: 18px;
+  color: var(--ls-text);
+}
+
+.edu-simMeta{
+  min-width: 0;
+}
+
+.edu-simTitle{
+  font-weight: 950;
+  color: var(--ls-text);
+  line-height: 1.25;
+}
+
+.edu-simDesc{
+  margin-top: 6px;
+  color: var(--ls-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* ✅ Message card styling */
+.signal-card {
+  position: relative;
+  border-left: 4px solid rgba(255, 193, 7, 0.55);
+}
+
+.signal-card__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.signal-card__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 193, 7, 0.9);
+  box-shadow: 0 0 16px rgba(255, 193, 7, 0.35);
+}
+
+.signal-card__label {
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  opacity: 0.85;
+}
+
+/* ✅ body a bit tighter */
+.signal-body {
+  line-height: 1.55;
+}
+
+/* ✅ meta pills */
+.signal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.signal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.signal-pill__text {
+  opacity: 0.92;
+}
+
+/* ✅ subtle type colors by category */
+.signal-pill--location {
+  border-color: rgba(255, 99, 71, 0.35);
+}
+
+.signal-pill--device {
+  border-color: rgba(99, 179, 237, 0.35);
+}
+
+.signal-pill--time {
+  border-color: rgba(255, 193, 7, 0.35);
+}
+
+.signal-pill--from,
+.signal-pill--subject,
+.signal-pill--hint {
+  border-color: rgba(167, 139, 250, 0.35);
+}
+
+.signal-pill:hover {
+  transform: translateY(-1px);
+  transition: transform 160ms ease;
+}
+
+/* =========================
+   Unit1_5_2 (5.4) Layout
+========================= */
+
+.u54-intro {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+/* header line: risk + case */
+.u54-header {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* optional badge variants */
+.edu-badge--warn {
+  border-color: rgba(255, 193, 7, 0.45);
+}
+.edu-badge--safe {
+  border-color: rgba(99, 179, 237, 0.45);
+}
+
+/* prompt card (แบบเดียวกับ “มะกี้”) */
+.u54-promptCard {
+  border-left: 4px solid rgba(255, 193, 7, 0.55);
+}
+
+.u54-promptTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.u54-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 193, 7, 0.9);
+  box-shadow: 0 0 16px rgba(255, 193, 7, 0.35);
+}
+
+.u54-promptLabel {
+  font-size: 12px;
+  opacity: 0.85;
+  letter-spacing: 0.2px;
+}
+
+.u54-promptText {
+  line-height: 1.6;
+  font-weight: 600; /* ให้คำถามเด่นขึ้น */
+}
+
+/* choices */
+.u54-choiceTop {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* status row after feedback */
+.u54-status {
+  margin-top: 8px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  opacity: 0.95;
+}
+
+.u54-statusIcon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.u54-status--good {
+  border-color: rgba(34, 197, 94, 0.35);
+}
+.u54-status--bonus {
+  border-color: rgba(99, 179, 237, 0.35);
+}
+.u54-status--bad {
+  border-color: rgba(239, 68, 68, 0.35);
+}
+.u54-status--neutral {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.u54-feedbackTop {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ================================
+   Score Pill – Dark Glass Style
+   ================================ */
+
+.edu-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ✅ Score pill (ใช้ root เท่านั้น) */
+.edu-pill--score{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 8px 12px;
+  border-radius: 999px;
+
+  color: var(--ls-text);
+  background: var(--ls-surface);
+  border: 1px solid var(--ls-border);
+
+  box-shadow: var(--ls-shadow-soft);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+}
+
+/* ✅ จุดสถานะ (นุ่ม ไม่แสบตา) */
+.edu-pill--score::before{
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+
+  background: var(--ls-focus);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.14); /* ใช้โทนเดียวกับ focus ring */
+  flex: 0 0 auto;
+}
+
+/* ✅ โฮเวอร์แบบ premium (ยกนิดเดียว) */
+.edu-pill--score:hover{
+  transform: translateY(-1px);
+  background: var(--ls-surface-2);
+  border-color: var(--ls-border-strong);
+  box-shadow: var(--ls-shadow);
+}
+
+/* ✅ โฟกัส (เวลาคีย์บอร์ด) */
+.edu-pill--score:focus-visible{
+  outline: none;
+  box-shadow: var(--ls-shadow-soft), var(--ls-focus-ring);
+}
+
+/* (แนะนำ) ตัวเลขคะแนนให้เด่นนิดนึง */
+.edu-pill--score .score-value{
+  font-weight: 700;
+  letter-spacing: .2px;
+  color: var(--ls-text);
+}
+
+/* (แนะนำ) ข้อความประกอบจางลง */
+.edu-pill--score .score-label{
+  color: var(--ls-dim);
+  font-weight: 600;
+}
