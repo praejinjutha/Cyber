@@ -22,43 +22,35 @@ export default function Login() {
 
   /**
    * ✅ Login handler
-   * แก้ bug "Cannot access 'data' before initialization" ด้วย:
-   * - ห้ามอ้างถึง data ก่อน destructure
-   * - เปลี่ยนชื่อ data → authData / sessionData เพื่อไม่ชนกับ data ตัวอื่น
+   * - ใช้กับ <form onSubmit> เพื่อแก้ DOM warning และให้กด Enter แล้ว submit ได้ถูกต้อง
+   * - แยก error 400/401 (รหัสผิด) ออกจาก 500 (Supabase Auth server/data มีปัญหา)
    */
-  const onLogin = async () => {
+  const onLogin = async (e) => {
+    // ✅ กันหน้า reload จาก form submit
+    e?.preventDefault?.();
+
     // ✅ reset ui
     setMsg("");
     setBusy(true);
 
     try {
-      // ===============================
-      // 🔍 DEBUG 1: input ที่ผู้ใช้กรอก
-      // ===============================
-      console.log("DEBUG INPUT:", { username, password });
-
-      // ===============================
-      // ✅ validate input ก่อนทำอะไรทั้งหมด
-      // ===============================
+      // ✅ validate input
       if (!username.trim() || !password) {
         throw new Error("กรุณากรอก username และรหัสผ่าน");
       }
 
-      // ===============================
-      // 🔄 แปลง username → email
-      // (ระบบ local ของคุณใช้รูปแบบ user001@local.app)
-      // ===============================
+      // ✅ แปลง username -> email (เช่น user001 -> user001@local.app)
       let email = username.trim().toLowerCase();
       if (!email.includes("@")) {
         email = `${email}@local.app`;
       }
 
+      // ✅ debug แบบไม่โชว์รหัสจริง
+      console.log("DEBUG INPUT:", { username, password: "***" });
       console.log("DEBUG EMAIL:", email);
       console.log("DEBUG: about to signIn");
 
-      // ===============================
-      // 🔐 LOGIN ด้วย Supabase Auth
-      // ===============================
+      // ✅ login ด้วย Supabase Auth
       const { data: authData, error: loginError } =
         await supabase.auth.signInWithPassword({
           email,
@@ -67,19 +59,37 @@ export default function Login() {
 
       console.log("DEBUG signIn result:", { authData, loginError });
 
-      // ✅ handle login error
-      if (loginError) throw new Error("Username หรือ Password ไม่ถูกต้อง");
+      // ✅ handle login error แบบแยกประเภท
+      if (loginError) {
+        const status = loginError.status; // บางเวอร์ชันอาจมี/ไม่มี
+
+        console.error("SUPABASE LOGIN ERROR:", loginError);
+
+        // ✅ รหัสผิด/ไม่อนุญาต (มักเป็น 400/401)
+        if (status === 400 || status === 401) {
+          throw new Error("Username หรือ Password ไม่ถูกต้อง");
+        }
+
+        // ✅ 500 = server/data auth มีปัญหา (กรณีของคุณ)
+        if (status === 500) {
+          throw new Error(
+            "Supabase Auth ตอบกลับ 500 (Server Error) — มักเกิดจากการ seed ผู้ใช้ลง auth.* โดยตรงจนข้อมูลไม่สอดคล้อง"
+          );
+        }
+
+        // ✅ กรณีอื่น ๆ แสดงข้อความจริงจากระบบ
+        throw new Error(loginError.message || "เกิดข้อผิดพลาดในการเข้าสู่ระบบ");
+      }
+
+      // ✅ ต้องมี user
       if (!authData?.user) throw new Error("ไม่พบข้อมูลผู้ใช้");
 
-      // ===============================
-      // 🔑 DEBUG 2: session + access_token
-      // (บางที session จะอยู่ใน authData.session อยู่แล้ว
-      // แต่ดึงผ่าน getSession เพื่อความชัวร์)
-      // ===============================
+      // ✅ ดึง session (optional แต่ช่วย debug ได้)
       const { data: sessionData, error: sessionError } =
         await supabase.auth.getSession();
 
       if (sessionError) {
+        console.error("SESSION ERROR:", sessionError);
         throw new Error("ไม่สามารถดึง session ได้");
       }
 
@@ -88,28 +98,24 @@ export default function Login() {
       console.log("DEBUG session:", session);
       console.log("DEBUG access_token:", session?.access_token);
 
+      // ✅ ต้องมี access token
       if (!session?.access_token) {
         throw new Error("ไม่สามารถสร้าง access token ได้");
       }
 
-      // ✅ ถ้าจะ debug token แบบเดี่ยว ๆ ให้ทำตรงนี้เท่านั้น
-      console.log("ACCESS_TOKEN_ONLY:", session.access_token);
-
-      // ===============================
-      // 👤 เช็ก role จาก user_profiles
-      // ===============================
+      // ✅ เช็ก role จาก user_profiles
       const { data: profile, error: roleError } = await supabase
         .from("user_profiles")
         .select("is_admin")
-        .eq("user_id", authData.user.id) // ✅ ใช้ authData.user.id ไม่ใช่ data.user.id
+        .eq("user_id", authData.user.id)
         .single();
 
       console.log("DEBUG profile:", profile, roleError);
 
-      // ✅ ถ้าไม่เจอโปรไฟล์/สิทธิ์ → sign out แล้วแจ้ง error
+      // ✅ ถ้าไม่เจอโปรไฟล์ → sign out แล้วแจ้ง error
       if (roleError || !profile) {
         await supabase.auth.signOut();
-        throw new Error("ไม่พบข้อมูลสิทธิ์การใช้งาน");
+        throw new Error("ไม่พบข้อมูลสิทธิ์การใช้งาน (user_profiles)");
       }
 
       // ✅ กัน admin ล็อกอินผิดหน้า
@@ -118,9 +124,7 @@ export default function Login() {
         throw new Error("บัญชี Admin กรุณาเข้าใช้งานผ่านหน้า Login ผู้ดูแลระบบ");
       }
 
-      // ===============================
-      // ✅ LOGIN สำเร็จ
-      // ===============================
+      // ✅ login สำเร็จ
       navigate("/profile", { replace: true });
     } catch (err) {
       console.error("Login Error:", err);
@@ -128,11 +132,6 @@ export default function Login() {
     } finally {
       setBusy(false);
     }
-  };
-
-  // ✅ enter to login
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") onLogin();
   };
 
   return (
@@ -176,7 +175,12 @@ export default function Login() {
             </a>
           </div>
 
-          <div className="form" style={{ maxWidth: "400px", margin: "0 auto" }}>
+          {/* ✅ แก้ DOM warning: ใส่ form ครอบ */}
+          <form
+            className="form"
+            onSubmit={onLogin}
+            style={{ maxWidth: "400px", margin: "0 auto" }}
+          >
             <div>
               <label className="label">
                 <span
@@ -194,7 +198,6 @@ export default function Login() {
                 className="input"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                onKeyDown={handleKeyDown}
                 placeholder="เช่น user001"
                 autoComplete="username"
               />
@@ -218,16 +221,16 @@ export default function Login() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={handleKeyDown}
                 placeholder="รหัสผ่านของคุณ"
                 autoComplete="current-password"
               />
             </div>
 
             <div className="actions" style={{ textAlign: "center" }}>
+              {/* ✅ submit ผ่าน form */}
               <button
                 className="btn btn-primary"
-                onClick={onLogin}
+                type="submit"
                 disabled={busy}
                 style={{ width: "100%" }}
               >
@@ -244,7 +247,7 @@ export default function Login() {
             >
               ระบบทดลองเพื่อการศึกษา — บัญชีผู้ใช้ถูกสร้างไว้ล่วงหน้าโดยผู้ดูแล
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>

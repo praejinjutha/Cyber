@@ -19,7 +19,6 @@ import Main from "./pages/Main";
 import Lessons from "./pages/Lessons";
 import LessonLinear from "./pages/LessonLinear";
 
-
 import Dashboard from "./pages/Dashboard";
 import DashScore from "./pages/DashScore";
 import Survey from "./pages/Survey";
@@ -37,6 +36,13 @@ import Learn4 from "./pages/Unit1/Learn4";
 import Learn5 from "./pages/Unit1/Learn5";
 import PosttestRun from "./pages/Unit1/PosttestRun";
 
+// Unit 2
+import LearnUnit2 from "./pages/Unit2/Learn"; 
+import Learn1Unit2 from "./pages/Unit2/Learn1"; 
+import Learn2Unit2 from "./pages/Unit2/Learn2"; 
+import Learn3Unit2 from "./pages/Unit2/Learn3"; 
+import Examples from "./pages/Unit2/Examples"; 
+import Unit2PosttestRun from "./pages/Unit2/PosttestRun";
 
 // ====================
 // Protected wrapper
@@ -58,25 +64,24 @@ function AdminRoute({ session }) {
         setIsAdmin(false);
         return;
       }
-      const { data } = await supabase
-        .from("user_profiles")
-        .select("is_admin")
-        .eq("user_id", session.user.id)
-        .single();
+      try {
+        // ✅ ใช้ maybeSingle เพื่อป้องกัน Database Error querying schema
+        const { data } = await supabase
+          .from("user_profiles")
+          .select("is_admin")
+          .eq("user_id", session.user.id)
+          .maybeSingle(); 
 
-      setIsAdmin(data?.is_admin || false);
+        setIsAdmin(data?.is_admin || false);
+      } catch (e) {
+        setIsAdmin(false);
+      }
     }
     checkAdmin();
   }, [session]);
 
-  if (isAdmin === null) {
-    return <div style={{ padding: 24 }}>Checking Permission...</div>;
-  }
-
-  if (!isAdmin) {
-    return <Navigate to="/admin/login" replace />;
-  }
-
+  if (isAdmin === null) return <div style={{ padding: 24, color: "white" }}>Checking Permission...</div>;
+  if (!isAdmin) return <Navigate to="/admin/login" replace />;
   return <Outlet />;
 }
 
@@ -109,7 +114,7 @@ function useGateStatus(session) {
           .from("student_profiles")
           .select("first_name,last_name")
           .eq("user_id", uid)
-          .maybeSingle();
+          .maybeSingle(); // ✅ แก้จุดเสี่ยง Error 500
 
         const profileComplete = !!(
           profile?.first_name?.trim() && profile?.last_name?.trim()
@@ -148,7 +153,7 @@ function useGateStatus(session) {
 function RequireCanDoPretest({ session }) {
   const { loading, profileComplete, hasPretest } = useGateStatus(session);
 
-  if (loading) return <div style={{ padding: 24 }}>Checking Status...</div>;
+  if (loading) return <div style={{ padding: 24, color: "white" }}>Checking Status...</div>;
   if (!profileComplete) return <Navigate to="/profile" replace />;
   if (hasPretest) return <Navigate to="/main" replace />;
 
@@ -161,7 +166,7 @@ function RequireCanDoPretest({ session }) {
 function RequirePretestDone({ session }) {
   const { loading, profileComplete, hasPretest } = useGateStatus(session);
 
-  if (loading) return <div style={{ padding: 24 }}>Verifying Access...</div>;
+  if (loading) return <div style={{ padding: 24, color: "white" }}>Verifying Access...</div>;
   if (!profileComplete) return <Navigate to="/profile" replace />;
   if (!hasPretest) return <Navigate to="/pretest" replace />;
 
@@ -222,7 +227,7 @@ export default function App() {
   }, []);
 
   if (loading) {
-    return <div style={{ padding: 24 }}>Loading Application...</div>;
+    return <div style={{ padding: 24, color: "white" }}>Loading Application...</div>;
   }
 
   return (
@@ -249,17 +254,25 @@ export default function App() {
             <Route path="/main" element={<Main />} />
             <Route path="/lessons" element={<Lessons />} />
             <Route path="/LessonLinear" element={<LessonLinear />} />
-            
 
             {/* Unit 1 */}
             <Route path="/unit1/learn" element={<Learn />} />
             <Route path="/unit1/learn1" element={<Learn1 />} />
+            <Route path="/unit1/learn/1.3" element={<Unit13Wrapper />} />
+            <Route path="/unit1/learn/1.4" element={<Unit14Placeholder />} />
             <Route path="/unit1/learn2" element={<Learn2 />} />
             <Route path="/unit1/learn3" element={<Learn3 />} />
             <Route path="/unit1/learn4" element={<Learn4 />} />
             <Route path="/unit1/learn5" element={<Learn5 />} />
             <Route path="/unit1/posttest" element={<PosttestRun />} />
 
+            {/* Unit 2 */}
+            <Route path="/unit2/learn" element={<LearnUnit2 />} /> 
+            <Route path="/unit2/learn1" element={<Learn1Unit2 />} /> 
+            <Route path="/unit2/learn2" element={<Learn2Unit2 />} />
+            <Route path="/unit2/learn3" element={<Learn3Unit2 />} />
+            <Route path="/unit2/Examples" element={<Examples />} />
+            <Route path="/unit2/posttest" element={<Unit2PosttestRun />} />
 
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashScore" element={<DashScore />} />

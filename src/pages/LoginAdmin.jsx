@@ -6,59 +6,83 @@ import { supabase } from "../lib/supabase";
 export default function LoginAdmin() {
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  // =========================
+  // State: ฟอร์มล็อกอิน
+  // =========================
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  // =========================
+  // State: UI
+  // =========================
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
+  /**
+   * ล็อกอินแอดมิน
+   * - Step 1: signInWithPassword
+   * - Step 2: เรียก RPC is_admin() เพื่อตรวจสิทธิ์ (ชัวร์กว่า select table ตรง ๆ)
+   * - Step 3: ถ้าเป็นแอดมิน -> ไป /admin/data
+   */
   const handleLogin = async () => {
     setErrorMsg("");
     setLoading(true);
 
-    // 1. จัดการชื่อ Email (เติม @local.app ให้อัตโนมัติ)
+    // =========================
+    // 1) จัดรูปแบบอีเมล
+    // - ถ้าพิมพ์ user001 -> เติม @local.app ให้
+    // =========================
     let email = username.trim().toLowerCase();
     if (!email.includes("@")) {
       email = `${email}@local.app`;
     }
 
     try {
-      // 2. ล็อกอินเข้าระบบ
+      // =========================
+      // 2) ล็อกอิน Supabase Auth
+      // =========================
       const { data, error: loginError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (loginError) throw new Error("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
-
-      // 3. ตรวจสอบในตาราง user_profiles ว่าเป็น Admin จริงไหม
-      const { data: userData, error: userError } = await supabase
-        .from("user_profiles")
-        .select("is_admin")
-        .eq("user_id", data.user.id)
-        .single();
-
-      if (userError || !userData) {
-        await supabase.auth.signOut();
-        throw new Error("ไม่พบข้อมูลสิทธิ์ผู้ใช้งาน");
+      if (loginError || !data?.user) {
+        throw new Error("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
       }
 
-      // 4. เงื่อนไขการเข้าถึง
-      if (userData.is_admin === true) {
-        // ✅ เป็นแอดมินจริง ไปที่หน้า DataAdmin
+      // =========================
+      // 3) เช็คสิทธิ์แอดมินด้วย RPC (ลดปัญหา RLS/จังหวะ session)
+      // =========================
+      const { data: isAdmin, error: roleError } = await supabase.rpc("is_admin");
+
+      // ถ้าเรียก RPC ไม่ได้/พัง ให้ logout เพื่อความปลอดภัย
+      if (roleError) {
+        await supabase.auth.signOut();
+        throw new Error("ตรวจสอบสิทธิ์ไม่สำเร็จ (RPC is_admin ล้มเหลว)");
+      }
+
+      // =========================
+      // 4) เงื่อนไขเข้า Admin
+      // =========================
+      if (isAdmin === true) {
+        // ✅ เป็นแอดมินจริง -> ไปหน้า DataAdmin
         navigate("/admin/data", { replace: true });
-      } else {
-        // ❌ ไม่ใช่แอดมิน (เป็นนักเรียน) สั่ง Logout และดีดออก
-        await supabase.auth.signOut();
-        throw new Error("ขออภัย! หน้านี้สำหรับผู้ดูแลระบบเท่านั้น");
+        return;
       }
 
+      // ❌ ไม่ใช่แอดมิน -> logout แล้วแจ้งเตือน
+      await supabase.auth.signOut();
+      throw new Error("ขออภัย! หน้านี้สำหรับผู้ดูแลระบบเท่านั้น");
     } catch (err) {
-      setErrorMsg(err.message);
+      setErrorMsg(err?.message || "เกิดข้อผิดพลาด");
     } finally {
       setLoading(false);
     }
   };
 
+  /**
+   * กด Enter เพื่อ login
+   */
   const handleKeyDown = (e) => {
     if (e.key === "Enter") handleLogin();
   };
@@ -92,6 +116,7 @@ export default function LoginAdmin() {
                   onChange={(e) => setUsername(e.target.value)}
                   onKeyDown={handleKeyDown}
                 />
+
                 <input
                   className="edu-input"
                   placeholder="Password"
@@ -108,7 +133,7 @@ export default function LoginAdmin() {
                 )}
 
                 <button
-                  className={`edu-btn edu-btn--primary ${loading ? 'disabled' : ''}`}
+                  className={`edu-btn edu-btn--primary ${loading ? "disabled" : ""}`}
                   onClick={handleLogin}
                   disabled={loading}
                 >

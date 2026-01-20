@@ -1,3 +1,4 @@
+
 // src/pages/Unit1/PosttestRun.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +22,16 @@ export default function PosttestRun() {
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState(null);
   const [showSolutions, setShowSolutions] = useState(true);
+
+  // =========================
+  // Helper: Scroll ไปบนสุด
+  // =========================
+  const scrollToTop = () => {
+    // หมายเหตุ: เผื่อบาง browser / iOS
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  };
 
   const initAnswerForItem = (item) => {
     if (item.type === "single") return { type: "single", value: "" };
@@ -233,6 +244,11 @@ export default function PosttestRun() {
       return;
     }
 
+    // =========================
+    // 1) กดส่งแล้วเด้งขึ้นไปบนสุดทันที
+    // =========================
+    scrollToTop();
+
     setSubmitting(true);
     console.log("submit start:", { attemptId, posttestId, totalMaxScore });
 
@@ -344,6 +360,21 @@ export default function PosttestRun() {
 
   return (
     <div className="pt-page">
+      {/* =========================
+          2) Popup ระหว่างกำลังส่ง/คำนวณคะแนน (submitting)
+          CSS คุณแก้ไฟล์แยกแล้ว: ใช้ class ตามนี้ได้เลย
+      ========================= */}
+      {submitting && (
+        <div className="pt-popupOverlay" role="dialog" aria-modal="true" aria-label="กำลังประมวลผลคะแนน">
+          <div className="pt-popup">
+            <div className="pt-popup__spinner" aria-hidden="true" />
+            <div className="pt-popup__title">ระบบกำลังคำนวณคะแนน…</div>
+            <div className="pt-popup__desc">กรุณารอสักครู่ ระบบกำลังบันทึกคำตอบและตรวจคำตอบด้วย AI</div>
+            <div className="pt-popup__hint">อย่าปิดหน้านี้ระหว่างประมวลผลนะครับ</div>
+          </div>
+        </div>
+      )}
+
       <header className="pt-topbar">
         <div className="pt-topbar__inner">
           <div className="pt-title">
@@ -519,10 +550,20 @@ export default function PosttestRun() {
                           <div className="pt-orderRow__index">{idx + 1}</div>
                           <div className="pt-orderRow__label">{label}</div>
                           <div className="pt-orderRow__actions">
-                            <button className="pt-btn pt-btn--mini" type="button" onClick={() => moveOrdering(q.id, idx, idx - 1)} disabled={submitting || submitted || isFirst}>
+                            <button
+                              className="pt-btn pt-btn--mini"
+                              type="button"
+                              onClick={() => moveOrdering(q.id, idx, idx - 1)}
+                              disabled={submitting || submitted || isFirst}
+                            >
                               ↑
                             </button>
-                            <button className="pt-btn pt-btn--mini" type="button" onClick={() => moveOrdering(q.id, idx, idx + 1)} disabled={submitting || submitted || isLast}>
+                            <button
+                              className="pt-btn pt-btn--mini"
+                              type="button"
+                              onClick={() => moveOrdering(q.id, idx, idx + 1)}
+                              disabled={submitting || submitted || isLast}
+                            >
                               ↓
                             </button>
                           </div>
@@ -552,7 +593,9 @@ export default function PosttestRun() {
         {!loading && items.length > 0 && (
           <footer className="pt-footer">
             <div className="pt-footer__inner">
-              <div className="pt-footer__note">{!submitted ? "กดส่งทีเดียว ระบบจะบันทึกคำตอบทั้งหมดลงฐานข้อมูล" : "ตรวจคำตอบเสร็จแล้ว กดถัดไปเพื่อกลับหน้าเรียน"}</div>
+              <div className="pt-footer__note">
+                {!submitted ? "กดส่งทีเดียว ระบบจะบันทึกคำตอบทั้งหมดลงฐานข้อมูล" : "ตรวจคำตอบเสร็จแล้ว กดถัดไปเพื่อกลับหน้าเรียน"}
+              </div>
 
               <button
                 className="pt-btn pt-btn--primary"
@@ -573,3 +616,4 @@ export default function PosttestRun() {
     </div>
   );
 }
+

@@ -1,461 +1,678 @@
-/* ============================= */
-/* ✅ Luxury Emerald Theme (หรู เขียว-ขาว ไม่แบ๊ว) */
-/* ============================= */
+/* =========================================================
+   ✅ LESSONS / ADAPTIVE OVERRIDE
+   - หน้าโดยรวม: Bright / White Glass
+   - ส่วน Roadmap: Dark premium
+   - โฟกัส: stacking + tooltip (ไม่โดนบัง/ไม่โดนตัด)
+========================================================= */
 
-/* ✅ ตัวแปรธีมหลัก */
-.ls-adaptive { /* scope ของธีมทั้งหมด */
-  --ls-bg: /* พื้นหลังรวม */
-    radial-gradient(1200px 600px at 20% -10%, rgba(16,185,129,0.16) 0%, rgba(255,255,255,0) 55%), /* แสงเขียวซ้ายบน */
-    radial-gradient(900px 500px at 110% 10%, rgba(5,150,105,0.12) 0%, rgba(255,255,255,0) 55%),  /* แสงเขียวขวาบน */
-    linear-gradient(180deg, #ffffff 0%, #f6fffb 100%); /* ไล่ขาวลงขาวอมเขียว */
+/* =========================================================
+   🟢 GLOBAL VARIABLES
+========================================================= */
+:root {
+  /* Brand */
+  --primary-green: #10b981;
+  --glow-green: rgba(16, 185, 129, 0.28);
 
-  --ls-card: rgba(255,255,255,0.78); /* สีการ์ดหลัก (โปร่งนิด ๆ แบบ glass) */
-  --ls-card2: rgba(255,255,255,0.72); /* สีการ์ดรอง */
-  --ls-border: rgba(6,78,59,0.14); /* เส้นขอบบาง ๆ หรู */
-  --ls-text: #052e24; /* สีข้อความหลัก (เขียวเข้ม) */
-  --ls-sub: #0f766e; /* สีข้อความรอง (emerald/teal) */
-  --ls-mute: rgba(15,118,110,0.78); /* สีข้อความจาง */
-  --ls-shadow: 0 18px 55px rgba(2,44,34,0.14); /* เงาหลักแบบนุ่มหรู */
-  --ls-shadow2: 0 10px 26px rgba(2,44,34,0.10); /* เงารอง */
-  --ls-radius: 18px; /* โค้งระดับ 1 */
-  --ls-radius2: 22px; /* โค้งระดับ 2 */
+  /* Bright glass */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(15, 23, 42, 0.10);
+
+  /* Text */
+  --text-main: #0f172a;
+  --text-sub: rgba(15, 23, 42, 0.72);
+
+  /* Shadows */
+  --shadow-lg: 0 18px 40px rgba(15, 23, 42, 0.10);
+  --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
+
+  /* Page background */
+  --page-bg:
+    radial-gradient(1200px 600px at 20% 10%, rgba(16, 185, 129, 0.16), transparent 55%),
+    radial-gradient(900px 500px at 80% 20%, rgba(56, 189, 248, 0.14), transparent 60%),
+    linear-gradient(180deg, #ffffff, #f6f8fb);
+
+  /* Roadmap dark palette */
+  --road-bg-1: rgba(15, 23, 42, 0.92);
+  --road-bg-2: rgba(2, 6, 23, 0.94);
+
+  /* Status colors */
+  --done-ring: rgba(16, 185, 129, 0.55);
+  --done-text: #d1fae5;
+
+  --active-ring: rgba(56, 189, 248, 0.60);
+  --active-text: #e0f2fe;
+
+  --locked-ring: rgba(255, 255, 255, 0.12);
+  --locked-text: rgba(255, 255, 255, 0.40);
 }
 
-/* ============================= */
-/* ✅ Layout */
-/* ============================= */
-
-.ls-grid { /* กริดหลัก */
-  display: grid; /* ใช้ grid */
-  grid-template-columns: 1.1fr 0.9fr; /* ซ้ายใหญ่ ขวาเล็ก */
-  gap: 14px; /* ช่องว่าง */
+/* =========================================================
+   ✅ PAGE WRAPPER
+========================================================= */
+.edu-app.ls-adaptive {
+  min-height: 100vh;
+  background: var(--page-bg);
+  color: var(--text-main);
 }
 
-@media (max-width: 980px) { /* หน้าจอเล็ก */
-  .ls-grid { /* ปรับกริด */
-    grid-template-columns: 1fr; /* เหลือคอลัมน์เดียว */
+.edu-app.ls-adaptive * {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================================================
+   ✅ TOPBAR
+========================================================= */
+.edu-app.ls-adaptive .edu-topbar {
+  background: rgba(255, 255, 255, 0.78);
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  position: relative;
+  z-index: 50; /* กันเผื่อเลเยอร์ทับกัน */
+}
+
+.edu-app.ls-adaptive .edu-brandtext__title,
+.edu-app.ls-adaptive .edu-brandtext__subtitle {
+  color: var(--text-main);
+}
+
+.edu-app.ls-adaptive .edu-userchip {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+}
+
+.edu-hero__head {
+  display: flex;
+  align-items: flex-start; /* หรือ center ถ้าต้องการให้ปุ่มอยู่กึ่งกลางแนวตั้ง */
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.edu-hero__text {
+  max-width: 70%; /* กันข้อความดันปุ่มตกบรรทัด */
+}
+
+@media (max-width: 768px) {
+  .edu-hero__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .edu-btn {
+    align-self: flex-end; /* มือถือให้ปุ่มไปอยู่ขวาล่าง */
   }
 }
 
-/* ============================= */
-/* ✅ Card */
-/* ============================= */
 
-.ls-card { /* กล่องการ์ด */
-  background: var(--ls-card); /* ใช้สีการ์ดจากตัวแปร */
-  border: 1px solid var(--ls-border); /* เส้นขอบ */
-  border-radius: var(--ls-radius2); /* มุมโค้ง */
-  box-shadow: var(--ls-shadow); /* เงา */
-  backdrop-filter: blur(14px); /* เบลอหลังแบบ glass */
-  overflow: hidden; /* ตัดขอบไม่ให้ล้น */
+.edu-app.ls-adaptive .edu-btn--danger {
+  background: rgba(239, 68, 68, 0.10);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #b91c1c;
 }
 
-.ls-cardHead { /* หัวการ์ด */
-  padding: 14px 14px 10px; /* ระยะขอบ */
-  display: flex; /* จัดแนวนอน */
-  align-items: flex-start; /* ชิดบน */
-  justify-content: space-between; /* ซ้าย-ขวา */
-  gap: 10px; /* ช่องว่าง */
-  background: linear-gradient(135deg, rgba(6,78,59,0.08) 0%, rgba(16,185,129,0.06) 45%, rgba(255,255,255,0.25) 100%); /* หัวแบบหรู */
-  border-bottom: 1px solid var(--ls-border); /* เส้นคั่น */
-  margin-bottom: 20px;
+.edu-app.ls-adaptive .edu-btn--danger:hover {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.35);
 }
 
-.ls-cardTitle { /* ชื่อหัวข้อ */
-  font-weight: 900; /* หนา */
-  color: var(--ls-text); /* สีข้อความหลัก */
-  font-size: 14.5px; /* ขนาด */
-  letter-spacing: 0.2px; /* ระยะตัวอักษร */
-  display: flex; /* จัดไอคอนกับข้อความ */
-  gap: 8px; /* ช่องว่าง */
-  align-items: center; /* กึ่งกลาง */
+/* =========================================================
+   ✅ HERO
+========================================================= */
+.edu-app.ls-adaptive .edu-hero__card {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-lg);
+  color: var(--text-main);
 }
 
-.ls-cardSub { /* คำอธิบายใต้หัว */
-  margin-top: 6px; /* เว้นบน */
-  color: var(--ls-sub); /* สีรอง */
-  font-size: 12.8px; /* ขนาด */
-  line-height: 1.35; /* ระยะบรรทัด */
+.edu-app.ls-adaptive .edu-hero__card h1 {
+  color: var(--text-main);
 }
 
-/* ============================= */
-/* ✅ Chip */
-/* ============================= */
-
-.ls-chip { /* ชิปสถานะ */
-  border: 1px solid var(--ls-border); /* ขอบ */
-  background: linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(16,185,129,0.10) 100%); /* ขาวเขียวหรู */
-  color: var(--ls-text); /* สีข้อความ */
-  border-radius: 999px; /* โค้งสุด */
-  padding: 6px 10px; /* ระยะขอบ */
-  font-size: 12px; /* ขนาด */
-  font-weight: 900; /* หนา */
-  white-space: nowrap; /* ไม่ตัดบรรทัด */
+.edu-app.ls-adaptive .edu-hero__card p {
+  color: var(--text-sub);
 }
 
-/* ============================= */
-/* ✅ Buttons */
-/* ============================= */
+.edu-app.ls-adaptive .section__title {
+  color: var(--text-main) !important;
+}
 
-.ls-btn { /* ปุ่มหลัก (compact) */
-  border: 1px solid rgba(16,185,129,0.3);
-  background: linear-gradient(135deg, #0b7a5a 0%, #064e3b 100%);
-  color: #ffffff;
+/* =========================================================
+   ✅ ROADMAP SECTION (STACKING สำคัญมาก)
+========================================================= */
+.roadmap-section {
+  position: relative;
+  z-index: 1;
+}
 
-  border-radius: 10px;          /* 🔽 โค้งน้อยลง */
-  padding: 6px 10px;            /* 🔽 เล็กลงชัดเจน */
-  font-size: 13px;              /* 🔽 ขนาดตัวอักษร */
-  font-weight: 700;             /* 🔽 หนาลดลงนิด */
-  
+.roadmap-section .roadmap-container {
+  position: relative;
+  z-index: 1;
+
+  border-radius: 22px;
+  padding: 18px;
+
+  /* ขอบนุ่มขึ้น + ดูเป็นกระจก */
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+
+  /* ✅ ทำให้พื้น “ไม่เข้มเกิน” + มีมิติ */
+  background:
+    radial-gradient(900px 380px at 18% 12%, rgba(16, 185, 129, 0.18), transparent 60%),
+    radial-gradient(700px 320px at 86% 24%, rgba(56, 189, 248, 0.14), transparent 62%),
+    radial-gradient(520px 260px at 50% 0%, rgba(255, 255, 255, 0.07), transparent 70%),
+    linear-gradient(180deg, rgba(18, 24, 38, 0.78), rgba(10, 14, 24, 0.72));
+
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
+
+  /* สำคัญกับ tooltip */
+  overflow: visible;
+}
+
+/* (แนะนำ) ทำไฮไลท์ขอบด้านบนให้ดูพรีเมียมขึ้น */
+.roadmap-section .roadmap-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0.03) 35%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  opacity: 0.7;
+}
+
+.roadmap-svg path {
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.35));
+}
+
+
+
+
+/* texture เบา ๆ (แทน ::after สีขาวทึบที่ทำให้ภาพหม่น) */
+.roadmap-section .roadmap-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.16;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.10) 0 1px,
+      rgba(255, 255, 255, 0.00) 1px 6px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.10) 0 1px,
+      rgba(0, 0, 0, 0.00) 1px 7px
+    );
+}
+
+/* =========================================================
+   ✅ SVG ROAD (อยู่หลัง node)
+========================================================= */
+.roadmap-section .roadmap-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; /* ถนน */
+  pointer-events: none;
+}
+
+.roadmap-section .roadmap-svg path {
+  stroke: rgba(255, 255, 255, 0.10) !important;
+  stroke-width: 54 !important;
+  stroke-linecap: round;
+  fill: none;
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.45));
+}
+
+/* =========================================================
+   ✅ NODE WRAPPER (อยู่เหนือถนน)
+========================================================= */
+.roadmap-node-wrapper {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 10; /* ค่า default */
+}
+
+/* 🔥 สำคัญ: ตัวที่ hover ต้องขึ้น top ของ roadmap ทั้งก้อน */
+.roadmap-node-wrapper.is-hovered {
+  z-index: 100000; /* สูงกว่า node อื่นทั้งหมด */
+}
+
+.roadmap-node-wrapper.is-hovered .unit-tooltip {
+  z-index: 100001;
+}
+/* =========================================================
+   ✅ UNIT NODE (3 สถานะ)
+========================================================= */
+.unit-node {
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.88);
+
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.40);
+
   display: inline-flex;
   align-items: center;
-  gap: 6px;                     /* 🔽 ช่องว่างไอคอน */
+  justify-content: center;
 
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease,
+    background 0.14s ease,
+    border-color 0.14s ease,
+    filter 0.14s ease;
+
+  position: relative;
+}
+
+.unit-node::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: inherit;
+  border: 2px solid rgba(255, 255, 255, 0.10);
+  opacity: 0.95;
+}
+
+/* hover เฉพาะอันกดได้ */
+.unit-node:enabled:hover {
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(255, 255, 255, 0.10);
+  box-shadow:
+    0 22px 55px rgba(16, 185, 129, 0.18),
+    0 22px 55px rgba(0, 0, 0, 0.45);
+}
+
+/* COMPLETED */
+.unit-node--completed {
+  border-color: var(--done-ring);
+  color: var(--done-text);
+  box-shadow:
+    0 22px 55px rgba(16, 185, 129, 0.22),
+    0 22px 55px rgba(0, 0, 0, 0.45);
+}
+
+.unit-node--completed::after {
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.10);
+}
+
+/* ACTIVE */
+.unit-node--active {
+  border-color: var(--active-ring);
+  color: var(--active-text);
+  box-shadow:
+    0 26px 60px rgba(56, 189, 248, 0.18),
+    0 22px 55px rgba(0, 0, 0, 0.45);
+}
+
+.unit-node--active::after {
+  border-color: rgba(56, 189, 248, 0.55);
+  animation: roadmapPulse 1.35s ease-in-out infinite;
+}
+
+@keyframes roadmapPulse {
+  0% { transform: scale(1); opacity: 0.85; }
+  60% { transform: scale(1.08); opacity: 0.25; }
+  100% { transform: scale(1); opacity: 0.85; }
+}
+
+/* LOCKED */
+.unit-node--locked {
+  border-color: var(--locked-ring);
+  color: var(--locked-text);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.38);
+  filter: grayscale(0.25);
+  cursor: not-allowed;
+}
+
+.unit-node--locked::after {
+  border-color: rgba(255, 255, 255, 0.12);
+  border-style: dashed;
+  opacity: 0.75;
+}
+
+/* LABEL */
+.unit-label {
+  margin-top: 9px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(2, 6, 23, 0.55);
+
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.roadmap-node-wrapper .unit-node--completed + .unit-label {
+  border-color: rgba(16, 185, 129, 0.22);
+  color: rgba(209, 250, 229, 0.88);
+}
+
+.roadmap-node-wrapper .unit-node--active + .unit-label {
+  border-color: rgba(56, 189, 248, 0.22);
+  color: rgba(224, 242, 254, 0.92);
+}
+
+.roadmap-node-wrapper .unit-node--locked + .unit-label {
+  opacity: 0.75;
+}
+
+/* =========================================================
+   ✅ TOOLTIP (z-index หนัก + ไม่โดนตัด + ไม่โดนบัง)
+========================================================= */
+.unit-tooltip {
+  position: absolute;
+
+  /* สำคัญมาก: ให้ลอยเหนือทุกอย่างใน roadmap */
+  z-index: 99999;
+
+  left: 50%;
+  bottom: calc(100% + 12px);
+  transform: translateX(-50%);
+
+  width: 280px;
+  max-width: min(320px, 72vw);
+  padding: 10px 12px;
+  border-radius: 14px;
+
+  background: rgba(18, 24, 38, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.60);
+
+  pointer-events: none;
+
+  animation: unitTipIn 140ms ease-out;
+}
+
+.unit-tooltip__title {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 6px;
+}
+
+.unit-tooltip__desc {
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.unit-tooltip__arrow {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 10px;
+  height: 10px;
+
+  background: rgba(18, 24, 38, 0.84);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+
+  transform: translateX(-50%) rotate(45deg);
+}
+
+@keyframes unitTipIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* =========================================================
+   ✅ NEXT TARGET BOX
+========================================================= */
+.ls-nextBox{
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-lg);
+  color: var(--text-main);
+
+  /* ✅ เพิ่ม 2 บรรทัดนี้ */
+  display: flex;
+  flex-direction: column;
+
+}
+.ls-nextBox__row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ls-nextBox__text{
+  min-width: 0;          /* สำคัญ: กัน text ดันปุ่มตกบรรทัด */
+}
+
+.ls-nextBox__text p{
+  margin: 0;             /* กันระยะทำให้ดูสูงเกิน */
+  white-space: nowrap;   /* ถ้าอยากให้เป็นบรรทัดเดียว */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ปุ่มไม่ให้ถูกบีบ */
+.ls-nextBox__cta{
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+
+.ls-nextBox h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 950;
+  letter-spacing: 0.3px;
+  color: var(--primary-green);
+  text-shadow: 0 0 10px var(--glow-green);
+}
+
+.ls-nextBox p {
+  margin: 0 0 12px;
+  color: var(--text-sub);
+  line-height: 1.55;
+}
+
+/* =========================================================
+   ✅ BUTTONS (Adaptive)
+========================================================= */
+.ls-btn {
+  appearance: none;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text-main);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 900;
   cursor: pointer;
-  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
-  box-shadow: 0 6px 14px rgba(2,44,34,0.16); /* 🔽 เงาเบาลง */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease,
+    background 0.14s ease,
+    border-color 0.14s ease;
+
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
 }
 
-
-.ls-btn:hover { /* ตอน hover */
-  transform: translateY(-2px); /* ยกขึ้น */
-  filter: brightness(1.05); /* สว่างขึ้นนิด */
-  box-shadow: 0 14px 30px rgba(2,44,34,0.22); /* เงาหนักขึ้น */
+.ls-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 14px 28px rgba(16, 185, 129, 0.18);
+  background: rgba(255, 255, 255, 0.92);
 }
 
-.ls-btn:active { /* ตอนกด */
-  transform: translateY(0px); /* กลับลง */
+.ls-btn:active {
+  transform: translateY(0px);
 }
 
-.ls-btn--ghost { /* ปุ่มโปร่ง */
-  background: rgba(255,255,255,0.6); /* ขาวโปร่ง */
-  color: var(--ls-text); /* สีข้อความ */
-  border: 1px solid var(--ls-border); /* ขอบ */
-  box-shadow: var(--ls-shadow2); /* เงาเบา */
+.ls-btn--primary {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.14);
+  color: #065f46;
 }
 
-.ls-btn--primary { /* ปุ่ม primary เสริม */
-  background: linear-gradient(135deg, #10b981 0%, #064e3b 100%); /* emerald -> forest */
-  color: #ffffff; /* ขาว */
-  border-color: transparent; /* ไม่เอาขอบ */
-  box-shadow: 0 12px 26px rgba(2,44,34,0.20); /* เงา */
+.ls-btn--primary:hover {
+  border-color: rgba(16, 185, 129, 0.55);
+  background: var(--primary-green);
+  color: #ffffff;
 }
 
-/* ============================= */
-/* ✅ Summary (left) */
-/* ============================= */
+/* =========================================================
+   ✅ LEGEND
+========================================================= */
+.ls-legend {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 
-.ls-summaryBody { /* body ของ summary */
-  padding: 0 14px 14px; /* ระยะขอบ */
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+
+  color: var(--text-main);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
 }
 
-.ls-summaryTop { /* กล่อง summary ด้านบน */
-  display: grid; /* ใช้ grid */
-  grid-template-columns: 1fr auto; /* ซ้ายข้อความ ขวา progress */
-  gap: 12px; /* ช่องว่าง */
-  align-items: center; /* กึ่งกลาง */
-  padding: 12px 12px; /* ระยะขอบ */
-  border: 1px solid var(--ls-border); /* ขอบ */
-  border-radius: 18px; /* โค้ง */
-  background: linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(16,185,129,0.10) 100%); /* หรู */
-  box-shadow: var(--ls-shadow2); /* เงา */
-  margin-top: 25px;
+.ls-legend > div {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  background: rgba(255, 255, 255, 0.72);
+
+  font-weight: 900;
+  font-size: 12.5px;
+  line-height: 1;
+  color: rgba(15, 23, 42, 0.78);
 }
 
-.ls-summaryMetaTitle { /* หัว summary */
-  font-weight: 900; /* หนา */
-  color: var(--ls-text); /* สีหลัก */
-  font-size: 14px; /* ขนาด */
+/* =========================================================
+   ✅ REVIEW MINI
+========================================================= */
+.ls-reviewMini {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-lg);
+  color: var(--text-main);
 }
 
-.ls-summaryMetaSub { /* คำอธิบาย summary */
-  margin-top: 4px; /* เว้นบน */
-  color: var(--ls-sub); /* สีรอง */
-  font-size: 12.6px; /* ขนาด */
-  line-height: 1.35; /* ระยะบรรทัด */
+.ls-reviewMini h3 {
+  margin: 0 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 950;
+  color: var(--text-main);
 }
 
-.ls-progressWrap { /* กล่อง progress */
-  text-align: right; /* ชิดขวา */
+.ls-reviewRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.ls-progressPct { /* เปอร์เซ็นต์ใหญ่ */
-  font-size: 18px; /* ขนาด */
-  font-weight: 1000; /* หนามาก */
-  color: #059669; /* emerald */
-  line-height: 1; /* บรรทัดชิด */
+.ls-reviewRow button {
+  appearance: none;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  background: rgba(255, 255, 255, 0.72);
+  color: rgba(15, 23, 42, 0.72);
+
+  border-radius: 999px;
+  padding: 10px 14px;
+
+  font-weight: 900;
+  font-size: 12.5px;
+  cursor: pointer;
+
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    border-color 0.12s ease,
+    background 0.12s ease;
+
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
 }
 
-.ls-progressLabel { /* label progress */
-  margin-top: 4px; /* เว้นบน */
-  font-size: 12px; /* ขนาด */
-  color: var(--ls-mute); /* สีจาง */
+.ls-reviewRow button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.10);
+  color: #065f46;
+  box-shadow: 0 14px 24px rgba(16, 185, 129, 0.14);
 }
 
-.ls-bar { /* แถบ progress */
-  margin-top: 10px; /* เว้นบน */
-  height: 10px; /* ความสูง */
-  border-radius: 999px; /* โค้งสุด */
-  background: rgba(6,78,59,0.05); /* พื้นหลังจาง */
-  border: 1px solid var(--ls-border); /* ขอบ */
-  overflow: hidden; /* ตัดขอบ */
-}
+/* =========================================================
+   📱 RESPONSIVE
+========================================================= */
+@media (max-width: 520px) {
+  .ls-legend { gap: 8px; }
+  .ls-legend > div { font-size: 12px; padding: 8px 10px; }
 
-.ls-bar > span { /* ส่วนที่เติม */
-  display: block; /* บล็อค */
-  height: 100%; /* เต็มสูง */
-  width: 0%; /* เริ่มต้น 0 (ให้ JS เปลี่ยน) */
-  background: linear-gradient(90deg, #0f766e 0%, #10b981 45%, #064e3b 100%); /* ไล่สีหรู */
-  transition: width .25s ease; /* ขยับลื่น */
-  box-shadow: 0 0 14px rgba(16,185,129,0.35); /* glow เบา ๆ */
-}
-
-/* ============================= */
-/* ✅ Next Box (ตัดเหลืองหวาน → ขาวเขียวหม่น) */
-/* ============================= */
-
-.ls-nextBox { /* กล่อง next */
-  margin-top: 12px; /* เว้นบน */
-  padding: 12px 12px; /* ระยะขอบ */
-  border: 1px solid rgba(16,185,129,0.22); /* ขอบเขียวจาง */
-  border-radius: 18px; /* โค้ง */
-  background: linear-gradient(135deg, rgba(255,255,255,0.78) 0%, rgba(16,185,129,0.12) 100%); /* หรู ไม่เหลือง */
-  box-shadow: var(--ls-shadow2); /* เงา */
-}
-
-.ls-nextTitle { /* หัว next */
-  font-weight: 900; /* หนา */
-  color: var(--ls-text); /* สีหลัก */
-  font-size: 13.5px; /* ขนาด */
-  display: flex; /* จัด icon */
-  gap: 8px; /* ช่องว่าง */
-  align-items: center; /* กึ่งกลาง */
-}
-
-.ls-nextHint { /* คำอธิบาย next */
-  margin-top: 6px; /* เว้นบน */
-  color: var(--ls-sub); /* สีรอง */
-  font-size: 12.6px; /* ขนาด */
-  line-height: 1.35; /* ระยะบรรทัด */
-}
-
-/* ============================= */
-/* ✅ Task list (left) */
-/* ============================= */
-
-.ls-taskList { /* รายการ task */
-  margin-top: 12px; /* เว้นบน */
-  display: grid; /* grid */
-  gap: 10px; /* ช่องว่าง */
-}
-
-.ls-taskRow { /* แถว task */
-  width: 100%; /* เต็ม */
-  text-align: left; /* ชิดซ้าย */
-  border: 1px solid var(--ls-border); /* ขอบ */
-  background: rgba(255,255,255,0.78); /* ขาวโปร่ง */
-  border-radius: 18px; /* โค้ง */
-  padding: 12px 12px; /* ระยะขอบ */
-  display: grid; /* grid */
-  grid-template-columns: auto 1fr auto; /* step | text | arrow */
-  gap: 12px; /* ช่องว่าง */
-  align-items: center; /* กึ่งกลาง */
-  cursor: pointer; /* pointer */
-  transition: transform .15s ease, background .15s ease, opacity .15s ease, box-shadow .15s ease; /* smooth */
-  box-shadow: var(--ls-shadow2); /* เงา */
-}
-
-.ls-taskRow:hover { /* hover task */
-  transform: translateY(-2px); /* ยก */
-  background: linear-gradient(135deg, rgba(255,255,255,0.80) 0%, rgba(16,185,129,0.10) 100%); /* หรู */
-  box-shadow: 0 14px 34px rgba(2,44,34,0.14); /* เงาหนักขึ้น */
-}
-
-.ls-taskRow:disabled { /* ถ้าปิดใช้งาน */
-  cursor: not-allowed; /* ห้ามกด */
-  opacity: 0.6; /* จาง */
-  transform: none; /* ไม่ยก */
-}
-.ls-step { /* กล่องเลข step (Luxury Gold) */
-  width: 34px; /* กว้าง */
-  height: 34px; /* สูง */
-  border-radius: 12px; /* โค้ง */
-  border: 1px solid rgba(180,150,90,0.55); /* ขอบทองหม่น */
-  background: linear-gradient(
-    135deg,
-    #f6e27a 0%,   /* highlight ทองอ่อน */
-    #d4af37 35%,  /* gold มาตรฐาน */
-    #b8962e 65%,  /* gold เข้ม */
-    #8a6f1f 100%  /* เงาทอง */
-  ); /* ไล่ทองแบบโลหะ */
-  display: grid; /* grid */
-  place-items: center; /* กลาง */
-  font-weight: 1000; /* หนามาก */
-  color: #3b2f0b; /* ตัวเลขน้ำตาลเข้ม (ดูแพงกว่าใช้ขาว) */
-  box-shadow:
-    0 6px 16px rgba(138,111,31,0.35), /* เงาทอง */
-    inset 0 1px 0 rgba(255,255,255,0.45); /* highlight ด้านใน */
-}
-
-
-.ls-taskTitle { /* ชื่อ task */
-  font-weight: 900; /* หนา */
-  color: var(--ls-text); /* สีหลัก */
-  font-size: 13.5px; /* ขนาด */
-  line-height: 1.25; /* ระยะบรรทัด */
-}
-
-.ls-taskDesc { /* รายละเอียด task */
-  margin-top: 5px; /* เว้นบน */
-  color: var(--ls-sub); /* สีรอง */
-  font-size: 12.6px; /* ขนาด */
-  line-height: 1.35; /* ระยะบรรทัด */
-}
-
-.ls-taskFoot { /* ท้าย task สำหรับ badge */
-  margin-top: 8px; /* เว้นบน */
-  display: flex; /* flex */
-  gap: 8px; /* ช่องว่าง */
-  align-items: center; /* กึ่งกลาง */
-  flex-wrap: wrap; /* ตัดบรรทัดได้ */
-}
-
-.ls-arrow { /* ลูกศร */
-  opacity: 0.85; /* จางนิด */
-  color: var(--ls-sub); /* สีรอง */
-}
-
-/* ============================= */
-/* ✅ Done block (ตัดฟ้า → เขียวหรู) */
-/* ============================= */
-
-
-
-/* ============================= */
-/* ✅ Review panel (right) */
-/* ============================= */
-
-.ls-reviewBody { /* body review */
-  padding: 0 14px 14px; /* ระยะขอบ */
-}
-
-.ls-reviewGrid { /* กริด review */
-  display: grid; /* grid */
-  grid-template-columns: 1fr; /* 1 คอลัมน์ */
-  gap: 10px; /* ช่องว่าง */
-  padding-bottom: 4px; /* เว้นล่าง */
-}
-
-.ls-reviewCard { /* การ์ด review */
-  width: 100%; /* เต็ม */
-  text-align: left; /* ชิดซ้าย */
-  border: 1px solid var(--ls-border); /* ขอบ */
-  background: rgba(255,255,255,0.78); /* ขาวโปร่ง */
-  border-radius: 18px; /* โค้ง */
-  padding: 12px 12px; /* ระยะขอบ */
-  cursor: pointer; /* pointer */
-  transition: transform .15s ease, background .15s ease, box-shadow .15s ease; /* smooth */
-  display: grid; /* grid */
-  grid-template-columns: auto 1fr auto; /* icon | text | arrow */
-  gap: 12px; /* ช่องว่าง */
-  align-items: center; /* กึ่งกลาง */
-  box-shadow: var(--ls-shadow2); /* เงา */
-}
-
-.ls-reviewCard:hover { /* hover review */
-  transform: translateY(-2px); /* ยก */
-  background: linear-gradient(135deg, rgba(255,255,255,0.80) 0%, rgba(6,78,59,0.10) 100%); /* ไม่เหลือง */
-  box-shadow: 0 14px 34px rgba(2,44,34,0.14); /* เงาหนักขึ้น */
-}
-
-.ls-reviewIcon { /* ไอคอน review (Gold luxury) */
-  width: 36px; /* กว้าง */
-  height: 36px; /* สูง */
-  border-radius: 12px; /* โค้ง */
-  border: 1px solid rgba(180,150,90,0.55); /* ขอบทองหม่น */
-  background: linear-gradient(
-    135deg,
-    #f6e27a 0%,   /* highlight ทองอ่อน */
-    #d4af37 35%,  /* gold มาตรฐาน */
-    #b8962e 65%,  /* gold เข้ม */
-    #8a6f1f 100%  /* เงาทอง */
-  ); /* ไล่ทองแบบโลหะ */
-  display: grid; /* grid */
-  place-items: center; /* กลาง */
-  color: #3b2f0b; /* ตัวไอคอนน้ำตาลเข้ม (ดูแพงกว่าใช้ขาว) */
-  box-shadow:
-    0 6px 16px rgba(138,111,31,0.35), /* เงาทอง */
-    inset 0 1px 0 rgba(255,255,255,0.45); /* highlight ด้านใน */
-}
-
-
-.ls-reviewTitle { /* ชื่อ review */
-  font-weight: 900; /* หนา */
-  color: var(--ls-text); /* สีหลัก */
-  font-size: 13.5px; /* ขนาด */
-}
-
-.ls-reviewDesc { /* รายละเอียด review */
-  margin-top: 5px; /* เว้นบน */
-  color: var(--ls-sub); /* สีรอง */
-  font-size: 12.6px; /* ขนาด */
-  line-height: 1.35; /* ระยะบรรทัด */
-}
-
-.ls-reviewMeta { /* meta review */
-  margin-top: 8px; /* เว้นบน */
-  display: flex; /* flex */
-  gap: 8px; /* ช่องว่าง */
-  flex-wrap: wrap; /* ตัดบรรทัด */
-  align-items: center; /* กึ่งกลาง */
-}
-
-/* ============================= */
-/* ✅ Badges */
-/* ============================= */
-
-.ls-badge { /* badge ปกติ */
-  display: inline-flex; /* inline + flex */
-  gap: 7px; /* ช่องว่าง */
-  align-items: center; /* กึ่งกลาง */
-  padding: 6px 10px; /* ระยะขอบ */
-  border-radius: 999px; /* โค้งสุด */
-  font-size: 12px; /* ขนาด */
-  font-weight: 900; /* หนา */
-  border: 1px solid var(--ls-border); /* ขอบ */
-  background: rgba(255,255,255,0.65); /* ขาวโปร่ง */
-  color: var(--ls-sub); /* สีรอง */
-  white-space: nowrap; /* ไม่ตัดบรรทัด */
-}
-
-.ls-badge--ok { /* badge สำเร็จ */
-  background: linear-gradient(135deg, #10b981 0%, #064e3b 100%); /* เขียวเข้ม */
-  color: #ffffff; /* ขาว */
-  border-color: transparent; /* ไม่เอาขอบ */
-  box-shadow: 0 10px 18px rgba(2,44,34,0.18); /* เงา */
-}
-
-.ls-badge--go { /* badge พร้อมทำ (ไม่ใช้เหลือง) */
-  background: linear-gradient(135deg, rgba(255,255,255,0.78) 0%, rgba(16,185,129,0.22) 100%); /* ขาวเขียว */
-  color: var(--ls-text); /* สีหลัก */
-  border-color: rgba(16,185,129,0.25); /* ขอบเขียว */
-}
-
-.ls-badge--lock { /* badge ล็อค */
-  background: linear-gradient(135deg, #0f172a 0%, #334155 100%); /* เทาเข้ม */
-  color: #ffffff; /* ขาว */
-  border-color: transparent; /* ไม่เอาขอบ */
-  box-shadow: 0 10px 18px rgba(15,23,42,0.20); /* เงา */
-}
-
-/* ============================= */
-/* ✅ Note */
-/* ============================= */
-
-.ls-note { /* ข้อความโน้ต */
-  margin-top: 12px; /* เว้นบน */
-  color: var(--ls-mute); /* สีจาง */
-  font-size: 12.5px; /* ขนาด */
-  line-height: 1.45; /* ระยะบรรทัด */
-  padding: 0 2px; /* ระยะข้าง */
+  .ls-reviewRow { gap: 8px; }
+  .ls-reviewRow button {
+    width: 100%;
+    justify-content: center;
+    border-radius: 14px;
+  }
 }

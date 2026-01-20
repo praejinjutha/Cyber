@@ -579,3 +579,69 @@
     justify-content: center;
   }
 }
+
+
+/* =========================
+   Popup Overlay (Submitting)
+========================= */
+.pt-popupOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  padding: 16px;
+}
+
+.pt-popup {
+  width: min(520px, 92vw);
+  border-radius: 16px;
+  padding: 18px 18px;
+
+  background: rgba(17, 24, 39, 0.85); /* เข้าธีม dark glass */
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+
+  color: #fff;
+}
+
+.pt-popup__title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin-top: 8px;
+}
+
+.pt-popup__desc {
+  margin-top: 6px;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+.pt-popup__hint {
+  margin-top: 12px;
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+/* Spinner */
+.pt-popup__spinner {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: rgba(255, 255, 255, 0.95);
+  animation: ptSpin 0.9s linear infinite;
+}
+
+@keyframes ptSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -714,10 +714,6 @@ button{ font: inherit; }
 .edu-miniStat__label{ color: var(--muted); font-size: 12px; font-weight: 900; }
 .edu-miniStat__value{ margin-top: 6px; font-size: 16px; font-weight: 900; }
 
-.edu-lessons{
-  display: grid;
-  gap: 10px;
-}
 
 .edu-lessonCard{
   width: 100%;
@@ -787,7 +783,7 @@ button{ font: inherit; }
 
 .edu-lessons{
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 4 ต่อแถว */
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 4 ต่อแถว */
   gap: 14px;
 }
 

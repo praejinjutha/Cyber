@@ -204,21 +204,13 @@ export default function Main() {
         </section>
 
         {/* CONTENT */}
-        <section className="homesections">
-          {/* OVERVIEW */}
+        {/* <section className="homesections">
           <div className="section">
             <div className="section__head">
               <div className="section__title">
                 <FiActivity aria-hidden="true" />
                 ภาพรวมความก้าวหน้า
               </div>
-              <button
-                className="section__link"
-                type="button"
-                onClick={() => navigate("/dashboard")}
-              >
-                ดูทั้งหมด <FiChevronRight aria-hidden="true" />
-              </button>
             </div>
 
             <div className="kpis">
@@ -232,14 +224,10 @@ export default function Main() {
                 <div className="kpi__value">—</div>
                 <div className="kpi__hint">Pretest/แบบฝึกหัด</div>
               </div>
-              <div className="kpi">
-                <div className="kpi__label">คะแนนล่าสุด</div>
-                <div className="kpi__value">—</div>
-                <div className="kpi__hint">ดูรายละเอียดในเมนูคะแนน</div>
-              </div>
             </div>
           </div>
-        </section>
+        </section> */}
+        
       </main>
     </div>
   );

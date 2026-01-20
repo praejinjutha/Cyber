@@ -1,12 +1,13 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import logo from "../assets/logo.png";
 
-import "../main.css"; 
-import "../dashboard.css"; 
+import "../main.css";
+import "../dashboard.css";
 
-import { FiUser, FiLogOut, FiChevronLeft, FiHome, FiTrendingUp, FiLock,FiEdit } from "react-icons/fi";
+import { FiUser, FiLogOut, FiChevronLeft, FiHome, FiTrendingUp, FiLock, FiEdit } from "react-icons/fi";
 
 export default function DashScore() {
   const navigate = useNavigate();
@@ -14,20 +15,30 @@ export default function DashScore() {
   // ✅ 1) State สำหรับข้อมูลจาก DB
   const [studentName, setStudentName] = useState("ผู้เรียน");
   const [loading, setLoading] = useState(true);
-  const [unit1Score, setUnit1Score] = useState(null); // { score, max }
+
+  // ✅ เก็บคะแนน posttest “ครั้งแรกที่ submit” ของแต่ละบท (1-8)
+  // รูปแบบ: { 1: { score, max }, 2: { score, max }, ... }
+  const [scoresByUnit, setScoresByUnit] = useState({});
 
   // ✅ 2) Mock Data (Pretest และ Final ยังคงเป็น Mock ตามโครงเดิม)
   const programPre = { done: true, score: 12, max: 20 };
   const programPost = { done: false, score: null, max: 20 };
 
-  // ✅ 3) Logic ดึงข้อมูล Profile + คะแนน Unit 1 จาก Database
+  // ✅ 3) Logic ดึงข้อมูล Profile + คะแนน Unit 1-8 จาก Database (จำ “ครั้งแรก” เท่านั้น)
   useEffect(() => {
     let mounted = true;
 
     const fetchData = async () => {
       try {
         setLoading(true);
-        const { data: { session } } = await supabase.auth.getSession();
+
+        const {
+          data: { session },
+          error: sessionErr,
+        } = await supabase.auth.getSession();
+
+        if (sessionErr) console.error("getSession error:", sessionErr);
+
         if (!session?.user) {
           navigate("/login", { replace: true });
           return;
@@ -35,30 +46,49 @@ export default function DashScore() {
 
         const userId = session.user.id;
 
-        // ดึง Profile
-        const { data: profile } = await supabase
+        // -------------------------
+        // 1) ดึง Profile
+        // -------------------------
+        const { data: profile, error: profileErr } = await supabase
           .from("student_profiles")
           .select("first_name, last_name")
           .eq("user_id", userId)
           .maybeSingle();
 
+        if (profileErr) console.error("profile load error:", profileErr);
+
         if (mounted && profile) {
           setStudentName(`${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() || "ผู้เรียน");
         }
 
-        // ดึงคะแนน Unit 1 (ครั้งแรกที่ Submit)
-        // หา ID ของ Posttest Unit 1 ก่อน
-        const { data: posttest } = await supabase
-          .from("posttests")
-          .select("id")
-          .eq("unit", 1)
-          .eq("is_active", true)
-          .maybeSingle();
+        // -------------------------
+        // 2) ดึงคะแนน Posttest “ครั้งแรกที่ submit” ของ Unit 1-8
+        // - หา posttest_id ของแต่ละ unit
+        // - แล้วหา attempt แรกที่ submitted_at != null (เรียงเวลาส่ง asc)
+        // - เก็บคะแนน total_score/max_score ตาม “จำนวนข้อของบทนั้น” จริง
+        // -------------------------
+        const scoresMap = {};
 
-        if (posttest) {
-          const { data: firstAttempt } = await supabase
+        for (let unit = 1; unit <= 8; unit++) {
+          // หา ID ของ Posttest ของ unit นั้น
+          const { data: posttest, error: posttestErr } = await supabase
+            .from("posttests")
+            .select("id")
+            .eq("unit", unit)
+            .eq("is_active", true)
+            .maybeSingle();
+
+          if (posttestErr) {
+            console.error(`posttest load error (unit ${unit}):`, posttestErr);
+            continue;
+          }
+
+          if (!posttest?.id) continue;
+
+          // หา “ครั้งแรกที่ submit”
+          const { data: firstAttempt, error: attemptErr } = await supabase
             .from("posttest_attempts")
-            .select("total_score, max_score")
+            .select("total_score, max_score, submitted_at")
             .eq("user_id", userId)
             .eq("posttest_id", posttest.id)
             .not("submitted_at", "is", null)
@@ -66,13 +96,20 @@ export default function DashScore() {
             .limit(1)
             .maybeSingle();
 
-          if (mounted && firstAttempt) {
-            setUnit1Score({
+          if (attemptErr) {
+            console.error(`attempt load error (unit ${unit}):`, attemptErr);
+            continue;
+          }
+
+          if (firstAttempt) {
+            scoresMap[unit] = {
               score: firstAttempt.total_score,
-              max: firstAttempt.max_score
-            });
+              max: firstAttempt.max_score,
+            };
           }
         }
+
+        if (mounted) setScoresByUnit(scoresMap);
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
       } finally {
@@ -81,33 +118,26 @@ export default function DashScore() {
     };
 
     fetchData();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [navigate]);
 
-  // ✅ 4) จัดการรายการบทเรียน 1-8
+  // ✅ 4) จัดการรายการบทเรียน 1-8 (ใช้ข้อมูลจาก DB ทุกบท)
   const unitPost = useMemo(() => {
     return Array.from({ length: 8 }, (_, i) => {
       const unitNum = i + 1;
-      if (unitNum === 1) {
-        // บทที่ 1: ใช้ข้อมูลจาก DB
-        return {
-          unit: 1,
-          done: !!unit1Score,
-          score: unit1Score?.score ?? null,
-          max: unit1Score?.max ?? 10,
-          pretestPassed: true, // ตามเงื่อนไขไฟล์เก่า
-        };
-      }
-      // บทที่ 2-8: ตั้งค่าเป็นยังไม่ได้ทำ
+      const s = scoresByUnit[unitNum];
+
       return {
         unit: unitNum,
-        done: false,
-        score: null,
-        max: 10,
-        pretestPassed: false,
+        done: !!s,
+        score: s?.score ?? null,
+        max: s?.max ?? 10, // ถ้ายังไม่ได้ทำ ให้โชว์ default 10 (ไม่กระทบ เพราะ done=false)
+        pretestPassed: unitNum === 1 ? true : false, // คงเงื่อนไขเดิมไว้ก่อน
       };
     });
-  }, [unit1Score]);
+  }, [scoresByUnit]);
 
   // UI Helpers
   const doneUnits = useMemo(() => unitPost.filter((u) => u.done).length, [unitPost]);
@@ -118,11 +148,17 @@ export default function DashScore() {
 
   const compareReady = Boolean(programPre.done && programPost.done);
   const compareDelta = (programPost.score ?? 0) - (programPre.score ?? 0);
-  const compareStatusText = !programPre.done 
-    ? "ต้องทำ Pretest ก่อน" 
-    : !programPost.done 
-    ? "รอคะแนน Final เพื่อสรุปความพัฒนา" 
+  const compareStatusText = !programPre.done
+    ? "ต้องทำ Pretest ก่อน"
+    : !programPost.done
+    ? "รอคะแนน Final เพื่อสรุปความพัฒนา"
     : "สรุปความพัฒนาแล้ว";
+
+  // NOTE: โค้ดเดิมของพี่อ้างถึง comparePct / primaryCTA
+  // เพื่อให้ไฟล์ “ทำงานเหมือนเดิม” และไม่ error ตอน render
+  // ผมใส่ค่าเริ่มต้นไว้ให้แบบไม่เปลี่ยนพฤติกรรมหลักของหน้า
+  const comparePct = null;
+  const primaryCTA = { label: "กลับหน้าหลัก", to: "/main" };
 
   return (
     <div className="edu-app">
@@ -137,12 +173,17 @@ export default function DashScore() {
           </div>
           <div className="edu-topbar__right">
             <div className="edu-userchip">
-              <div className="edu-userchip__avatar"><FiUser /></div>
+              <div className="edu-userchip__avatar">
+                <FiUser />
+              </div>
               <div className="edu-userchip__meta">
                 <div className="edu-userchip__name">{loading ? "..." : studentName}</div>
               </div>
             </div>
-            <button className="edu-btn edu-btn--danger" onClick={() => supabase.auth.signOut().then(() => navigate("/login"))}>
+            <button
+              className="edu-btn edu-btn--danger"
+              onClick={() => supabase.auth.signOut().then(() => navigate("/login"))}
+            >
               <FiLogOut /> ออกจากระบบ
             </button>
           </div>
@@ -150,33 +191,27 @@ export default function DashScore() {
       </header>
 
       <main className="edu-layout">
-        <section className="edu-hero">
-          <div className="edu-hero__card">
-            <div className="edu-hero__row">
-              <div className="edu-hero__headline">
-                <div className="edu-hero__title">Dashboard คะแนนแบบทดสอบ</div>
-                <div className="edu-lessons__toolbar">
-                  <button className="edu-btn edu-btn--back" onClick={() => navigate(-1)}>
-                    <FiChevronLeft /> กลับ
-                  </button>
-                  <button className="edu-btn edu-btn--ghost" onClick={() => navigate("/main")} style={{ marginLeft: 8 }}>
-                    <FiHome /> กลับหน้าหลัก
-                  </button>
-                </div>
-              </div>
-              <div className="edu-lessons__meta">
-                <div className="edu-miniStat">
-                  <div className="edu-miniStat__label">ความก้าวหน้า</div>
-                  <div className="edu-miniStat__value">{overallProgress}%</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+<section className="edu-hero">
+  <div className="edu-hero__card">
+    <div className="edu-hero__header">
+      <div className="edu-hero__title">
+        Dashboard คะแนนแบบทดสอบ
+      </div>
+
+      <button
+        className="edu-btn edu-btn--ghost"
+        type="button"
+        onClick={() => navigate("/main")}
+      >
+        <FiHome aria-hidden="true" /> กลับหน้าหลัก
+      </button>
+    </div>
+  </div>
+</section>
+
 
         <div className="dash dash--score">
           <div className="dash__grid dash__grid--score">
-            
             {/* 1) Pretest */}
             <section className="dashCard dashCard--pre">
               <div className="dashCard__head">
@@ -188,7 +223,7 @@ export default function DashScore() {
                   {programPre.done ? `คะแนน: ${programPre.score}/${programPre.max}` : "ต้องทำก่อนเริ่มเรียน"}
                 </div>
                 <div className="dashBar__track">
-                  <div className="dashBar__fill" style={{ width: `${(programPre.score/programPre.max)*100}%` }} />
+                  <div className="dashBar__fill" style={{ width: `${(programPre.score / programPre.max) * 100}%` }} />
                 </div>
               </div>
             </section>
@@ -206,9 +241,7 @@ export default function DashScore() {
                     <div className="dashStep__body">
                       <div className="dashStep__title">บทที่ {u.unit}</div>
                       <div className={`dashStep__meta ${u.done ? "is-done" : ""}`}>
-                        {u.done 
-                          ? `ทำแล้ว • ${u.score}/${u.max}` 
-                          : "ยังไม่ทำ"}
+                        {u.done ? `ทำแล้ว • ${u.score}/${u.max}` : "ยังไม่ทำ"}
                       </div>
                     </div>
                   </li>
@@ -216,42 +249,40 @@ export default function DashScore() {
               </ol>
             </section>
 
-     {/* แทรกการ์ด Evaluation */}
-<section className="dashCard">
-                <div className="dashCard__head">
+            {/* แทรกการ์ด Evaluation */}
+            <section className="dashCard">
+              <div className="dashCard__head">
                 <h2 className="dashCard__title">3) การประเมิน</h2>
                 <span className="dashPill">{programPost.done ? "ทำแล้ว" : "ยังไม่ทำ"}</span>
               </div>
 
-  <div className="dashList">
-    <div className="dashList__row">
-      <div>
-        <div className="dashList__title">Post-test </div>
-<div className="dashList__desc">
-  แบบทดสอบรวบยอดหลังเรียนครบทุกบท
-  <span>เพื่อวัดผลรวมทั้งหลักสูตร</span>
-</div>
+              <div className="dashList">
+                <div className="dashList__row">
+                  <div>
+                    <div className="dashList__title">Post-test </div>
+                    <div className="dashList__desc">
+                      แบบทดสอบรวบยอดหลังเรียนครบทุกบท
+                      <span>เพื่อวัดผลรวมทั้งหลักสูตร</span>
+                    </div>
+                  </div>
+                  <Link className="dashMiniLink" to="/dashscore">
+                    <FiEdit />
+                  </Link>
+                </div>
 
-      </div>
-<Link className="dashMiniLink" to="/dashscore">
-  <FiEdit />
-</Link>
-
-    </div>
-
-    <div className="dashList__row">
-      <div>
-        <div className="dashList__title">ความพึงพอใจต่อระบบ</div>
-        <div className="dashList__desc">
-          ประเมินด้านการใช้งาน ความน่าสนใจ <span>และประโยชน์ที่ได้รับ</span>
-        </div>
-      </div>
-      <Link className="dashBtn dashBtn--solid" to="/survey">
-        <FiEdit />
-</Link>
-    </div>
-  </div>
-</section>
+                <div className="dashList__row">
+                  <div>
+                    <div className="dashList__title">ความพึงพอใจต่อระบบ</div>
+                    <div className="dashList__desc">
+                      ประเมินด้านการใช้งาน ความน่าสนใจ <span>และประโยชน์ที่ได้รับ</span>
+                    </div>
+                  </div>
+                  <Link className="dashBtn dashBtn--solid" to="/survey">
+                    <FiEdit />
+                  </Link>
+                </div>
+              </div>
+            </section>
 
             {/* Card 4: Compare (Pretest vs Final) */}
             <section className={`dashCard dashCard--compare ${compareReady ? "" : "is-locked"}`}>
@@ -276,16 +307,12 @@ export default function DashScore() {
               <div className="dashCompare">
                 <div className="dashCompare__row">
                   <div className="dashCompare__label">Pretest</div>
-                  <div className="dashCompare__value">
-                    {programPre.done ? `${programPre.score}/${programPre.max}` : "—"}
-                  </div>
+                  <div className="dashCompare__value">{programPre.done ? `${programPre.score}/${programPre.max}` : "—"}</div>
                 </div>
 
                 <div className="dashCompare__row">
                   <div className="dashCompare__label">Final</div>
-                  <div className="dashCompare__value">
-                    {programPost.done ? `${programPost.score}/${programPost.max}` : "รอคะแนน"}
-                  </div>
+                  <div className="dashCompare__value">{programPost.done ? `${programPost.score}/${programPost.max}` : "รอคะแนน"}</div>
                 </div>
 
                 <div className="dashCompare__divider" />
@@ -342,3 +369,4 @@ export default function DashScore() {
     </div>
   );
 }
+

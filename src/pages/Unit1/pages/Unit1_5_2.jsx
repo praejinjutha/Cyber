@@ -308,7 +308,7 @@ export default function Unit1_5_2({ onNext, mode = "all" }) {
             </button>
 
             <button
-              className="edu-btn edu-btn--back"
+              className="edu-btn edu-btn--danger"
               type="button"
               onClick={() => setPicked({})}
               title="ล้างที่เลือก"

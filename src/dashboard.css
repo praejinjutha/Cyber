@@ -454,6 +454,31 @@ body{
   display: block;
 }
 
+.edu-hero__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.edu-hero__title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+/* มือถือ */
+@media (max-width: 640px) {
+  .edu-hero__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .edu-btn--ghost {
+    align-self: flex-end;
+  }
+}
+
 
 /* Bullets */
 .dashBullets{
