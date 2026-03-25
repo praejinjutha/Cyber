@@ -222,7 +222,7 @@ export default function Feedback() {
               >
                 <div className="edu-feedbackCard__head">
                   <div className="edu-feedbackCard__title">
-                    บทที่ {f.no}: {f.title}
+                    หน่วยที่ {f.no}: {f.title}
                   </div>
                   {renderStatus(f.status)}
                 </div>

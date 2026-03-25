@@ -138,11 +138,8 @@
   align-items: center; /* Ensure they are centered vertically */
 }
 
-.edu-pill--ok {
-  background: rgba(34,197,94,0.10); /* สีเขียวอ่อน */
-  border-color: rgba(34,197,94,0.22); /* ขอบสีเขียว */
-  color: #166534; /* ตัวอักษรสีเขียวเข้ม */
-}
+
+
 
 
 
@@ -179,6 +176,63 @@
   background: var(--primary);
   border-color: var(--primary);
   color: var(--primary-ink);
+}
+
+.homebtn--success{
+  background:#166534;
+  border-color:#166534;
+  color:#ffffff;
+
+  animation: successPulse 1.6s infinite ease-in-out;
+}
+
+/* pulse + ขยายเล็กน้อย */
+@keyframes successPulse {
+  0%{
+    box-shadow: 0 0 0 0 rgba(22,101,52,0.6);
+    transform: scale(1);
+  }
+
+  50%{
+    box-shadow: 0 0 0 12px rgba(22,101,52,0);
+    transform: scale(1.05);
+  }
+
+  100%{
+    box-shadow: 0 0 0 0 rgba(22,101,52,0);
+    transform: scale(1);
+  }
+}
+
+
+
+.edu-pill--ok{
+  background:#e7f8ee !important;
+  color:#1a7f37 !important;
+  border:1px solid #bfe9cd !important;
+  font-weight:600;
+}
+
+/* มีสิทธิ์เข้าสู่แบบทดสอบหลังเรียน (สีเหลือง) */
+.edu-pill--warn {
+  background: rgba(234,179,8,0.12) !important;   /* เหลืองอ่อน */
+  border-color: rgba(234,179,8,0.25) !important; /* ขอบเหลือง */
+  color: #854d0e !important;                     /* ตัวอักษรเหลืองเข้ม */
+}
+
+/* อยู่ระหว่างการเรียนรู้ (สีแดง) */
+.edu-pill--danger {
+  background: rgba(239,68,68,0.10) !important;   /* แดงอ่อน */
+  border-color: rgba(239,68,68,0.25) !important; /* ขอบแดง */
+  color: #7f1d1d !important;                     /* ตัวอักษรแดงเข้ม */
+}
+
+
+
+.homebtn--success:hover{
+  background:#14532d;
+  border-color:#14532d;
+  animation:none;
 }
 
 .homebtn--danger{

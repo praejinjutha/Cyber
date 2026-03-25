@@ -92,7 +92,7 @@ export default function Learn2() {
    */
   const panelTitle = useMemo(() => {
     if (step === "task21") return "แนวคิดระดับการเข้าถึงข้อมูล";
-    if (step === "task22") return "ความสัมพันธ์ (ข้อมูล × บริบท × ระดับการเข้าถึง)";
+    if (step === "task22") return "ความสัมพันธ์ (ข้อมูล × บริหน่วย × ระดับการเข้าถึง)";
     return "กิจกรรม 2.4: วิเคราะห์สถานการณ์ + ให้เหตุผล";
   }, [step]);
 
@@ -141,7 +141,7 @@ export default function Learn2() {
             <div className="edu-hero__row">
               <div className="edu-hero__headline">
                 <div className="edu-hero__title">Unit 1: การคุ้มครองข้อมูลส่วนบุคคลและความปลอดภัยบัญชี</div>
-
+<div className="edu-hero__sub">เรื่องที่ 2	การตั้งค่าความเป็นส่วนตัวให้เหมาะสม</div>
                 <div className="edu-lessons__toolbar">
                   <button
                     className="edu-btn edu-btn--back"

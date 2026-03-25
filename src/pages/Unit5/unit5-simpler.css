@@ -1,0 +1,423 @@
+/* =========================================================
+   Unit5 simpler UI (click easy / scan easy)
+   ใช้ร่วมกับ main.css + learn.css
+========================================================= */
+
+.u5s .edu-panel1{
+  padding: 14px;
+}
+
+/* chips right in hero */
+.u5s-metaChips{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+.u5s-chip{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(255,255,255,.72);
+  font-weight: 900;
+  font-size: 12px;
+}
+
+/* wrapper spacing */
+.u5s-wrap{
+  display:grid;
+  gap: 14px;
+}
+
+/* simple card */
+.u5s-card{
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 24px rgba(15,23,42,.08);
+  padding: 14px;
+}
+.u5s-cardTitle{
+  font-weight: 950;
+  font-size: 15px;
+}
+
+/* formula */
+.u5s-bigFormula{
+  margin-top: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(15,23,42,.03);
+  padding: 12px;
+  line-height: 1.6;
+  font-weight: 800;
+  display:flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.u5s-dot{
+  opacity: .6;
+}
+
+/* callout */
+.u5s-callout{
+  margin-top: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(37,99,235,.18);
+  background: rgba(37,99,235,.06);
+  padding: 12px;
+  line-height: 1.6;
+  font-weight: 750;
+}
+
+/* actions row */
+.u5s-actions{
+  margin-top: 12px;
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items:center;
+}
+
+/* small note */
+.u5s-miniNote{
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: .78;
+  font-weight: 800;
+}
+
+/* case */
+.u5s-case{
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 24px rgba(15,23,42,.08);
+  overflow:hidden;
+}
+.u5s-caseHead{
+  padding: 12px 12px 0;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.u5s-caseTitle{
+  font-weight: 950;
+}
+.u5s-caseImg{
+  padding: 12px;
+}
+.u5s-caseImg img{
+  width: 100%;
+  height: auto;
+  display:block;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,.10);
+}
+
+/* grid: block stack */
+.u5s-grid{
+  display:grid;
+  gap: 14px;
+}
+
+/* block */
+.u5s-block{
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 24px rgba(15,23,42,.08);
+  padding: 12px;
+}
+.u5s-blockHead{
+  display:flex;
+  gap: 10px;
+  align-items:flex-start;
+}
+.u5s-blockNo{
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display:grid;
+  place-items:center;
+  font-weight: 950;
+  border: 1px solid rgba(37,99,235,.22);
+  background: rgba(37,99,235,.10);
+  color: #1d4ed8;
+  flex: 0 0 auto;
+}
+.u5s-blockTitle{
+  font-weight: 950;
+  line-height: 1.25;
+}
+.u5s-blockSub{
+  margin-top: 3px;
+  font-size: 12px;
+  opacity: .75;
+  font-weight: 800;
+}
+
+/* locked */
+.u5s-block.is-locked{
+  opacity: .60;
+  filter: grayscale(.12);
+}
+.u5s-lockHint{
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px dashed rgba(15,23,42,.18);
+  background: rgba(15,23,42,.03);
+  font-weight: 850;
+  font-size: 12px;
+  opacity: .85;
+}
+
+/* scenario list */
+.u5s-scenarioList{
+  margin-top: 10px;
+  display:grid;
+  gap: 10px;
+}
+.u5s-scenario{
+  width: 100%;
+  text-align: left;
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(255,255,255,.80);
+  padding: 12px;
+  display:flex;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+}
+.u5s-scenario:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(15,23,42,.10);
+  border-color: rgba(37,99,235,.22);
+}
+.u5s-scenario.is-active{
+  border-color: rgba(37,99,235,.35);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+  background: rgba(37,99,235,.06);
+}
+.u5s-scenarioIcon{
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display:grid;
+  place-items:center;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(15,23,42,.03);
+  flex: 0 0 auto;
+}
+.u5s-scenarioText{
+  min-width: 0;
+}
+.u5s-scenarioTitle{
+  font-weight: 950;
+}
+.u5s-scenarioDesc{
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: .80;
+  line-height: 1.35;
+}
+.u5s-scenarioTone{
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: .75;
+  font-weight: 800;
+}
+
+/* decision grid */
+.u5s-decisionGrid{
+  margin-top: 10px;
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+@media (min-width: 860px){
+  .u5s-decisionGrid{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.u5s-decision{
+  width: 100%;
+  text-align: left;
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(255,255,255,.80);
+  padding: 12px;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+  min-height: 92px;
+}
+.u5s-decision:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(15,23,42,.10);
+  border-color: rgba(37,99,235,.22);
+}
+.u5s-decision.is-active{
+  border-color: rgba(37,99,235,.35);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+  background: rgba(37,99,235,.06);
+}
+.u5s-decisionTop{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+.u5s-decisionEmoji{
+  font-size: 20px;
+}
+.u5s-decisionTitle{
+  font-weight: 950;
+}
+.u5s-decisionHint{
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: .78;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+/* accordion */
+.u5s-accordion{
+  margin-top: 10px;
+  display:grid;
+  gap: 10px;
+}
+.u5s-accItem{
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(255,255,255,.80);
+  overflow:hidden;
+}
+.u5s-accHead{
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 12px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  cursor:pointer;
+  font-weight: 950;
+}
+.u5s-accTitle{
+  font-weight: 950;
+}
+.u5s-accState{
+  font-size: 12px;
+  opacity: .7;
+  font-weight: 900;
+}
+.u5s-accBody{
+  padding: 0 12px 12px;
+  display:grid;
+  gap: 10px;
+}
+
+/* big check rows */
+.u5s-checkRow{
+  width: 100%;
+  text-align: left;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(255,255,255,.86);
+  padding: 12px;
+  display:flex;
+  gap: 10px;
+  align-items:flex-start;
+  cursor:pointer;
+  transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+}
+.u5s-checkRow:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(15,23,42,.08);
+  border-color: rgba(37,99,235,.22);
+}
+.u5s-checkRow.is-active{
+  border-color: rgba(37,99,235,.35);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+  background: rgba(37,99,235,.06);
+}
+.u5s-checkBox{
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 1px solid rgba(15,23,42,.22);
+  background: rgba(255,255,255,.80);
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+.u5s-checkBox.is-active{
+  border-color: rgba(37,99,235,.45);
+  background: rgba(37,99,235,.20);
+}
+.u5s-checkText{
+  font-weight: 850;
+  line-height: 1.4;
+}
+
+/* feedback */
+.u5s-feedback{
+  margin-top: 10px;
+  display:flex;
+  gap: 10px;
+  align-items:flex-start;
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(59,130,246,.06);
+  padding: 12px;
+}
+.u5s-feedback.good{
+  border-color: rgba(22,163,74,.22);
+  background: rgba(22,163,74,.10);
+}
+.u5s-feedback.warn{
+  border-color: rgba(245,158,11,.22);
+  background: rgba(245,158,11,.10);
+}
+.u5s-feedback.neutral{
+  border-color: rgba(59,130,246,.18);
+  background: rgba(59,130,246,.06);
+}
+.u5s-feedbackIcon{
+  font-size: 18px;
+  margin-top: 2px;
+}
+.u5s-feedbackTitle{
+  font-weight: 950;
+}
+.u5s-feedbackBody{
+  margin-top: 6px;
+  font-size: 13px;
+  opacity: .88;
+  line-height: 1.55;
+}
+
+/* samples */
+.u5s-sampleList{
+  margin-top: 12px;
+  display:grid;
+  gap: 10px;
+}
+.u5s-sample{
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(255,255,255,.80);
+  padding: 12px;
+  font-weight: 850;
+  line-height: 1.6;
+}

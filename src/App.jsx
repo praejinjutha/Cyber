@@ -7,7 +7,8 @@ import {
   Outlet,
   useNavigate,
 } from "react-router-dom";
-import { supabase } from "./lib/supabase";
+import { supabase } from "./lib/supabase.js";
+import ProtectedUnitRoute from "./components/ProtectedUnitRoute.jsx";
 
 // ====================
 // Pages
@@ -15,6 +16,7 @@ import { supabase } from "./lib/supabase";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Pretest from "./pages/Pretest";
+import Final from "./pages/Final";
 import Main from "./pages/Main";
 import Lessons from "./pages/Lessons";
 import LessonLinear from "./pages/LessonLinear";
@@ -37,12 +39,68 @@ import Learn5 from "./pages/Unit1/Learn5";
 import PosttestRun from "./pages/Unit1/PosttestRun";
 
 // Unit 2
-import LearnUnit2 from "./pages/Unit2/Learn"; 
-import Learn1Unit2 from "./pages/Unit2/Learn1"; 
-import Learn2Unit2 from "./pages/Unit2/Learn2"; 
-import Learn3Unit2 from "./pages/Unit2/Learn3"; 
-import Examples from "./pages/Unit2/Examples"; 
+import LearnUnit2 from "./pages/Unit2/Learn";
+import Learn1Unit2 from "./pages/Unit2/Learn1";
+import Learn2Unit2 from "./pages/Unit2/Learn2";
+import Learn3Unit2 from "./pages/Unit2/Learn3";
+import Examples from "./pages/Unit2/Examples";
 import Unit2PosttestRun from "./pages/Unit2/PosttestRun";
+
+// Unit 3
+import LearnUnit3 from "./pages/Unit3/Learn";
+import Learn1Unit3 from "./pages/Unit3/Learn1";
+import Learn2Unit3 from "./pages/Unit3/Learn2";
+import Learn3Unit3 from "./pages/Unit3/Learn3";
+import Learn4Unit3 from "./pages/Unit3/Learn4";
+import Learn5Unit3 from "./pages/Unit3/Learn5";
+import Learn6Unit3 from "./pages/Unit3/Learn6";
+import Unit3PosttestRun from "./pages/Unit3/PosttestRun";
+
+// Unit 4
+import LearnUnit4 from "./pages/Unit4/Learn";
+import Learn1Unit4 from "./pages/Unit4/Learn1";
+import Learn2Unit4 from "./pages/Unit4/Learn2";
+import Learn3Unit4 from "./pages/Unit4/Learn3";
+import Learn4Unit4 from "./pages/Unit4/Learn4";
+import Learn5Unit4 from "./pages/Unit4/Learn5";
+import Unit4PosttestRun from "./pages/Unit4/PosttestRun";
+
+// Unit 5
+import LearnUnit5 from "./pages/Unit5/Learn";
+import Learn1Unit5 from "./pages/Unit5/Learn1";
+import Learn2Unit5 from "./pages/Unit5/Learn2";
+import Learn3Unit5 from "./pages/Unit5/Learn3";
+import Learn4Unit5 from "./pages/Unit5/Learn4";
+import Learn5Unit5 from "./pages/Unit5/Learn5";
+import Learn6Unit5 from "./pages/Unit5/Learn6";
+import Unit5PosttestRun from "./pages/Unit5/PosttestRun";
+
+// Unit 6
+import LearnUnit6 from "./pages/Unit6/Learn";
+import Learn1Unit6 from "./pages/Unit6/Learn1";
+import Learn2Unit6 from "./pages/Unit6/Learn2";
+import Learn3Unit6 from "./pages/Unit6/Learn3";
+import Learn4Unit6 from "./pages/Unit6/Learn4";
+import Unit6PosttestRun from "./pages/Unit6/PosttestRun";
+
+// Unit 7
+import LearnUnit7 from "./pages/Unit7/Learn";
+import Learn1Unit7 from "./pages/Unit7/Learn1";
+import Learn2Unit7 from "./pages/Unit7/Learn2";
+import Learn3Unit7 from "./pages/Unit7/Learn3";
+import Learn4Unit7 from "./pages/Unit7/Learn4";
+import Learn5Unit7 from "./pages/Unit7/Learn5";
+import Unit7PosttestRun from "./pages/Unit7/PosttestRun";
+
+// Unit 8
+import LearnUnit8 from "./pages/Unit8/Learn";
+import Learn1Unit8 from "./pages/Unit8/Learn1";
+import Learn2Unit8 from "./pages/Unit8/Learn2";
+import Learn3Unit8 from "./pages/Unit8/Learn3";
+import Learn4Unit8 from "./pages/Unit8/Learn4";
+import Learn5Unit8 from "./pages/Unit8/Learn5";
+import Learn6Unit8 from "./pages/Unit8/Learn6";
+import Unit8PosttestRun from "./pages/Unit8/PosttestRun";
 
 // ====================
 // Protected wrapper
@@ -64,23 +122,27 @@ function AdminRoute({ session }) {
         setIsAdmin(false);
         return;
       }
+
       try {
-        // ✅ ใช้ maybeSingle เพื่อป้องกัน Database Error querying schema
         const { data } = await supabase
           .from("user_profiles")
           .select("is_admin")
           .eq("user_id", session.user.id)
-          .maybeSingle(); 
+          .maybeSingle();
 
         setIsAdmin(data?.is_admin || false);
-      } catch (e) {
+      } catch {
         setIsAdmin(false);
       }
     }
+
     checkAdmin();
   }, [session]);
 
-  if (isAdmin === null) return <div style={{ padding: 24, color: "white" }}>Checking Permission...</div>;
+  if (isAdmin === null) {
+    return <div style={{ padding: 24, color: "white" }}>Checking Permission...</div>;
+  }
+
   if (!isAdmin) return <Navigate to="/admin/login" replace />;
   return <Outlet />;
 }
@@ -101,7 +163,11 @@ function useGateStatus(session) {
     (async () => {
       if (!session?.user?.id) {
         if (alive) {
-          setState({ loading: false, profileComplete: false, hasPretest: false });
+          setState({
+            loading: false,
+            profileComplete: false,
+            hasPretest: false,
+          });
         }
         return;
       }
@@ -109,18 +175,16 @@ function useGateStatus(session) {
       const uid = session.user.id;
 
       try {
-        // 1) Profile
         const { data: profile } = await supabase
           .from("student_profiles")
           .select("first_name,last_name")
           .eq("user_id", uid)
-          .maybeSingle(); // ✅ แก้จุดเสี่ยง Error 500
+          .maybeSingle();
 
         const profileComplete = !!(
           profile?.first_name?.trim() && profile?.last_name?.trim()
         );
 
-        // 2) Pretest
         const { data: pretest } = await supabase
           .from("pretest_results")
           .select("id")
@@ -135,7 +199,9 @@ function useGateStatus(session) {
           });
         }
       } catch {
-        if (alive) setState((prev) => ({ ...prev, loading: false }));
+        if (alive) {
+          setState((prev) => ({ ...prev, loading: false }));
+        }
       }
     })();
 
@@ -153,7 +219,10 @@ function useGateStatus(session) {
 function RequireCanDoPretest({ session }) {
   const { loading, profileComplete, hasPretest } = useGateStatus(session);
 
-  if (loading) return <div style={{ padding: 24, color: "white" }}>Checking Status...</div>;
+  if (loading) {
+    return <div style={{ padding: 24, color: "white" }}>Checking Status...</div>;
+  }
+
   if (!profileComplete) return <Navigate to="/profile" replace />;
   if (hasPretest) return <Navigate to="/main" replace />;
 
@@ -166,7 +235,10 @@ function RequireCanDoPretest({ session }) {
 function RequirePretestDone({ session }) {
   const { loading, profileComplete, hasPretest } = useGateStatus(session);
 
-  if (loading) return <div style={{ padding: 24, color: "white" }}>Verifying Access...</div>;
+  if (loading) {
+    return <div style={{ padding: 24, color: "white" }}>Verifying Access...</div>;
+  }
+
   if (!profileComplete) return <Navigate to="/profile" replace />;
   if (!hasPretest) return <Navigate to="/pretest" replace />;
 
@@ -253,26 +325,99 @@ export default function App() {
           <Route element={<RequirePretestDone session={session} />}>
             <Route path="/main" element={<Main />} />
             <Route path="/lessons" element={<Lessons />} />
+            <Route path="/final" element={<Final />} />
             <Route path="/LessonLinear" element={<LessonLinear />} />
 
             {/* Unit 1 */}
-            <Route path="/unit1/learn" element={<Learn />} />
-            <Route path="/unit1/learn1" element={<Learn1 />} />
-            <Route path="/unit1/learn/1.3" element={<Unit13Wrapper />} />
-            <Route path="/unit1/learn/1.4" element={<Unit14Placeholder />} />
-            <Route path="/unit1/learn2" element={<Learn2 />} />
-            <Route path="/unit1/learn3" element={<Learn3 />} />
-            <Route path="/unit1/learn4" element={<Learn4 />} />
-            <Route path="/unit1/learn5" element={<Learn5 />} />
-            <Route path="/unit1/posttest" element={<PosttestRun />} />
+            <Route element={<ProtectedUnitRoute unitNo={1} />}>
+              <Route path="/unit1/learn" element={<Learn />} />
+              <Route path="/unit1/learn1" element={<Learn1 />} />
+              <Route path="/unit1/learn/1.3" element={<Unit13Wrapper />} />
+              <Route path="/unit1/learn/1.4" element={<Unit14Placeholder />} />
+              <Route path="/unit1/learn2" element={<Learn2 />} />
+              <Route path="/unit1/learn3" element={<Learn3 />} />
+              <Route path="/unit1/learn4" element={<Learn4 />} />
+              <Route path="/unit1/learn5" element={<Learn5 />} />
+              <Route path="/unit1/posttest" element={<PosttestRun />} />
+            </Route>
 
             {/* Unit 2 */}
-            <Route path="/unit2/learn" element={<LearnUnit2 />} /> 
-            <Route path="/unit2/learn1" element={<Learn1Unit2 />} /> 
-            <Route path="/unit2/learn2" element={<Learn2Unit2 />} />
-            <Route path="/unit2/learn3" element={<Learn3Unit2 />} />
-            <Route path="/unit2/Examples" element={<Examples />} />
-            <Route path="/unit2/posttest" element={<Unit2PosttestRun />} />
+            <Route element={<ProtectedUnitRoute unitNo={2} />}>
+              <Route path="/unit2/learn" element={<LearnUnit2 />} />
+              <Route path="/unit2/learn1" element={<Learn1Unit2 />} />
+              <Route path="/unit2/learn2" element={<Learn2Unit2 />} />
+              <Route path="/unit2/learn3" element={<Learn3Unit2 />} />
+              <Route path="/unit2/Examples" element={<Examples />} />
+              <Route path="/unit2/posttest" element={<Unit2PosttestRun />} />
+            </Route>
+
+            {/* Unit 3 */}
+            <Route element={<ProtectedUnitRoute unitNo={3} />}>
+              <Route path="/unit3/learn" element={<LearnUnit3 />} />
+              <Route path="/unit3/learn1" element={<Learn1Unit3 />} />
+              <Route path="/unit3/learn2" element={<Learn2Unit3 />} />
+              <Route path="/unit3/learn3" element={<Learn3Unit3 />} />
+              <Route path="/unit3/learn4" element={<Learn4Unit3 />} />
+              <Route path="/unit3/learn5" element={<Learn5Unit3 />} />
+              <Route path="/unit3/learn6" element={<Learn6Unit3 />} />
+              <Route path="/unit3/posttest" element={<Unit3PosttestRun />} />
+            </Route>
+
+            {/* Unit 4 */}
+            <Route element={<ProtectedUnitRoute unitNo={4} />}>
+              <Route path="/unit4/learn" element={<LearnUnit4 />} />
+              <Route path="/unit4/learn1" element={<Learn1Unit4 />} />
+              <Route path="/unit4/learn2" element={<Learn2Unit4 />} />
+              <Route path="/unit4/learn3" element={<Learn3Unit4 />} />
+              <Route path="/unit4/learn4" element={<Learn4Unit4 />} />
+              <Route path="/unit4/learn5" element={<Learn5Unit4 />} />
+              <Route path="/unit4/posttest" element={<Unit4PosttestRun />} />
+            </Route>
+
+            {/* Unit 5 */}
+            <Route element={<ProtectedUnitRoute unitNo={5} />}>
+              <Route path="/unit5/learn" element={<LearnUnit5 />} />
+              <Route path="/unit5/learn1" element={<Learn1Unit5 />} />
+              <Route path="/unit5/learn2" element={<Learn2Unit5 />} />
+              <Route path="/unit5/learn3" element={<Learn3Unit5 />} />
+              <Route path="/unit5/learn4" element={<Learn4Unit5 />} />
+              <Route path="/unit5/learn5" element={<Learn5Unit5 />} />
+              <Route path="/unit5/learn6" element={<Learn6Unit5 />} />
+              <Route path="/unit5/posttest" element={<Unit5PosttestRun />} />
+            </Route>
+
+            {/* Unit 6 */}
+            <Route element={<ProtectedUnitRoute unitNo={6} />}>
+              <Route path="/unit6/learn" element={<LearnUnit6 />} />
+              <Route path="/unit6/learn1" element={<Learn1Unit6 />} />
+              <Route path="/unit6/learn2" element={<Learn2Unit6 />} />
+              <Route path="/unit6/learn3" element={<Learn3Unit6 />} />
+              <Route path="/unit6/learn4" element={<Learn4Unit6 />} />
+              <Route path="/unit6/posttest" element={<Unit6PosttestRun />} />
+            </Route>
+
+            {/* Unit 7 */}
+            <Route element={<ProtectedUnitRoute unitNo={7} />}>
+              <Route path="/unit7/learn" element={<LearnUnit7 />} />
+              <Route path="/unit7/learn1" element={<Learn1Unit7 />} />
+              <Route path="/unit7/learn2" element={<Learn2Unit7 />} />
+              <Route path="/unit7/learn3" element={<Learn3Unit7 />} />
+              <Route path="/unit7/learn4" element={<Learn4Unit7 />} />
+              <Route path="/unit7/learn5" element={<Learn5Unit7 />} />
+              <Route path="/unit7/posttest" element={<Unit7PosttestRun />} />
+            </Route>
+
+            {/* Unit 8 */}
+            <Route element={<ProtectedUnitRoute unitNo={8} />}>
+              <Route path="/unit8/learn" element={<LearnUnit8 />} />
+              <Route path="/unit8/learn1" element={<Learn1Unit8 />} />
+              <Route path="/unit8/learn2" element={<Learn2Unit8 />} />
+              <Route path="/unit8/learn3" element={<Learn3Unit8 />} />
+              <Route path="/unit8/learn4" element={<Learn4Unit8 />} />
+              <Route path="/unit8/learn5" element={<Learn5Unit8 />} />
+              <Route path="/unit8/learn6" element={<Learn6Unit8 />} />
+              <Route path="/unit8/posttest" element={<Unit8PosttestRun />} />
+            </Route>
 
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashScore" element={<DashScore />} />

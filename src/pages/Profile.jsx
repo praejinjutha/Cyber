@@ -243,8 +243,14 @@ export default function Profile() {
       return;
     }
 
-    alert("รีเซ็ตแล้ว ✅");
-    await loadAll();
+alert("รีเซ็ตแล้ว ✅");
+
+setFirstName("")
+setLastName("")
+setAge("15")
+setHasPretest(false)
+
+await loadAll();
   };
 
   return (
@@ -477,7 +483,7 @@ export default function Profile() {
           </div>
 
           {/* RIGHT: การจัดการข้อมูล (Reset) */}
-          <aside className="edu-col">
+          {/* <aside className="edu-col">
             <div className="edu-panel">
               <div className="edu-panel__head">
                 <div className="edu-panel__title">
@@ -513,7 +519,7 @@ export default function Profile() {
                 Tip: ใช้ปุ่มนี้เมื่อต้องการทดสอบระบบใหม่ตั้งแต่ต้น
               </div>
             </div>
-          </aside>
+          </aside> */}
         </section>
       </main>
     </div>

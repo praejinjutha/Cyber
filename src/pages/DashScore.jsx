@@ -89,7 +89,7 @@ export default function DashScore() {
     return Array.from({ length: 8 }, (_, i) => {
       const unitNum = i + 1;
       if (unitNum === 1) {
-        // บทที่ 1: ใช้ข้อมูลจาก DB
+        // หน่วยที่ 1: ใช้ข้อมูลจาก DB
         return {
           unit: 1,
           done: !!unit1Score,
@@ -98,7 +98,7 @@ export default function DashScore() {
           pretestPassed: true, // ตามเงื่อนไขไฟล์เก่า
         };
       }
-      // บทที่ 2-8: ตั้งค่าเป็นยังไม่ได้ทำ
+      // หน่วยที่ 2-8: ตั้งค่าเป็นยังไม่ได้ทำ
       return {
         unit: unitNum,
         done: false,
@@ -193,7 +193,7 @@ export default function DashScore() {
               </div>
             </section>
 
-            {/* 2) Posttest รายบท */}
+            {/* 2) Posttest รายหน่วย */}
             <section className="dashCard dashCard--post">
               <div className="dashCard__head">
                 <h2 className="dashCard__title">2) แบบฝึกหัดท้ายบท</h2>
@@ -204,7 +204,7 @@ export default function DashScore() {
                   <li key={u.unit} className={`dashStep ${u.done ? "is-done" : ""}`}>
                     <div className="dashStep__num">{u.unit}</div>
                     <div className="dashStep__body">
-                      <div className="dashStep__title">บทที่ {u.unit}</div>
+                      <div className="dashStep__title">หน่วยที่ {u.unit}</div>
                       <div className={`dashStep__meta ${u.done ? "is-done" : ""}`}>
                         {u.done 
                           ? `ทำแล้ว • ${u.score}/${u.max}` 

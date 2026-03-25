@@ -231,6 +231,102 @@ button{ font: inherit; }
   flex-wrap: wrap;
 }
 
+/* ===============================
+   BADGE / PILL COLORS
+================================ */
+
+.edu-pill.edu-pill--pass{
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  border: 1px solid #bbf7d0 !important;
+  font-weight: 600;
+}
+
+.edu-pill.edu-pill--fail{
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fecaca !important;
+  font-weight: 600;
+}
+
+.edu-pill.edu-pill--pretest{
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+  border: 1px solid #bfdbfe !important;
+  font-weight: 600;
+}
+
+/* ===============================
+   SCORE BOX
+================================ */
+
+.edu-scoreBox{
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ===============================
+   SCORE ROW
+================================ */
+
+.edu-scoreRow{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.edu-scoreRow__label{
+  font-size: 13px;
+  color: #475569;
+  font-weight: 600;
+}
+
+.edu-scoreRow__value{
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.edu-lessonCard__meta--posttest{
+  position: relative;
+}
+
+.edu-cornerBadge{
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  padding: 4px 10px;
+  border-radius: 999px;
+
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* ===============================
+   SMALL UI IMPROVEMENT
+================================ */
+
+.edu-lessonCard__tags{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+
 .edu-hero__headline{
   min-width: 220px;
   flex: 1 1 420px;
@@ -1059,9 +1155,10 @@ button{ font: inherit; }
 }
 
 .edu-pill--ok{
-  background: rgba(34,197,94,.10);
-  border-color: rgba(34,197,94,.22);
-  color: #166534;
+  background:#dff5e6;
+  color:#1b7a3a;
+  border:1px solid #b7e6c8;
+  font-weight:600;
 }
 
 
@@ -1536,3 +1633,233 @@ button{ font: inherit; }
   font-size: 13px;
 }
 
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+/* ===== INSIGHT — Duck Green Theme + Red Improve ===== */
+
+.insight-force-fullwidth.cyber-insight {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.cyber-insight .insight-outer-frame {
+  margin: 1.5rem 0;
+  background: #eef8f5;
+  border: 1.5px solid #2f6f64;
+  border-radius: 16px;
+  width: 100% !important;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* HEADER */
+.cyber-insight .insight-header-box {
+  padding: 1.25rem 1.5rem 1rem;
+  background: #ffffff;
+  border-bottom: 1.5px solid #2f6f64;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+.cyber-insight .insight-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #d7ebe5;
+  color: #0f4f46;
+  border: 1px solid #2f6f64;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cyber-insight .insight-main-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0b3d36;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* INNER STACK */
+.cyber-insight .insight-inner-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* BLOCKS */
+.cyber-insight .inner-block {
+  padding: 1.25rem 1.5rem;
+  background: #ffffff;
+  border-bottom: 1.5px solid #2f6f64;
+}
+
+.cyber-insight .inner-block:last-child {
+  border-bottom: none;
+}
+
+/* Summary + Strength+Improve แบบ 2 col */
+.cyber-insight .strength-block,
+.cyber-insight .improve-block {
+  flex: 1;
+}
+
+.cyber-insight .strength-block {
+  border-right: 1.5px solid #2f6f64;
+  border-bottom: none;
+}
+
+/* BLOCK LABEL */
+.cyber-insight .block-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #0f5c50;
+  margin-bottom: 0.75rem;
+  border-bottom: none;
+}
+
+.cyber-insight .block-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 0.75rem;
+}
+
+.cyber-insight .block-header svg {
+  color: #0f5c50;
+  flex-shrink: 0;
+}
+
+.cyber-insight .block-header h3 {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #0f5c50;
+  margin: 0;
+}
+
+/* SUMMARY */
+.cyber-insight .summary-text {
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: #173c37;
+  margin: 0;
+}
+
+/* STRENGTHS */
+.cyber-insight .strength-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cyber-insight .strength-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 0.875rem;
+  color: #173c37;
+  line-height: 1.6;
+}
+
+.cyber-insight .strength-item svg {
+  color: #156f63;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+/* IMPROVE = RED */
+.cyber-insight .improve-block .block-header svg,
+.cyber-insight .improve-block .block-header h3 {
+  color: #b91c1c;
+}
+
+.cyber-insight .improve-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cyber-insight .improve-item {
+  padding: 10px 12px;
+  background: #fff1f2;
+  border: 1px solid #f8b4b4;
+  border-radius: 8px;
+  margin-bottom: 0;
+}
+
+.cyber-insight .topic-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #991b1b;
+  margin-bottom: 3px;
+}
+
+.cyber-insight .feedback-text {
+  font-size: 0.8rem;
+  color: #7f1d1d;
+  line-height: 1.5;
+}
+
+/* 2 col */
+.cyber-insight .side-by-side {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1.5px solid #2f6f64;
+}
+
+/* EMPTY STATE */
+.cyber-insight .insight-empty-state {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #2f6f64;
+  font-size: 0.875rem;
+  background: #ffffff;
+}
+
+/* SPIN */
+.icon-spin {
+  animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* MOBILE */
+@media (max-width: 640px) {
+  .cyber-insight .side-by-side {
+    grid-template-columns: 1fr;
+  }
+
+  .cyber-insight .strength-block {
+    border-right: none;
+    border-bottom: 1.5px solid #2f6f64;
+  }
+}

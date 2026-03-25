@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import logo from "../../assets/logo.png";
 
+
 // ✅ วิดีโอ Unit 1
 import learnVideo from "../../assets/learn1.mp4";
 
@@ -149,6 +150,7 @@ export default function Learn1() {
                 <div className="edu-hero__title">
                   Unit 1: การคุ้มครองข้อมูลส่วนบุคคลและความปลอดภัยบัญชี
                 </div>
+                <div className="edu-hero__sub">เรื่องที่ 1	ข้อมูลส่วนบุคคลในชีวิตดิจิทัล</div>
 
                 <div className="edu-lessons__toolbar">
                   <button

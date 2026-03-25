@@ -23,7 +23,64 @@
   --ring: 0 0 0 4px rgba(37,99,235,.12);
 }
 
-/* Base (ตามที่คุณให้) */
+.dashBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 14px 0 18px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+}
+
+.dashBanner__icon {
+  flex: 0 0 auto;
+  font-size: 1.4rem;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.dashBanner__content {
+  min-width: 0;
+}
+
+.dashBanner__title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.dashBanner__sub {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+.dashBanner--locked {
+  background: #f8fafc;
+  border-color: #e5e7eb;
+  color: #475569;
+}
+
+.dashBanner--up {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.dashBanner--same {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.dashBanner--down {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+/* Base  */
 *{ box-sizing: border-box; }
 html, body{ height: 100%; }
 body{

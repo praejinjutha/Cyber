@@ -20,7 +20,7 @@ import {
  * - เป็น adaptive task (แต่ไม่ใช้ AI) -> ใช้ rule-based
  *
  * Props:
- * - onNext(): จบบท 5 -> กลับหน้า Unit1 learn list
+ * - onNext(): จบหน่วย 5 -> กลับหน้า Unit1 learn list
  * - mode: เผื่ออนาคต
  */
 export default function Unit1_5_2({ onNext, mode = "all" }) {

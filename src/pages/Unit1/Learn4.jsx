@@ -166,6 +166,8 @@ export default function Learn4() {
                 <div className="edu-hero__title">
                   Unit 1: การคุ้มครองข้อมูลส่วนบุคคลและความปลอดภัยบัญชี
                 </div>
+                <div className="edu-hero__sub">เรื่องที่ 4	การใช้ MFA เพื่อปกป้องบัญชี
+</div>
 
                 {/* ✅ Toolbar */}
                 <div className="edu-lessons__toolbar">
@@ -271,7 +273,7 @@ export default function Learn4() {
           ========================= */}
           {step === "task43" && (
             <Unit1_4_3
-              // ✅ onNext: จบบท 4 -> กลับหน้ารายชื่อบท
+              // ✅ onNext: จบหน่วย 4 -> กลับหน้ารายชื่อบท
               onNext={() => {
                 navigate("/unit1/learn", { replace: true });
               }}

@@ -39,20 +39,20 @@ export default function LessonLinear() {
   }, [doneCount]);
 
   /**
- * ✅ ไปยังหน้าบทเรียนตามเลขบท (Linear)
- * - บทที่ 1 -> /unit1/learn
- * - บทที่ 2–8 -> /unit{n}/learn
+ * ✅ ไปยังหน้าบทเรียนตามเลขหน่วย (Linear)
+ * - หน่วยที่ 1 -> /unit1/learn
+ * - หน่วยที่ 2–8 -> /unit{n}/learn
  */
 const goToLesson = (n) => {
   console.log(`Navigating to Unit ${n}`);
 
-  // ✅ บท 1 เข้าหน้าเรียนของ Unit1
+  // ✅ หน่วย 1 เข้าหน้าเรียนของ Unit1
   if (n === 1) {
     navigate("/unit1/learn");
     return;
   }
 
-  // ✅ สำหรับบทที่ 2–8 เข้า /unit{n}/learn
+  // ✅ สำหรับหน่วยที่ 2–8 เข้า /unit{n}/learn
   if (n >= 2 && n <= 8) {
     navigate(`/unit${n}/learn`);
     return;
@@ -119,13 +119,13 @@ const goToLesson = (n) => {
       <main className="edu-layout">
         {/* HERO */}
        <section className="edu-hero" aria-label="Lessons header"> <div className="edu-hero__card"> <div className="edu-hero__row"> <div className="edu-hero__headline"> <div className="edu-hero__title">บทเรียนทั้งหมด 
-</div> <div className="edu-hero__sub"> คุณผ่านเส้นทางแบบ Adaptive ครบแล้ว — หน้านี้จึงแสดงบทเรียนทั้งหมดเรียงตามบท เพื่อทบทวน/เรียนซ้ำได้ทันที </div> <div className="edu-lessons__toolbar"> <button className="edu-btn edu-btn--ghost" type="button" onClick={() => navigate("/main")} style={{ marginLeft: 8 }} > <FiHome aria-hidden="true" /> กลับหน้าหลัก </button> </div> </div> <div className="edu-lessons__meta"> <div className="edu-miniStat"> <div className="edu-miniStat__label">จำนวนบท (รวม)</div> <div className="edu-miniStat__value">{LESSONS.length}</div> </div> </div> </div> </div> </section>
+</div> <div className="edu-hero__sub"> คุณผ่านเส้นทางแบบ Adaptive ครบแล้ว — หน้านี้จึงแสดงบทเรียนทั้งหมดเรียงตามหน่วย เพื่อทบทวน/เรียนซ้ำได้ทันที </div> <div className="edu-lessons__toolbar"> <button className="edu-btn edu-btn--ghost" type="button" onClick={() => navigate("/main")} style={{ marginLeft: 8 }} > <FiHome aria-hidden="true" /> กลับหน้าหลัก </button> </div> </div> <div className="edu-lessons__meta"> <div className="edu-miniStat"> <div className="edu-miniStat__label">จำนวนหน่วย (รวม)</div> <div className="edu-miniStat__value">{LESSONS.length}</div> </div> </div> </div> </div> </section>
 
         {/* Lesson Grid Card */}
 <section className="lgrid-container">
   <div className="lgrid-header">
     <h3 className="lgrid-title">เลือกบทเรียน</h3>
-    <p className="lgrid-subtitle">กดเริ่มได้ทุกบท (ทำแล้วก็กดเรียนซ้ำได้)</p>
+    <p className="lgrid-subtitle">กดเริ่มได้ทุกหน่วย (ทำแล้วก็กดเรียนซ้ำได้)</p>
   </div>
 
 <div className="lgrid-wrapper">
@@ -139,7 +139,7 @@ const goToLesson = (n) => {
 >
 
         <div className="lgrid-item-top">
-          <div className="lgrid-badge">บทที่ {lesson.no}</div>
+          <div className="lgrid-badge">หน่วยที่ {lesson.no}</div>
         </div>
 
         <div className="lgrid-item-body">

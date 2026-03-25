@@ -176,6 +176,7 @@ export default function Learn3() {
                 <div className="edu-hero__title">
                   Unit 1: การคุ้มครองข้อมูลส่วนบุคคลและความปลอดภัยบัญชี
                 </div>
+                <div className="edu-hero__sub">เรื่องที่ 3	ผลกระทบและความเสี่ยงจากการเปิดเผยข้อมูล</div>
 
                 {/* ✅ Toolbar */}
                 <div className="edu-lessons__toolbar">

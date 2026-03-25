@@ -10,7 +10,7 @@ import { MATCHING_CASES } from "../data/matchingCases.js";
 
 /**
  * ✅ Unit 1.2.2 — Matching Task
- * แนวคิด: ประเภทข้อมูล × บริบท × ระดับการเข้าถึง
+ * แนวคิด: ประเภทข้อมูล × บริหน่วย × ระดับการเข้าถึง
  *
  * Flow:
  * - ผู้เรียนเลือก “ระดับการเข้าถึง” ให้ครบทุกเคส
@@ -94,7 +94,7 @@ export default function Unit1_2_2({ onNext }) {
       {/* ✅ กล่องตาราง */}
       <div className="edu-card">
         <div className="edu-card__body">
-          {/* ✅ ตาราง 3 คอลัมน์: ข้อมูล / บริบท / ระดับเข้าถึง */}
+          {/* ✅ ตาราง 3 คอลัมน์: ข้อมูล / บริหน่วย / ระดับเข้าถึง */}
           <div className="edu-table-wrap">
             <table className="edu-table">
               <thead>
@@ -123,7 +123,7 @@ export default function Unit1_2_2({ onNext }) {
                         ) : null}
                       </td>
 
-                      {/* ✅ คอลัมน์บริบท */}
+                      {/* ✅ คอลัมน์บริหน่วย */}
                       <td>
                         <div className="edu-cell-title">{item.context}</div>
 

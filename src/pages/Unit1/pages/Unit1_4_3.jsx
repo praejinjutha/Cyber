@@ -155,7 +155,7 @@ export default function Unit1_4_3({ onNext }) {
   useEffect(() => {
     setSimPhase("idle");
     setSimIndex(0);
-    setImpactChoice(null); // ✅ เปลี่ยนบริบท = ให้ตอบใหม่ (กันตอบค้างแล้วกดผ่าน)
+    setImpactChoice(null); // ✅ เปลี่ยนบริหน่วย = ให้ตอบใหม่ (กันตอบค้างแล้วกดผ่าน)
   }, [scenarioKey, methodKey]);
 
   // ✅ Start simulation (กดครั้งเดียว)

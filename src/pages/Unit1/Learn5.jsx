@@ -158,6 +158,8 @@ export default function Learn5() {
                 <div className="edu-hero__title">
                   Unit 1: การคุ้มครองข้อมูลส่วนบุคคลและความปลอดภัยบัญชี
                 </div>
+                <div className="edu-hero__sub">เรื่องที่ 5	การสังเกตและรับมือสัญญาณบัญชีผิดปกติ
+</div>
 
                 {/* ✅ Toolbar */}
                 <div className="edu-lessons__toolbar">
@@ -234,7 +236,7 @@ export default function Learn5() {
             <Unit1_5_2
               mode={mode}
               onNext={() => {
-                // ✅ จบบท 5 -> กลับหน้า Unit1 learn list
+                // ✅ จบหน่วย 5 -> กลับหน้า Unit1 learn list
                 navigate("/unit1/learn", { replace: true });
               }}
             />

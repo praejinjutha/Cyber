@@ -494,6 +494,8 @@ const Learn2Unit2 = () => {
             <div className="edu-hero__row">
               <div className="edu-hero__headline">
                 <div className="edu-hero__title">Unit 2: การปฏิบัติความปลอดภัยทางเทคนิคพื้นฐาน</div>
+<div className="edu-hero__sub">เรื่องที่ 2	การวิเคราะห์สถานการณ์และสัญญาณเตือน
+</div>
 
                 <div className="edu-lessons__toolbar">
                   <button className="edu-btn edu-btn--back" type="button" onClick={() => navigate(-1)}>

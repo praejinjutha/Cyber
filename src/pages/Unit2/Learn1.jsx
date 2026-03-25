@@ -267,6 +267,10 @@ const goNextAfterQuiz = () => {
               <div className="edu-hero__headline">
                 {/* ✅ Title */}
                 <div className="edu-hero__title">Unit 2: การปฏิบัติความปลอดภัยทางเทคนิคพื้นฐาน</div>
+<div className="edu-hero__sub">เรื่องที่ 1	ความตระหนักด้านภัยคุกคามไซเบอร์
+</div>
+
+
 
                 {/* ✅ Toolbar buttons */}
                 <div className="edu-lessons__toolbar">
