@@ -13,11 +13,11 @@ import { supabase } from "../../lib/supabase";
 import logo from "../../assets/logo.png";
 
 // ✅ ภาพตัวอย่างตามที่กำหนด
-import imgEmotion from "../unit8/ชี้นำอารมณ์.jpg";
-import imgStrong from "../unit8/ใช้คำแรง.jpg";
-import imgFeeling from "../unit8/ชี้นำความรู้สึก.jpg";
-import imgNeutral from "../unit8/ใช้คำกลาง.jpg";
-import imgMislead from "../unit8/เข้าใจผิดได้.jpg";
+import imgEmotion from "./emotion.jpg";
+import imgStrong from "./strong.jpg";
+import imgFeeling from "./feeling.jpg";
+import imgNeutral from "./neutral.jpg";
+import imgMislead from "./mislead.jpg";
 
 // ✅ CSS ตามที่กำหนด
 import "../../main.css";

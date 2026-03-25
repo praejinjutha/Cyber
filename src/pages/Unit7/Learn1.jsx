@@ -12,9 +12,9 @@ import { supabase } from "../../lib/supabase";
 import logo from "../../assets/logo.png";
 import learnVideo from "../../assets/learn3.1.mp4";
 
-import organicImg from "../unit7/Organic.jpg";
-import directImg from "../unit7/Direct.jpg";
-import embeddedImg from "../unit7/Embedded.jpg";
+import organicImg from "./Organic.jpg";
+import directImg from "./Direct.jpg";
+import embeddedImg from "./Embedded.jpg";
 
 import "../../main.css";
 import "../Unit1/learn.css";

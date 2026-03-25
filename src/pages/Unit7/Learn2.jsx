@@ -9,9 +9,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import logo from "../../assets/logo.png";
 
-import organicImg from "../unit7/FlashSale.jpg";
-import directImg from "../unit7/SocialProof.jpg";
-import embeddedImg from "../unit7/Emotional.jpg";
+import organicImg from "./FlashSale.jpg";
+import directImg from "./SocialProof.jpg";
+import embeddedImg from "./Emotional.jpg";
 
 import "../../main.css";
 import "../Unit1/learn.css";
