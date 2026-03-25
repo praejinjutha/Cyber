@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 
 import logo from "../../assets/logo.png";
-import processImg from "../unit5/process.png";
+import processImg from "./process.png";
 
 import {
   FiChevronLeft,

@@ -9,9 +9,9 @@ import logo from "../../assets/logo.png"; // ✅ Brand logo
 import learnVideo from "../../assets/learn3.1.mp4";
 
 // ✅ (เพิ่ม) รูป “ฐานข้อมูลให้จำแนกความน่าเชื่อถือของแหล่งข่าว (ไทย)”
-import sourceThaiGood from "../unit5/source_th_good.png"; // ✅ สื่อไทยมีตัวตนชัด (เช่น Thai PBS)
-import sourceThaiGeneral from "../unit5/source_th_general.png"; // ✅ เพจทั่วไป/โพสต์ทั่วไป (ไม่ระบุองค์กรชัด)
-import sourceThaiSuspicious from "../unit5/source_th_suspicious.png"; // ✅ แหล่งข่าวน่าสงสัย (เร่งแชร์/ไม่มี about/contact)
+import sourceThaiGood from "./source_th_good.png";
+import sourceThaiGeneral from "./source_th_general.png";
+import sourceThaiSuspicious from "./source_th_suspicious.png";
 
 // ✅ CSS
 import "../../main.css";

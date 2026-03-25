@@ -10,11 +10,11 @@ import { supabase } from "../../lib/supabase"; // ✅ Supabase auth/profile
 import logo from "../../assets/logo.png"; // ✅ Brand logo
 
 // ✅ (เพิ่ม) รูปตัวอย่างเจตนา (อยู่ใน src/assets/unit5/)
-import imgInformative from "../unit5/Informative.webp";
-import imgShare from "../unit5/Share-oriented.jpg";
-import imgClickbait from "../unit5/Clickbait.jpg";
-import imgEmotional from "../unit5/Emotional.jpg";
-import imgAdvertising from "../unit5/Advertising.jpg";
+import imgInformative from "./Informative.webp";
+import imgShare from "./Share-oriented.jpg";
+import imgClickbait from "./Clickbait.jpg";
+import imgEmotional from "./Emotional.jpg";
+import imgAdvertising from "./Advertising.jpg";
 
 // ✅ CSS (ตามที่สั่ง)
 import "../../main.css";

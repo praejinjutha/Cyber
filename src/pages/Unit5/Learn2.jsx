@@ -11,7 +11,8 @@ import logo from "../../assets/logo.png"; // ✅ Brand logo
 
 // ✅ (เพิ่ม) รูปตัวอย่างข่าว “พาดหัวแรง/ภาษาชี้นำ”
 // ⭐ ให้วางไฟล์จริงไว้ที่: src/assets/unit5/dara.jpg
-import daraImg from "../unit5/dara.png";
+
+import daraImg from "./dara.png";
 
 // ✅ CSS (ตามที่สั่ง)
 import "../../main.css";
