@@ -7,7 +7,7 @@ import { supabase } from "../../lib/supabase";
 import logo from "../../assets/logo.png";
 
 // ✅ รูปเคสตั้งต้น (วางไฟล์ไว้ที่: src/assets/process.png)
-import processImg from "../unit5/process.png";
+import processImg from "./process.png";
 
 // ✅ CSS (ตามที่สั่ง)
 import "../../main.css";
