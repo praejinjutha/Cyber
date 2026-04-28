@@ -4,23 +4,26 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import logo from "../../assets/logo.png";
 
-
 // ✅ วิดีโอ Unit 1
 import learnVideo from "../../assets/learn1.mp4";
 
 import "../../main.css";
 import "./learn.css";
 
-import { FiChevronLeft, FiChevronRight, FiFileText, FiHome, FiLogOut, FiUser } from "react-icons/fi";
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiFileText,
+  FiHome,
+  FiLogOut,
+  FiUser,
+} from "react-icons/fi";
 
 // ✅ 1.2
 import ClassificationTask from "./components/ClassificationTask";
 
 // ✅ 1.3 (embed อยู่ panel1)
 import HighlightTask from "./pages/Unit1_3/HighlightTask";
-
-// ✅ progress
-import { loadU1_12, saveU1_12, loadU1_13, saveU1_13 } from "./utils/progress";
 
 export default function Learn1() {
   const navigate = useNavigate();
@@ -43,11 +46,7 @@ export default function Learn1() {
    */
   const [step, setStep] = useState("video");
 
-  // ✅ เก็บผล 1.2 / 1.3 (เผื่อใช้ต่อ)
-  const [task12Result, setTask12Result] = useState(null);
-  const [task13Result, setTask13Result] = useState(null);
-
-  // ✅ โหลดชื่อผู้เรียน + โหลด progress เดิม (ถ้ามี)
+  // ✅ โหลดชื่อผู้เรียนเท่านั้น (ไม่โหลด progress ใด ๆ)
   useEffect(() => {
     let alive = true;
 
@@ -73,16 +72,10 @@ export default function Learn1() {
       if (!alive) return;
 
       if (profile) {
-        setStudentName(`${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim());
+        setStudentName(
+          `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim()
+        );
       }
-
-      // ✅ โหลด progress ของ 1.2
-      const saved12 = loadU1_12();
-      if (saved12) setTask12Result(saved12);
-
-      // ✅ โหลด progress ของ 1.3
-      const saved13 = loadU1_13();
-      if (saved13) setTask13Result(saved13);
 
       setLoading(false);
     })();
@@ -150,7 +143,9 @@ export default function Learn1() {
                 <div className="edu-hero__title">
                   Unit 1: การคุ้มครองข้อมูลส่วนบุคคลและความปลอดภัยบัญชี
                 </div>
-                <div className="edu-hero__sub">เรื่องที่ 1	ข้อมูลส่วนบุคคลในชีวิตดิจิทัล</div>
+                <div className="edu-hero__sub">
+                  เรื่องที่ 1 ข้อมูลส่วนบุคคลในชีวิตดิจิทัล
+                </div>
 
                 <div className="edu-lessons__toolbar">
                   <button
@@ -163,6 +158,7 @@ export default function Learn1() {
                         window.scrollTo({ top: 0, behavior: "smooth" });
                         return;
                       }
+
                       if (step === "task12") {
                         setStep("video");
                         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -170,7 +166,6 @@ export default function Learn1() {
                       }
 
                       navigate(-1);
-
                     }}
                   >
                     <FiChevronLeft aria-hidden="true" />
@@ -213,7 +208,7 @@ export default function Learn1() {
                   className="edu-btn edu-btn--ghost"
                   type="button"
                   onClick={() => {
-                    setStep("task12"); // ✅ ไป 1.2
+                    setStep("task12");
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
                   title="ไปทำกิจกรรม 1.2"
@@ -227,31 +222,21 @@ export default function Learn1() {
           {/* STEP 2: Task 1.2 */}
           {step === "task12" && (
             <ClassificationTask
-              onComplete={(result) => {
-                setTask12Result(result);
-                saveU1_12(result);
-              }}
+              onComplete={() => {}}
               onNext={() => {
-                // ✅ อยู่ใน panel1: ไป 1.3 ด้วยการ setStep
                 setStep("task13");
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
             />
           )}
 
-          {/* STEP 3: Task 1.3 (อยู่ใน panel1 เหมือนกัน) */}
-{step === "task13" && (
-  <HighlightTask
-    initialProgress={task13Result}
-    onComplete={(result) => {
-      setTask13Result(result);
-      saveU1_13(result);
-    }}
-    onNext={() => navigate("/unit1/learn", { replace: true })}
-    
-  />
-)}
-
+          {/* STEP 3: Task 1.3 */}
+          {step === "task13" && (
+            <HighlightTask
+              onComplete={() => {}}
+              onNext={() => navigate("/unit1/learn", { replace: true })}
+            />
+          )}
         </section>
       </main>
     </div>

@@ -1,12 +1,4 @@
-// src/pages/Unit4/Learn1.jsx
-// ✅ Unit 4 - เรื่องที่ 1: การสื่อสารออนไลน์อย่างเหมาะสมและปลอดภัย
-// ✅ ปรับตามคำขอ: เอาวิดีโอออก → เริ่มที่ Micro-lesson ทันที
-// Flow: Micro-lesson → Interactive Concept Checking → Immediate Feedback → Mini quiz
-// ✅ เนื้อหาตามที่ผู้ใช้ให้:
-// - ความหมายของข้อความ/พฤติกรรมที่ไม่สุภาพ กลั่นแกล้ง หรือยั่วยุให้เกิดความขัดแย้ง
-// - ตัวอย่างข้อความและพฤติกรรมในสถานการณ์จริง
-// - แยกแยะการสื่อสารเชิงสร้างสรรค์ vs การสื่อสารที่ก่อปัญหา
-// - กิจกรรมให้ผู้เรียน “ระบุ” ข้อความ/พฤติกรรมที่ไม่เหมาะสม
+
 
 import { useEffect, useMemo, useState } from "react"; // ✅ React hooks
 import { useLocation, useNavigate } from "react-router-dom"; // ✅ Router helpers

@@ -33,14 +33,14 @@ export default function DashScore() {
   const [programPre, setProgramPre] = useState({
     done: false,
     score: null,
-    max: 24,
+    max: 48,
   });
 
   // ✅ คะแนน Final “ครั้งแรก”
   const [programPost, setProgramPost] = useState({
     done: false,
     score: null,
-    max: 24,
+    max: 48,
   });
 
   // ✅ 3) Logic ดึงข้อมูล Profile + คะแนนจาก Database
@@ -104,7 +104,7 @@ export default function DashScore() {
           setProgramPre({
             done: pretestResult?.total_score != null,
             score: pretestResult?.total_score ?? null,
-            max: 24,
+            max: 48,
           });
         }
 
@@ -125,7 +125,7 @@ export default function DashScore() {
           setProgramPost({
             done: finalResult?.first_total_score != null,
             score: finalResult?.first_total_score ?? null,
-            max: 24,
+            max: 48,
           });
         }
 

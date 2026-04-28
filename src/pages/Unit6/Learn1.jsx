@@ -10,7 +10,7 @@ import { supabase } from "../../lib/supabase";
 import logo from "../../assets/logo.png";
 
 // ✅ เปลี่ยนมาใช้ Local Import วีดีโอแทน Link YouTube
-import learnVideo from "../../assets/learn3.1.mp4";
+import learnVideo from "../../assets/learn6.mp4";
 
 import "../../main.css";
 import "../Unit1/learn.css";

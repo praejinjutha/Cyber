@@ -2,11 +2,56 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
-const UNIT_TIME_SECONDS = 180; // 3 นาทีต่อบท
-const UNIT_PASS_SCORE = 2.0;
-const MULTI_PASS_SCORE = 0.67; // multi ต้องได้อย่างน้อย 2/3 แบบไม่เลือกมั่วเกิน
-const TOTAL_UNITS = 8; // บังคับให้มี 8 หน่วย และหน่วย 8 คือบทสุดท้ายเสมอ
+import img1 from "../assets/1.png";
+import img2 from "../assets/2.jpg";
+import img3 from "../assets/3.png";
+import img4 from "../assets/4.png";
+import img5 from "../assets/5.png";
+import img6 from "../assets/6.png";
+import img7 from "../assets/7.jpg";
 
+const getUnitTimeSeconds = (unit) => {
+  const u = Number(unit);
+
+  if ([1, 2, 3, 4, 6].includes(u)) return 360; // 6 นาที
+  if ([5, 7].includes(u)) return 480; // 8 นาที
+  if (u === 8) return 600; // 10 นาที
+
+  return 360;
+};
+const TOTAL_UNITS = 8;
+
+const UNIT_PASS_REQUIREMENTS = {
+  1: 4,
+  2: 4,
+  3: 4,
+  4: 4,
+  5: 6,
+  6: 4,
+  7: 6,
+  8: 8,
+};
+
+const UNIT_MAX_QUESTIONS = {
+  1: 5,
+  2: 5,
+  3: 5,
+  4: 5,
+  5: 7,
+  6: 5,
+  7: 7,
+  8: 9,
+};
+
+const QUESTION_IMAGE_MAP = {
+  21: img1,
+  22: img2,
+  23: img3,
+  24: img4,
+  25: img5,
+  26: img6,
+  27: img7,
+};
 export default function Pretest() {
   const navigate = useNavigate();
 
@@ -32,7 +77,7 @@ export default function Pretest() {
 
   const [currentUnit, setCurrentUnit] = useState(1);
   const [unitStartedAt, setUnitStartedAt] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(UNIT_TIME_SECONDS);
+  const [timeLeft, setTimeLeft] = useState(getUnitTimeSeconds(1));
 
   const [showRulesModal, setShowRulesModal] = useState(true);
   const [examStarted, setExamStarted] = useState(false);
@@ -97,8 +142,6 @@ export default function Pretest() {
     items.forEach((it) => {
       const a = answers[it.id];
       if (it.type === "single" && a) count++;
-      if (it.type === "multi" && Array.isArray(a) && a.length > 0) count++;
-      if (it.type === "short" && String(a || "").trim().length > 0) count++;
     });
     return count;
   }, [items, answers]);
@@ -108,50 +151,34 @@ export default function Pretest() {
     return Math.round((answeredCount / totalQuestions) * 100);
   }, [answeredCount, totalQuestions]);
 
-  const initAnswerByType = (type) => {
-    if (type === "multi") return [];
-    return "";
-  };
+  const initAnswerByType = () => "";
 
   const isAnswered = (item) => {
     const val = answers[item.id];
-    if (item.type === "multi") return Array.isArray(val) && val.length > 0;
-    if (item.type === "short") return String(val || "").trim().length > 0;
     return !!val;
   };
 
   const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
 
-  const getDefaultPointByType = (type) => {
-    if (type === "single") return 0.5;
-    if (type === "multi") return 1.0;
-    if (type === "short") return 1.5;
-    return 1;
-  };
-
   const getItemPoint = (item) => {
     const dbPoint = Number(item?.points);
     if (Number.isFinite(dbPoint) && dbPoint > 0) return dbPoint;
-    return getDefaultPointByType(item?.type);
+    return 1;
   };
 
-  const calcMultiPartialScore = (picked, correct, maxScore = 1.0) => {
-    const pickedArr = Array.isArray(picked) ? picked : [];
-    const correctArr = Array.isArray(correct) ? correct : [];
+  const getUnitPassThreshold = (unit) => {
+    const safeUnit = Number(unit);
+    return UNIT_PASS_REQUIREMENTS[safeUnit] ?? 0;
+  };
 
-    const pickedSet = new Set(pickedArr);
-    const correctSet = new Set(correctArr);
+  const getUnitMaxScore = (unit) => {
+    const safeUnit = Number(unit);
+    return UNIT_MAX_QUESTIONS[safeUnit] ?? 0;
+  };
 
-    const totalCorrect = correctSet.size;
-    if (totalCorrect === 0) return 0;
-
-    const correctPicked = [...pickedSet].filter((x) => correctSet.has(x)).length;
-    const wrongPicked = [...pickedSet].filter((x) => !correctSet.has(x)).length;
-
-    const rawRatio = (correctPicked - wrongPicked) / totalCorrect;
-    const clampedRatio = Math.max(0, Math.min(1, rawRatio));
-
-    return round2(clampedRatio * maxScore);
+  const getQuestionImage = (item) => {
+    const orderIndex = Number(item?.order_index);
+    return QUESTION_IMAGE_MAP[orderIndex] || null;
   };
 
   const formatTime = (seconds) => {
@@ -161,30 +188,28 @@ export default function Pretest() {
     return `${mm}:${ss}`;
   };
 
-  const calculateRemainingSeconds = (startedAtIso) => {
-    if (!startedAtIso) return UNIT_TIME_SECONDS;
-    const startedMs = new Date(startedAtIso).getTime();
-    const nowMs = Date.now();
-    const diff = Math.floor((nowMs - startedMs) / 1000);
-    return Math.max(0, UNIT_TIME_SECONDS - diff);
-  };
+  const calculateRemainingSeconds = (startedAtIso, unit) => {
+  const unitTime = getUnitTimeSeconds(unit);
+  if (!startedAtIso) return unitTime;
+
+  const startedMs = new Date(startedAtIso).getTime();
+  const nowMs = Date.now();
+  const diff = Math.floor((nowMs - startedMs) / 1000);
+
+  return Math.max(0, unitTime - diff);
+};
 
   const saveAnswerToDb = async (item, value) => {
     if (!attemptId) return;
 
-    let safeValue = value;
-    if (item.type === "multi") {
-      safeValue = Array.isArray(value) ? value : [];
-    } else {
-      safeValue = value == null ? "" : value;
-    }
+    const safeValue = value == null ? "" : value;
 
     const { error } = await supabase.from("pretest_answers").upsert(
       [
         {
           attempt_id: attemptId,
           item_id: item.id,
-          answer: { type: item.type, value: safeValue },
+          answer: { type: "single", value: safeValue },
         },
       ],
       { onConflict: "attempt_id,item_id" }
@@ -199,17 +224,12 @@ export default function Pretest() {
     if (!attemptId || currentItems.length === 0) return;
 
     const rows = currentItems.map((it) => {
-      let safeValue = answers[it.id];
-      if (it.type === "multi") {
-        safeValue = Array.isArray(safeValue) ? safeValue : [];
-      } else {
-        safeValue = safeValue == null ? "" : safeValue;
-      }
+      const safeValue = answers[it.id] == null ? "" : answers[it.id];
 
       return {
         attempt_id: attemptId,
         item_id: it.id,
-        answer: { type: it.type, value: safeValue },
+        answer: { type: "single", value: safeValue },
       };
     });
 
@@ -220,63 +240,25 @@ export default function Pretest() {
     if (error) throw error;
   };
 
-  const runAiGradeShort = async (attemptIdParam) => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+  const buildPassMapFromSectionScores = (sectionScores) => {
+    const passMap = {};
 
-    if (!session) throw new Error("No session");
+    for (let unit = 1; unit <= TOTAL_UNITS; unit++) {
+      const score = Number(sectionScores[unit]) || 0;
+      passMap[unit] = score >= getUnitPassThreshold(unit);
+    }
 
-    const { data, error } = await supabase.functions.invoke("grade-pretest", {
-      body: { attempt_id: attemptIdParam },
-    });
-
-    if (error) throw error;
-    return data;
-  };
-
-  const fetchAnswersAfterAi = async (attemptIdParam) => {
-    const { data, error } = await supabase
-      .from("pretest_answers")
-      .select("item_id, score, ai_feedback")
-      .eq("attempt_id", attemptIdParam);
-
-    if (error) throw error;
-    return data || [];
+    return passMap;
   };
 
   const buildScoresFromLockedUnits = async ({
-    attemptIdParam,
     lockedUnits = [],
     forceZeroFromUnit = null,
   }) => {
-    const aiRows = await fetchAnswersAfterAi(attemptIdParam);
-    const aiMap = {};
-
-    aiRows.forEach((r) => {
-      aiMap[r.item_id] = {
-        score: Number(r.score) || 0,
-        feedback: r.ai_feedback || "",
-      };
-    });
-
     let totalScore = 0;
     let maxScore = 0;
 
     const sectionScores = createUnitScoreMap();
-    const multiScores = createUnitScoreMap();
-
-    const passMap = {
-      1: true,
-      2: false,
-      3: false,
-      4: false,
-      5: false,
-      6: false,
-      7: false,
-      8: false,
-    };
-
     const answersPayload = {};
 
     items.forEach((it) => {
@@ -293,20 +275,9 @@ export default function Pretest() {
       const isForcedZero =
         forceZeroFromUnit != null && unit >= Number(forceZeroFromUnit);
 
-      if (isLocked && !isForcedZero) {
-        if (it.type === "single") {
-          const correct = it.correct_answer?.value;
-          score = userAnswer === correct ? point : 0;
-        } else if (it.type === "multi") {
-          const correct = Array.isArray(it.correct_answer?.value)
-            ? it.correct_answer.value
-            : [];
-          score = calcMultiPartialScore(userAnswer, correct, point);
-        } else if (it.type === "short") {
-          const ai = aiMap[it.id];
-          score = ai ? Math.max(0, Math.min(point, Number(ai.score) || 0)) : 0;
-          score = round2(score);
-        }
+      if (isLocked && !isForcedZero && it.type === "single") {
+        const correct = it.correct_answer?.value;
+        score = userAnswer === correct ? point : 0;
       } else {
         score = 0;
       }
@@ -314,28 +285,14 @@ export default function Pretest() {
       score = round2(score);
       totalScore = round2(totalScore + score);
       sectionScores[unit] = round2((Number(sectionScores[unit]) || 0) + score);
-
-      if (it.type === "multi") {
-        multiScores[unit] = round2((Number(multiScores[unit]) || 0) + score);
-      }
     });
 
-    Object.keys(sectionScores).forEach((unitKey) => {
-      const unit = Number(unitKey);
-      if (unit === 1) {
-        passMap[unit] = true;
-      } else {
-        passMap[unit] =
-          Number(sectionScores[unit]) >= UNIT_PASS_SCORE &&
-          Number(multiScores[unit]) >= MULTI_PASS_SCORE;
-      }
-    });
+    const passMap = buildPassMapFromSectionScores(sectionScores);
 
     return {
       totalScore,
       maxScore,
       sectionScores,
-      multiScores,
       passMap,
       answersPayload,
     };
@@ -344,22 +301,6 @@ export default function Pretest() {
   const setSingle = async (item, choiceId) => {
     setAnswers((prev) => ({ ...prev, [item.id]: choiceId }));
     await saveAnswerToDb(item, choiceId);
-  };
-
-  const toggleMulti = async (item, choiceId) => {
-    const current = Array.isArray(answers[item.id]) ? answers[item.id] : [];
-    const exists = current.includes(choiceId);
-    const next = exists
-      ? current.filter((x) => x !== choiceId)
-      : [...current, choiceId];
-
-    setAnswers((prev) => ({ ...prev, [item.id]: next }));
-    await saveAnswerToDb(item, next);
-  };
-
-  const setShort = async (item, text) => {
-    setAnswers((prev) => ({ ...prev, [item.id]: text }));
-    await saveAnswerToDb(item, text);
   };
 
   const finalizePretest = async () => {
@@ -389,18 +330,12 @@ export default function Pretest() {
       }
 
       const rows = items.map((it) => {
-        let safeValue = answers[it.id];
-
-        if (it.type === "multi") {
-          safeValue = Array.isArray(safeValue) ? safeValue : [];
-        } else {
-          safeValue = safeValue == null ? "" : safeValue;
-        }
+        const safeValue = answers[it.id] == null ? "" : answers[it.id];
 
         return {
           attempt_id: attemptId,
           item_id: it.id,
-          answer: { type: it.type, value: safeValue },
+          answer: { type: "single", value: safeValue },
         };
       });
 
@@ -412,28 +347,16 @@ export default function Pretest() {
 
       openProcessingPopup(
         "กรุณารอสักครู่",
-        "AI กำลังตรวจคำตอบอัตนัยและกำหนดเส้นทางการเรียนของคุณ"
+        "ระบบกำลังตรวจคำตอบและกำหนดเส้นทางการเรียนของคุณ"
       );
-      setMsg("ขณะนี้ AI กำลังประมวลผลคำตอบและกำหนดเส้นทางการเรียน กรุณาอย่าออกจากหน้านี้");
 
+      setMsg("ระบบกำลังประมวลผลคำตอบและกำหนดเส้นทางการเรียน กรุณาอย่าออกจากหน้านี้");
       await new Promise((resolve) => setTimeout(resolve, 50));
-      await runAiGradeShort(attemptId);
-
-      const aiRows = await fetchAnswersAfterAi(attemptId);
-      const aiMap = {};
-
-      aiRows.forEach((r) => {
-        aiMap[r.item_id] = {
-          score: Number(r.score) || 0,
-          feedback: r.ai_feedback || "",
-        };
-      });
 
       let totalScore = 0;
       let maxScore = 0;
 
       const sectionScores = createUnitScoreMap();
-      const multiScores = createUnitScoreMap();
       const answersPayload = {};
       const perItem = {};
 
@@ -445,65 +368,26 @@ export default function Pretest() {
         answersPayload[`q${it.order_index}`] = userAnswer ?? "";
 
         let score = 0;
-        let feedback = "";
 
         if (it.type === "single") {
           const correct = it.correct_answer?.value;
           score = userAnswer === correct ? point : 0;
-        } else if (it.type === "multi") {
-          const correct = Array.isArray(it.correct_answer?.value)
-            ? it.correct_answer.value
-            : [];
-          score = calcMultiPartialScore(userAnswer, correct, point);
-        } else if (it.type === "short") {
-          const ai = aiMap[it.id];
-          score = ai ? Math.max(0, Math.min(point, Number(ai.score) || 0)) : 0;
-          score = round2(score);
-          feedback = ai?.feedback || "";
         }
 
         score = round2(score);
         totalScore = round2(totalScore + score);
         sectionScores[it.unit] = round2((Number(sectionScores[it.unit]) || 0) + score);
 
-        if (it.type === "multi") {
-          multiScores[it.unit] = round2((Number(multiScores[it.unit]) || 0) + score);
-        }
-
         perItem[it.id] = {
           score,
           maxScore: point,
-          feedback,
           unit: it.unit,
           orderIndex: it.order_index,
           type: it.type,
         };
       });
 
-      const passMap = {
-        1: true,
-        2:
-          Number(sectionScores[2]) >= UNIT_PASS_SCORE &&
-          Number(multiScores[2]) >= MULTI_PASS_SCORE,
-        3:
-          Number(sectionScores[3]) >= UNIT_PASS_SCORE &&
-          Number(multiScores[3]) >= MULTI_PASS_SCORE,
-        4:
-          Number(sectionScores[4]) >= UNIT_PASS_SCORE &&
-          Number(multiScores[4]) >= MULTI_PASS_SCORE,
-        5:
-          Number(sectionScores[5]) >= UNIT_PASS_SCORE &&
-          Number(multiScores[5]) >= MULTI_PASS_SCORE,
-        6:
-          Number(sectionScores[6]) >= UNIT_PASS_SCORE &&
-          Number(multiScores[6]) >= MULTI_PASS_SCORE,
-        7:
-          Number(sectionScores[7]) >= UNIT_PASS_SCORE &&
-          Number(multiScores[7]) >= MULTI_PASS_SCORE,
-        8:
-          Number(sectionScores[8]) >= UNIT_PASS_SCORE &&
-          Number(multiScores[8]) >= MULTI_PASS_SCORE,
-      };
+      const passMap = buildPassMapFromSectionScores(sectionScores);
 
       const { data: attemptBeforeUpdate, error: attemptBeforeUpdateErr } = await supabase
         .from("pretest_attempts")
@@ -526,7 +410,6 @@ export default function Pretest() {
           submitted_at: new Date().toISOString(),
           meta: {
             ...prevMeta,
-            multi_scores: multiScores,
           },
         })
         .eq("id", attemptId);
@@ -551,7 +434,6 @@ export default function Pretest() {
         totalScore,
         maxScore,
         sectionScores,
-        multiScores,
         passMap,
         perItem,
       });
@@ -603,12 +485,6 @@ export default function Pretest() {
         console.error("saveCurrentUnitAnswers before disqualify error:", saveErr);
       }
 
-      try {
-        await runAiGradeShort(attemptId);
-      } catch (aiErr) {
-        console.error("grade-pretest on disqualify error:", aiErr);
-      }
-
       const prevMeta = attemptRow?.meta || {};
       const lockedUnits = Array.isArray(prevMeta.locked_units)
         ? prevMeta.locked_units
@@ -623,11 +499,9 @@ export default function Pretest() {
         totalScore,
         maxScore,
         sectionScores,
-        multiScores,
         passMap,
         answersPayload,
       } = await buildScoresFromLockedUnits({
-        attemptIdParam: attemptId,
         lockedUnits,
         forceZeroFromUnit: currentUnitFromDb,
       });
@@ -649,7 +523,6 @@ export default function Pretest() {
             ...prevMeta,
             reason,
             disqualified_at_unit: currentUnitFromDb,
-            multi_scores: multiScores,
           },
         })
         .eq("id", attemptId);
@@ -681,7 +554,7 @@ export default function Pretest() {
         if (insertErr) throw insertErr;
       }
 
-      setMsg("ตรวจพบการออกจากหน้าแบบทดสอบ ระบบยุติการสอบและนับคะแนนเฉพาะหน่วยที่ส่งผ่านแล้ว");
+      setMsg("ตรวจพบการออกจากหน้าแบบทดสอบ ระบบยุติการสอบและนับคะแนนเฉพาะหน่วยที่ทำเสร็จก่อนหน้า");
 
       window.setTimeout(() => {
         navigate("/main", { replace: true });
@@ -701,7 +574,7 @@ export default function Pretest() {
     if (!isAuto) {
       for (const item of currentItems) {
         if (!isAnswered(item)) {
-          setMsg("กรุณาตอบให้ครบทั้ง 3 ข้อก่อนไปบทถัดไป");
+          setMsg(`กรุณาตอบให้ครบทั้ง ${currentItems.length} ข้อก่อนไปบทถัดไป`);
           return;
         }
       }
@@ -766,7 +639,7 @@ export default function Pretest() {
 
       setCurrentUnit(nextUnit);
       setUnitStartedAt(nowIso);
-      setTimeLeft(UNIT_TIME_SECONDS);
+      setTimeLeft(getUnitTimeSeconds(nextUnit));
 
       if (isAuto) {
         closeProcessingPopup();
@@ -927,6 +800,7 @@ export default function Pretest() {
         const normalizedItems = (itemsData || []).map((it) => ({
           ...it,
           unit: Number(it.unit),
+          order_index: Number(it.order_index),
           choices: Array.isArray(it.choices) ? it.choices : [],
         }));
 
@@ -945,12 +819,7 @@ export default function Pretest() {
           if (!item) return;
 
           const savedValue = row.answer?.value;
-
-          if (item.type === "multi") {
-            initialAnswers[row.item_id] = Array.isArray(savedValue) ? savedValue : [];
-          } else {
-            initialAnswers[row.item_id] = savedValue ?? "";
-          }
+          initialAnswers[row.item_id] = savedValue ?? "";
         });
 
         if (!alive) return;
@@ -966,7 +835,12 @@ export default function Pretest() {
         setAnswers(initialAnswers);
         setCurrentUnit(loadedUnit);
         setUnitStartedAt(currentAttempt.unit_started_at || new Date().toISOString());
-        setTimeLeft(calculateRemainingSeconds(currentAttempt.unit_started_at));
+        setTimeLeft(
+  calculateRemainingSeconds(
+    currentAttempt.unit_started_at,
+    loadedUnit
+  )
+);
       } finally {
         if (alive) setLoading(false);
       }
@@ -981,7 +855,7 @@ export default function Pretest() {
     if (!examStarted || !unitStartedAt || redirecting) return;
 
     const interval = setInterval(() => {
-      const remain = calculateRemainingSeconds(unitStartedAt);
+      const remain = calculateRemainingSeconds(unitStartedAt, safeCurrentUnit);
       setTimeLeft(remain);
 
       if (remain <= 0 && !autoMovingRef.current && !finalizingRef.current) {
@@ -1175,7 +1049,7 @@ export default function Pretest() {
               <div
                 style={{
                   width: "100%",
-                  maxWidth: 560,
+                  maxWidth: 600,
                   background: "#fff",
                   borderRadius: 20,
                   padding: 24,
@@ -1187,15 +1061,13 @@ export default function Pretest() {
                   ข้อกำหนดก่อนเริ่มทำ Pretest
                 </h2>
 
-                <div style={{ lineHeight: 1.7, color: "#333", fontSize: 15 }}>
+                <div style={{ lineHeight: 1.8, color: "#333", fontSize: 15 }}>
                   <div>1. แบบทดสอบนี้ทำได้เพียง 1 ครั้ง</div>
-                  <div>2. ระบบจับเวลา บทละ 3 นาที</div>
+                  <div>2. ระบบจับเวลาแต่ละบทไม่เท่ากันตามจำนวนข้อ (6, 8 และ 10 นาที)</div>
                   <div>3. เมื่อไปบทถัดไปแล้วจะไม่สามารถย้อนกลับได้</div>
                   <div>
-                    4. หากออกจากหน้าแบบทดสอบหรือสลับแท็บ ระบบจะยุติการสอบทันที และนับคะแนนเฉพาะหน่วยที่ส่งผ่านแล้ว
+                    4. หากออกจากหน้าแบบทดสอบหรือสลับแท็บ ระบบจะยุติการสอบทันที และนับคะแนนเฉพาะหน่วยที่ทำเสร็จก่อนหน้า
                   </div>
-                  <div>5. ไม่อนุญาตให้คัดลอกโจทย์ หรือวางคำตอบในข้ออัตนัย</div>
-                  <div>6. เมื่อหมดเวลา ระบบจะบันทึกคำตอบอัตโนมัติ</div>
                 </div>
 
                 <div
@@ -1206,9 +1078,10 @@ export default function Pretest() {
                     background: "#fff3cd",
                     color: "#7a5900",
                     fontWeight: 700,
+                    lineHeight: 1.7,
                   }}
                 >
-                  กรุณาเตรียมตัวให้พร้อมก่อนเริ่ม เมื่อกดเริ่มแล้วระบบจะเริ่มจับเวลาและบังคับใช้กติกาทันที
+                  ระบบจะใช้ผลคะแนนแต่ละบทเพื่อกำหนดเส้นทางการเรียนของคุณ
                 </div>
 
                 <div
@@ -1242,9 +1115,7 @@ export default function Pretest() {
           <div className="topRow" style={{ alignItems: "flex-start" }}>
             <div>
               <h1 className="title">Pretest ({totalQuestions} ข้อ)</h1>
-              <p className="subtitle">
-                ทำแบบทดสอบก่อนเรียนเพียง 1 ครั้ง • หน่วย {safeCurrentUnit} / {totalUnits}
-              </p>
+        
             </div>
 
             <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -1305,9 +1176,7 @@ export default function Pretest() {
               />
             </div>
 
-            <div style={{ marginTop: 8, fontSize: 13, color: "#666" }}>
-              ระบบล็อกการทำข้อสอบตามหน่วย หากออกจากหน้าแบบทดสอบ ระบบจะยุติการสอบและนับคะแนนเฉพาะหน่วยที่ส่งผ่านแล้ว
-            </div>
+
           </div>
 
           {items.length === 0 ? (
@@ -1320,106 +1189,87 @@ export default function Pretest() {
                 goToNextUnit(false);
               }}
             >
-              {currentItems.map((q, idx) => (
-                <div key={q.id} className="qCard">
-                  <div className="qHead">
-                    <div className="qNo">
-                      ข้อ {idx + 1} <span style={{ opacity: 0.7 }}>• หน่วย {q.unit}</span>
-                    </div>
-                    <div
-                      className="qText"
-                      onCopy={(e) => e.preventDefault()}
-                      onCut={(e) => e.preventDefault()}
-                      onContextMenu={(e) => e.preventDefault()}
-                    >
-                      {q.prompt}
-                    </div>
-                  </div>
+              {currentItems.map((q, idx) => {
+                const qImage = getQuestionImage(q);
 
-                  {q.type === "single" && (
-                    <div className="choices">
-                      {q.choices.map((c) => (
-                        <label
-                          key={c.id}
-                          className={`choice ${answers[q.id] === c.id ? "active" : ""}`}
+                return (
+                  <div key={q.id} className="qCard">
+                    <div className="qHead">
+                      <div className="qNo">
+                        ข้อ {idx + 1} <span style={{ opacity: 0.7 }}>• หน่วย {q.unit}</span>
+                      </div>
+                      <div
+                        className="qText"
+                        onCopy={(e) => e.preventDefault()}
+                        onCut={(e) => e.preventDefault()}
+                        onContextMenu={(e) => e.preventDefault()}
+                      >
+                        {q.prompt}
+                      </div>
+                    </div>
+
+                    {qImage && (
+                      <div style={{ marginTop: 14, marginBottom: 14 }}>
+                        <img
+                          src={qImage}
+                          alt={`question-${q.order_index}`}
                           style={{
-                            opacity: submitting || redirecting ? 0.7 : 1,
-                            pointerEvents: submitting || redirecting ? "none" : "auto",
+                            display: "block",
+                            width: "100%",
+                            maxWidth: "640px",
+                            borderRadius: 16,
+                            border: "1px solid #e5e7eb",
+                            margin: "0 auto",
+                            objectFit: "contain",
+                            background: "#fff",
                           }}
-                        >
-                          <input
-                            type="radio"
-                            name={q.id}
-                            value={c.id}
-                            checked={answers[q.id] === c.id}
-                            onChange={() => setSingle(q, c.id)}
-                            disabled={submitting || redirecting}
-                          />
-                          <span>{c.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
+                          onContextMenu={(e) => e.preventDefault()}
+                          draggable={false}
+                        />
+                      </div>
+                    )}
 
-                  {q.type === "multi" && (
-                    <div className="choices">
-                      {q.choices.map((c) => {
-                        const checked =
-                          Array.isArray(answers[q.id]) && answers[q.id].includes(c.id);
-
-                        return (
+                    {q.type === "single" ? (
+                      <div className="choices">
+                        {q.choices.map((c) => (
                           <label
                             key={c.id}
-                            className={`choice ${checked ? "active" : ""}`}
+                            className={`choice ${answers[q.id] === c.id ? "active" : ""}`}
                             style={{
                               opacity: submitting || redirecting ? 0.7 : 1,
                               pointerEvents: submitting || redirecting ? "none" : "auto",
                             }}
                           >
                             <input
-                              type="checkbox"
-                              name={`${q.id}-${c.id}`}
+                              type="radio"
+                              name={q.id}
                               value={c.id}
-                              checked={checked}
-                              onChange={() => toggleMulti(q, c.id)}
+                              checked={answers[q.id] === c.id}
+                              onChange={() => setSingle(q, c.id)}
                               disabled={submitting || redirecting}
                             />
                             <span>{c.label}</span>
                           </label>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {q.type === "short" && (
-                    <div style={{ marginTop: 12 }}>
-                      <textarea
-                        value={answers[q.id] || ""}
-                        onChange={(e) => setShort(q, e.target.value)}
-                        // onPaste={(e) => e.preventDefault()}
-                        // onCopy={(e) => e.preventDefault()}
-                        // onCut={(e) => e.preventDefault()}
-                        // onContextMenu={(e) => e.preventDefault()}
-                        disabled={submitting || redirecting}
-                        rows={4}
-                        placeholder="พิมพ์คำตอบของคุณ..."
-                        style={{
-                          width: "100%",
-                          borderRadius: 12,
-                          border: "1px solid #d9deea",
-                          padding: 12,
-                          fontSize: 15,
-                          resize: "vertical",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                      <div style={{ marginTop: 6, fontSize: 12, color: "#777" }}>
-                        ไม่อนุญาตให้วางข้อความในข้อนี้
+                        ))}
                       </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    ) : (
+                      <div
+                        style={{
+                          marginTop: 12,
+                          padding: 12,
+                          borderRadius: 12,
+                          background: "#fff4e5",
+                          color: "#8a5700",
+                          fontSize: 14,
+                          fontWeight: 600,
+                        }}
+                      >
+                        รองรับเฉพาะข้อสอบแบบเลือกตอบ (single) เท่านั้น
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
 
               <div
                 style={{
@@ -1448,14 +1298,21 @@ export default function Pretest() {
                 <div className="resultBox">
                   คะแนนรวม: <b>{Number(result.totalScore).toFixed(2)}</b> /{" "}
                   {Number(result.maxScore).toFixed(2)}
-                  <div style={{ marginTop: 8 }}>
-                    {Object.entries(result.sectionScores).map(([unit, score]) => (
-                      <div key={unit}>
-                        หน่วย {unit}: {Number(score).toFixed(2)}/3.00 • multi{" "}
-                        {Number(result.multiScores?.[unit] || 0).toFixed(2)}{" "}
-                        {result.passMap[unit] ? "✅ ผ่าน" : "❌ ไม่ผ่าน"}
-                      </div>
-                    ))}
+
+                  <div style={{ marginTop: 12, lineHeight: 1.8 }}>
+                    {Object.entries(result.sectionScores).map(([unit, score]) => {
+                      const unitNo = Number(unit);
+                      const unitMax = getUnitMaxScore(unitNo);
+                      const unitPass = getUnitPassThreshold(unitNo);
+
+                      return (
+                        <div key={unit}>
+                          หน่วย {unitNo}: {Number(score).toFixed(2)}/{unitMax}.00{" "}
+                          (เกณฑ์ผ่าน {unitPass}/{unitMax}){" "}
+                          {result.passMap[unitNo] ? "✅ ผ่าน" : "❌ ไม่ผ่าน"}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -1464,8 +1321,6 @@ export default function Pretest() {
             </form>
           )}
         </div>
-
-
       </div>
     </div>
   );

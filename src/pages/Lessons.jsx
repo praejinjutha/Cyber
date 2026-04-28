@@ -395,7 +395,7 @@ export default function Lessons() {
           <div className="edu-hero__card">
             <div className="edu-hero__head">
               <div className="edu-hero__text">
-                <h1>เส้นทางการเรียนแบบ Adaptive</h1>
+                <h1>เส้นทางการเรียนรู้</h1>
                 <p>
                   ระบบจะใช้ผล Pretest ร่วมกับคะแนนแบบฝึกหัดรายบท
                   โดยใช้คะแนนล่าสุดของแต่ละบทในการตัดสินว่าปลดล็อกบทถัดไปได้หรือไม่
@@ -553,7 +553,7 @@ export default function Lessons() {
                 type="button"
                 onClick={() => navigate("/final")}
               >
-                <FiBarChart2 aria-hidden="true" /> เริ่มทำ Posttest
+                <FiBarChart2 aria-hidden="true" /> เข้าสู่แบบทดสอบหลังเรียน
                 <FiChevronRight aria-hidden="true" />
               </button>
             </div>

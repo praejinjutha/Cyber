@@ -395,7 +395,7 @@ export default function Learn5Unit7() {
 
               <div className="edu-panel">
                 <div className="edu-adaptiveBlock__title">
-                  สรุปก่อนไปส่วนสะท้อนคิด
+                  สรุปก่อนไปส่วนถัดไป
                 </div>
 
                 <BulletList items={KEY_TAKEAWAYS} />
@@ -413,7 +413,7 @@ export default function Learn5Unit7() {
                   className="edu-btn edu-btn--primary"
                   onClick={() => setStep("reflect")}
                 >
-                  ไปส่วนสะท้อนคิด <FiChevronRight />
+                  ถัดไป <FiChevronRight />
                 </button>
               </div>
             </>

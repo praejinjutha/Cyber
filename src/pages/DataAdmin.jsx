@@ -479,7 +479,7 @@ export default function DataAdmin() {
         setPretestSummary({
           done: pretestResult?.total_score != null,
           score: pretestResult?.total_score ?? null,
-          max: 24,
+          max: 48,
         });
 
         // -------------------------
@@ -501,7 +501,7 @@ export default function DataAdmin() {
         setProgramPostSummary({
           done: finalResult?.first_total_score != null,
           score: finalResult?.first_total_score ?? null,
-          max: 24,
+          max: 48,
         });
 
         // -------------------------

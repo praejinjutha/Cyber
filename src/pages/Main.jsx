@@ -345,8 +345,7 @@ export default function Main() {
               </div>
             ) : (
               <p className="homehero__desc">
-                สวัสดี <b>{greet}</b> พร้อมเริ่มเรียน ทบทวนบทเรียน
-                และติดตามพัฒนาการของตนเองได้จากหน้านี้
+                สวัสดี <b>{greet}</b> 👋
               </p>
             )}
 
@@ -420,7 +419,7 @@ export default function Main() {
               <span className="quick__text">
                 <span className="quick__title">บทเรียนทั้งหมด</span>
                 <span className="quick__desc">
-                  เรียนรู้เนื้อหาแบบ Adaptive Learning ตามลำดับการพัฒนา
+                  เนื้อหาการเรียนรู้จำนวน 8 หน่วย
                 </span>
               </span>
               <FiChevronRight className="quick__arrow" aria-hidden="true" />

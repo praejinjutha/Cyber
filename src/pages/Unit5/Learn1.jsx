@@ -6,7 +6,7 @@ import logo from "../../assets/logo.png"; // ✅ Brand logo
 
 // ✅ วิดีโอของ Unit 5 เรื่องที่ 1
 // ⭐ ให้คุณใส่ไฟล์จริงไว้ที่ src/assets/learn5.1.mp4 (ตอนนี้คุณใช้ learn3.1.mp4 อยู่)
-import learnVideo from "../../assets/learn3.1.mp4";
+import learnVideo from "../../assets/learn5.mp4";
 
 // ✅ (เพิ่ม) รูป “ฐานข้อมูลให้จำแนกความน่าเชื่อถือของแหล่งข่าว (ไทย)”
 import sourceThaiGood from "./source_th_good.png";

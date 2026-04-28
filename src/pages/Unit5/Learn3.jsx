@@ -12,7 +12,7 @@ import logo from "../../assets/logo.png"; // ✅ Brand logo
 // ✅ (เพิ่ม) รูปตัวอย่างเจตนา (อยู่ใน src/assets/unit5/)
 import imgInformative from "./Informative.webp";
 import imgShare from "./Share-oriented.jpg";
-import imgClickbait from "./Clickbait.jpg";
+import imgClickbait from "./Clickbait.png";
 import imgEmotional from "./Emotional.jpg";
 import imgAdvertising from "./Advertising.jpg";
 

@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import logo from "../../assets/logo.png";
-import learnVideo from "../../assets/learn3.1.mp4";
+import learnVideo from "../../assets/learn7.mp4";
 
 import organicImg from "./Organic.jpg";
 import directImg from "./Direct.jpg";
