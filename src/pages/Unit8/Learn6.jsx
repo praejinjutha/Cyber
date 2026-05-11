@@ -296,7 +296,7 @@ export default function Learn6() {
           {step === "intro" && (
             <div className="edu-card">
               <div className="edu-card__title" style={{ fontWeight: 900 }}>
-                Video-based Concept Introduction
+                Introduction
               </div>
 
               <div

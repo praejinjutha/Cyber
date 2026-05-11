@@ -92,7 +92,7 @@ export default function Learn2() {
    */
   const panelTitle = useMemo(() => {
     if (step === "task21") return "แนวคิดระดับการเข้าถึงข้อมูล";
-    if (step === "task22") return "ความสัมพันธ์ (ข้อมูล × บริหน่วย × ระดับการเข้าถึง)";
+    if (step === "task22") return "ความสัมพันธ์ (ข้อมูล × บริบท × ระดับการเข้าถึง)";
     return "กิจกรรม 2.4: วิเคราะห์สถานการณ์ + ให้เหตุผล";
   }, [step]);
 

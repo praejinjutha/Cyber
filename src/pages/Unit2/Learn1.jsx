@@ -408,7 +408,7 @@ const goNextAfterQuiz = () => {
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
                   <div>
                     <div style={{ fontSize: 18, fontWeight: 950, marginBottom: 6 }}>mini quiz</div>
-                    <div style={softText}>ตอบจาก “สถานการณ์” เพื่อฝึกจำแนกภัยคุกคามให้แม่น (โฟกัส BO1-BO3)</div>
+                    <div style={softText}>ตอบจาก “สถานการณ์” เพื่อฝึกจำแนกภัยคุกคามให้แม่น </div>
                   </div>
 
                   <div style={{ fontSize: 12, opacity: 0.8, alignSelf: "center" }}>
