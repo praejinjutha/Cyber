@@ -19,6 +19,7 @@ import Pretest from "./pages/Pretest";
 import Final from "./pages/Final";
 import Main from "./pages/Main";
 import Lessons from "./pages/Lessons";
+import Cybercases from "./pages/Cybercases";
 import LessonLinear from "./pages/LessonLinear";
 
 import Dashboard from "./pages/Dashboard";
@@ -101,6 +102,14 @@ import Learn4Unit8 from "./pages/Unit8/Learn4";
 import Learn5Unit8 from "./pages/Unit8/Learn5";
 import Learn6Unit8 from "./pages/Unit8/Learn6";
 import Unit8PosttestRun from "./pages/Unit8/PosttestRun";
+
+import Group1 from "./pages/Case/Group1";
+import Group2 from "./pages/Case/Group2";
+import Group3 from "./pages/Case/Group3";
+import Group4 from "./pages/Case/Group4";
+import Group5 from "./pages/Case/Group5";
+import Group6 from "./pages/Case/Group6";
+import Group7 from "./pages/Case/Group7";
 
 // ====================
 // Protected wrapper
@@ -325,6 +334,7 @@ export default function App() {
           <Route element={<RequirePretestDone session={session} />}>
             <Route path="/main" element={<Main />} />
             <Route path="/lessons" element={<Lessons />} />
+            <Route path="/cybercases" element={<Cybercases />} />
             <Route path="/final" element={<Final />} />
             <Route path="/LessonLinear" element={<LessonLinear />} />
 
@@ -418,6 +428,15 @@ export default function App() {
               <Route path="/unit8/learn6" element={<Learn6Unit8 />} />
               <Route path="/unit8/posttest" element={<Unit8PosttestRun />} />
             </Route>
+
+
+            <Route path="/case/group1" element={<Group1 />} />
+            <Route path="/case/group2" element={<Group2 />} />
+            <Route path="/case/group3" element={<Group3 />} />
+            <Route path="/case/group4" element={<Group4 />} />
+            <Route path="/case/group5" element={<Group5 />} />
+            <Route path="/case/group6" element={<Group6 />} />
+            <Route path="/case/group7" element={<Group7 />} />
 
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashScore" element={<DashScore />} />

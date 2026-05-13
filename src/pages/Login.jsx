@@ -1,9 +1,10 @@
 import logo from "../assets/logo.png";
+import manualPdf from "../assets/manual.pdf"; // นำเข้าไฟล์ PDF
 
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { FiUser, FiLock, FiLogIn, FiHelpCircle } from "react-icons/fi";
+import { FiUser, FiLock, FiLogIn, FiHelpCircle, FiShield, FiX } from "react-icons/fi";
 
 export default function Login() {
   // ✅ router
@@ -16,6 +17,7 @@ export default function Login() {
   // ✅ ui state
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false); // ควบคุมการแสดง Popup
 
   // ✅ manual link
   const manualUrl = useMemo(() => "https://example.com/manual", []);
@@ -159,20 +161,46 @@ export default function Login() {
               <p className="subtitle">เข้าสู่ระบบเพื่อเริ่มทำแบบทดสอบ</p>
             </div>
 
-            <a
-              href={manualUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-secondary"
-              style={{
-                height: "fit-content",
-                textDecoration: "none",
-              }}
-              title="เปิดคู่มือการใช้งาน"
-            >
-              <FiHelpCircle />
-              คู่มือใช้งาน
-            </a>
+            <div style={{ display: "flex", gap: "10px" }}>
+              {/* ✅ ปุ่มแจ้งเรื่องความเป็นส่วนตัว (Privacy Popup) */}
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={() => setShowPrivacy(true)}
+                style={{
+                  height: "fit-content",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontSize: "0.9rem",
+                  padding: "8px 12px",
+                  cursor: "pointer"
+                }}
+              >
+                <FiShield />
+                ความเป็นส่วนตัว
+              </button>
+
+              <a
+                href={manualPdf} // ใช้ตัวแปรที่ import มา
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-secondary"
+                style={{
+                  height: "fit-content",
+                  textDecoration: "none",
+                  display: "inline-flex",   // เพิ่มเพื่อให้ Icon กับ Text อยู่แถวเดียวกัน
+                  alignItems: "center",     // จัดให้อยู่กึ่งกลางแนวตั้ง
+                  gap: "8px",               // เว้นระยะห่างระหว่าง Icon กับข้อความ
+                  fontSize: "0.9rem",
+                  padding: "8px 12px"
+                }}
+                title="เปิดคู่มือการใช้งาน"
+              >
+                <FiHelpCircle />
+                คู่มือใช้งาน
+              </a>
+            </div>
           </div>
 
           {/* ✅ แก้ DOM warning: ใส่ form ครอบ */}
@@ -250,6 +278,60 @@ export default function Login() {
           </form>
         </div>
       </div>
+
+      {/* ✅ Privacy Policy Popup (Modal) */}
+      {showPrivacy && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.6)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 1000, padding: "20px"
+        }}>
+          <div style={{
+            backgroundColor: "#fff", padding: "30px", borderRadius: "16px",
+            maxWidth: "550px", width: "100%", position: "relative",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.3)", border: "1px solid #eee"
+          }}>
+            <button 
+              onClick={() => setShowPrivacy(false)}
+              style={{
+                position: "absolute", top: "15px", right: "15px",
+                background: "none", border: "none", fontSize: "24px",
+                cursor: "pointer", color: "#999"
+              }}
+            >
+              <FiX />
+            </button>
+            
+            <h2 style={{ marginTop: 0, color: "#1e40af", display: "flex", alignItems: "center", gap: "12px" }}>
+              <FiShield /> ข้อตกลงความเป็นส่วนตัว
+            </h2>
+            
+            <div style={{ color: "#374151", lineHeight: "1.7", marginTop: "20px", fontSize: "0.95rem" }}>
+              <p style={{ fontWeight: "bold", marginBottom: "10px" }}>ถึง ผู้เข้าร่วมการวิจัยทุกท่าน (อายุ 15-18 ปี):</p>
+              <p>เพื่อให้การศึกษาวิจัยครั้งนี้เป็นไปตามหลักจริยธรรมและถูกต้องแม่นยำ ระบบมีความจำเป็นต้องขอข้อมูล <strong>"ชื่อ-นามสกุล และอายุ"</strong> ของท่านในขั้นตอนลงทะเบียน</p>
+              
+              <div style={{ backgroundColor: "#f8fafc", padding: "15px", borderRadius: "8px", borderLeft: "4px solid #3b82f6", margin: "15px 0" }}>
+                <p style={{ margin: 0 }}><strong>การรักษาความลับ:</strong> ระบบจะ <strong>ไม่เปิดเผย</strong> ชื่อจริง-นามสกุลของท่านสู่สาธารณะหรือในรายงานวิจัยโดยเด็ดขาด</p>
+              </div>
+
+              <ul style={{ paddingLeft: "20px" }}>
+                <li>ในหน้าแสดงลำดับคะแนนหรือสรุปผล ระบบจะใช้ชื่อแฝง <strong>user001 ถึง user040</strong> แทนชื่อจริงเสมอ</li>
+                <li>ข้อมูลส่วนตัวของท่านจะถูกเก็บเป็นความลับสูงสุดและเข้าถึงได้เฉพาะผู้วิจัยเท่านั้น</li>
+                <li>ข้อมูลจะถูกนำไปใช้วิเคราะห์ในภาพรวมเพื่อการพัฒนาสื่อการเรียนรู้ในงานวิจัยนี้เท่านั้น</li>
+              </ul>
+            </div>
+
+            <button 
+              className="btn btn-primary" 
+              onClick={() => setShowPrivacy(false)}
+              style={{ width: "100%", marginTop: "25px", padding: "12px", fontSize: "1rem" }}
+            >
+              รับทราบและยินยอมให้ข้อมูล
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,371 @@
+/* cybercases.css */
+
+:root {
+  --cb-primary:
+    linear-gradient(
+      135deg,
+      #166534 0%,
+      #064e3b 100%
+    );
+
+  --cb-green-700: #166534;
+  --cb-green-900: #064e3b;
+
+  --cb-bg: #f8faf9;
+
+  --cb-text: #0f172a;
+  --cb-text-soft: #64748b;
+
+  --cb-border: #e2e8f0;
+}
+
+/* ───────────────────── */
+/* GRID */
+/* ───────────────────── */
+
+.cb-grid-layout {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(320px, 1fr));
+
+  gap: 1.25rem;
+
+  padding: 1.5rem;
+}
+
+/* ───────────────────── */
+/* CARD */
+/* ───────────────────── */
+
+.cb-item-card {
+  position: relative;
+
+  overflow: hidden;
+
+  background:
+    rgba(255,255,255,0.92);
+
+  backdrop-filter: blur(10px);
+
+  border:
+    1px solid rgba(226,232,240,0.9);
+
+  border-radius: 24px;
+
+  padding: 1.2rem;
+
+  cursor: pointer;
+
+  min-height: 170px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.cb-item-card:hover {
+  transform:
+    translateY(-5px);
+
+  border-color:
+    rgba(22,101,52,0.22);
+
+  box-shadow:
+    0 12px 30px rgba(2,8,23,0.08),
+    0 4px 12px rgba(22,101,52,0.08);
+}
+
+/* ───────────────────── */
+/* GLOW */
+/* ───────────────────── */
+
+.cb-card-glow {
+  position: absolute;
+
+  top: -80px;
+  right: -80px;
+
+  width: 180px;
+  height: 180px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(22,101,52,0.10),
+      transparent 70%
+    );
+
+  pointer-events: none;
+}
+
+/* ───────────────────── */
+/* HEADER */
+/* ───────────────────── */
+
+.cb-item-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+
+  position: relative;
+  z-index: 2;
+}
+
+/* ───────────────────── */
+/* ICON */
+/* ───────────────────── */
+
+.cb-icon-frame {
+  width: 56px;
+  height: 56px;
+
+  flex-shrink: 0;
+
+  border-radius: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1.45rem;
+
+  background: var(--cb-primary);
+
+  color: white;
+
+  box-shadow:
+    0 8px 20px rgba(22,101,52,0.25);
+
+  transition:
+    transform 0.22s ease;
+}
+
+.cb-item-card:hover .cb-icon-frame {
+  transform:
+    scale(1.06)
+    rotate(-4deg);
+}
+
+/* ───────────────────── */
+/* CONTENT */
+/* ───────────────────── */
+
+.cb-content {
+  flex: 1;
+}
+
+/* ───────────────────── */
+/* TITLE */
+/* ───────────────────── */
+
+.cb-title-text {
+  font-size: 1.02rem;
+
+  font-weight: 700;
+
+  line-height: 1.45;
+
+  color: var(--cb-text);
+
+  letter-spacing: -0.02em;
+}
+
+/* ───────────────────── */
+/* CASE COUNT */
+/* ───────────────────── */
+
+.cb-case-count {
+  margin-top: 0.55rem;
+
+  font-size: 0.84rem;
+
+  color: var(--cb-text-soft);
+
+  font-weight: 500;
+}
+
+/* ───────────────────── */
+/* FOOTER */
+/* ───────────────────── */
+
+.cb-card-footer {
+  margin-top: 1.25rem;
+
+  padding-top: 1rem;
+
+  border-top:
+    1px solid rgba(226,232,240,0.85);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  position: relative;
+  z-index: 2;
+}
+
+/* ───────────────────── */
+/* OPEN TEXT */
+/* ───────────────────── */
+
+.cb-open-text {
+  font-size: 0.86rem;
+
+  font-weight: 700;
+
+  background: var(--cb-primary);
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  background-clip: text;
+}
+
+/* ───────────────────── */
+/* ARROW */
+/* ───────────────────── */
+
+.cb-card-footer svg {
+  color: #166534;
+
+  font-size: 1.05rem;
+
+  transition:
+    transform 0.2s ease;
+}
+
+.cb-item-card:hover .cb-card-footer svg {
+  transform:
+    translateX(4px);
+}
+
+/* ───────────────────── */
+/* MOBILE */
+/* ───────────────────── */
+
+@media (max-width: 640px) {
+  .cb-grid-layout {
+    grid-template-columns: 1fr;
+
+    padding: 1rem;
+  }
+
+  .cb-item-card {
+    border-radius: 20px;
+
+    min-height: 155px;
+  }
+
+  .cb-icon-frame {
+    width: 50px;
+    height: 50px;
+
+    font-size: 1.25rem;
+  }
+
+  .cb-title-text {
+    font-size: 0.96rem;
+  }
+}
+
+/* ───────────────────── */
+/* DESCRIPTION */
+/* ───────────────────── */
+
+.cb-description {
+  margin-top: 0.5rem;
+
+  font-size: 0.84rem;
+  line-height: 1.55;
+
+  color: var(--cb-text-soft);
+}
+
+/* ───────────────────── */
+/* CASE INFO */
+/* ───────────────────── */
+
+.cb-case-info {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.cb-case-number {
+  font-size: 1.05rem;
+  font-weight: 800;
+
+  color: #166534;
+}
+
+.cb-case-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+
+  color: var(--cb-text-soft);
+}
+
+/* ───────────────────── */
+/* ARROW BUTTON */
+/* ───────────────────── */
+
+.cb-arrow {
+  width: 34px;
+  height: 34px;
+
+  border-radius: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    rgba(22,101,52,0.08);
+
+  color: #166534;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.cb-item-card:hover .cb-arrow {
+  transform: translateX(4px);
+
+  background:
+    rgba(22,101,52,0.14);
+}
+
+/* ───────────────────── */
+/* ICON COLORS           */
+/* ───────────────────── */
+
+.cb-icon-frame {
+  color: inherit;
+  background: none;
+  border: none;
+}
+
+.cb-icon--emerald { background: #EAF3DE; color: #27500A; }
+.cb-icon--sky     { background: #E6F1FB; color: #0C447C; }
+.cb-icon--violet  { background: #EEEDFE; color: #3C3489; }
+.cb-icon--amber   { background: #FAEEDA; color: #633806; }
+.cb-icon--rose    { background: #FBEAF0; color: #72243E; }
+.cb-icon--red     { background: #FCEBEB; color: #791F1F; }
+.cb-icon--cyan    { background: #E1F5EE; color: #085041; }
+
+.cb-item-card:hover .cb-icon--emerald { background: #C0DD97; color: #173404; }
+.cb-item-card:hover .cb-icon--sky     { background: #B5D4F4; color: #042C53; }
+.cb-item-card:hover .cb-icon--violet  { background: #CECBF6; color: #26215C; }
+.cb-item-card:hover .cb-icon--amber   { background: #FAC775; color: #412402; }
+.cb-item-card:hover .cb-icon--rose    { background: #F4C0D1; color: #4B1528; }
+.cb-item-card:hover .cb-icon--red     { background: #F7C1C1; color: #501313; }
+.cb-item-card:hover .cb-icon--cyan    { background: #9FE1CB; color: #04342C; }

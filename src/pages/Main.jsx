@@ -16,7 +16,10 @@ import {
   FiHome,
   FiTrendingUp,
   FiAward,
+  FiAlertTriangle
 } from "react-icons/fi";
+
+
 
 const PASS_PERCENT = 60;
 const TOTAL_UNITS = 8;
@@ -424,6 +427,24 @@ export default function Main() {
               </span>
               <FiChevronRight className="quick__arrow" aria-hidden="true" />
             </button>
+
+
+<button
+  type="button"
+  className="quick"
+  onClick={() => navigate("/cybercases")}
+>
+  <span className="quick__icon" aria-hidden="true">
+    <FiAlertTriangle />
+  </span>
+  <span className="quick__text">
+    <span className="quick__title">Cyber Incident Case Studies</span>
+    <span className="quick__desc">
+      กรณีศึกษาภัยคุกคามจากสถานการณ์จริง 
+    </span>
+  </span>
+  <FiChevronRight className="quick__arrow" aria-hidden="true" />
+</button>
 
             
 
