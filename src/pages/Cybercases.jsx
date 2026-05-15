@@ -5,7 +5,7 @@ import logo from "../assets/logo.png";
 
 // Import CSS เดิมเพื่อรักษา Navbar/Hero และ CSS ใหม่เพื่อแต่งเนื้อหา
 import "../main.css"; 
-import "./cybercases.css"; 
+import "./Cybercases.css"; 
 
 import {
   FiChevronLeft, FiHome, FiLogOut, FiUser, FiAlertTriangle,

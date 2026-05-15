@@ -4,7 +4,7 @@ import { supabase } from "../../lib/supabase";
 import logo from "../../assets/logo.png";
 
 import "../../main.css";
-import "../cybercases.css"; 
+import "../Cybercases.css"; 
 
 import {
   FiChevronLeft, FiChevronRight, FiHome, FiLogOut, FiUser,
