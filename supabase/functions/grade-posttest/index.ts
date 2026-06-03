@@ -7,7 +7,8 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const PASS_PERCENT = 60;
+const PASS_PERCENT = 80;
+const SUMMARY_MAX_CHARS = 500;
 
 type CorrectAnswer = {
   value?: unknown;
@@ -58,6 +59,12 @@ type SummaryJson = {
   weaknesses: SummaryWeakness[];
 };
 
+type SummarySource = {
+  summary?: unknown;
+  strengths?: unknown;
+  weaknesses?: unknown;
+};
+
 type PosttestMeta = {
   id: string;
   unit?: number | null;
@@ -82,6 +89,24 @@ type ShortBatchResult = {
   summary?: string;
   strengths?: string[];
   weaknesses?: Array<string | { topic: string; feedback?: string }>;
+};
+
+type SummaryRowForAi = {
+  answer_id: string;
+  item_id: string;
+  unit: number | null;
+  unit_title: string;
+  order_index: number | null;
+  scenario_title: string;
+  scenario_context: string;
+  question: string;
+  type: string;
+  objective_tags: string[];
+  score: number;
+  max_score: number;
+  result: string;
+  feedback: string;
+  student_answer: unknown;
 };
 
 function jsonResponse(body: unknown, status = 200) {
@@ -166,6 +191,7 @@ function normalizeObjectiveTags(value: unknown): string[] {
   if (typeof value === "string") {
     const trimmed = value.trim();
     if (!trimmed) return [];
+
     try {
       const parsed = JSON.parse(trimmed);
       return Array.isArray(parsed)
@@ -206,6 +232,7 @@ function arraysEqualExactly(a: string[], b: string[]): boolean {
 function arraysEqualAsSet(a: string[], b: string[]): boolean {
   const sa = [...a].sort();
   const sb = [...b].sort();
+
   if (sa.length !== sb.length) return false;
   return sa.every((v, i) => v === sb[i]);
 }
@@ -289,49 +316,222 @@ function evaluateObjectiveAnswer(
   };
 }
 
-function sanitizeSummary(parsed: Partial<SummaryJson>): SummaryJson {
+function cleanSentenceText(text: unknown): string {
+  return String(text ?? "")
+    .replace(/\s+/g, " ")
+    .replace(/[“”"]/g, "")
+    .trim();
+}
+
+function hasIncompleteEnding(text: string): boolean {
+  const clean = cleanSentenceText(text);
+  if (!clean) return true;
+
+  const badEndings = [
+    "และ",
+    "แต่",
+    "หรือ",
+    "โดย",
+    "เพื่อ",
+    "เพราะ",
+    "จาก",
+    "กับ",
+    "ใน",
+    "ของ",
+    "ที่",
+    "ซึ่ง",
+    "รวมถึง",
+    "เช่น",
+    "ได้แก่",
+    "ควร",
+    "ต้อง",
+    "ยัง",
+    "การ",
+    "ความ",
+    "และการ",
+    "แต่ยัง",
+    "แต่ควร",
+  ];
+
+  return badEndings.some((ending) => clean.endsWith(ending));
+}
+
+function looksCompleteEnough(text: string): boolean {
+  const clean = cleanSentenceText(text);
+  if (!clean) return false;
+  if (clean.length < 40) return false;
+  if (hasIncompleteEnding(clean)) return false;
+
+  return true;
+}
+
+function normalizeShortPhrase(text: unknown, fallback: string): string {
+  const clean = cleanSentenceText(text);
+  if (!clean) return fallback;
+  if (hasIncompleteEnding(clean)) return fallback;
+
+  // ห้ามใช้ slice/substring กับภาษาไทยเพื่อบังคับความยาว
+  // ถ้าข้อความยาว ให้ใช้ทั้งข้อความหรือ fallback เท่านั้น เพื่อไม่ให้จบกลางคำ
+  return clean;
+}
+
+function normalizeWeaknesses(value: unknown): SummaryWeakness[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((w) => {
+      if (typeof w === "string") {
+        const topic = cleanSentenceText(w);
+        return topic ? { topic, feedback: "" } : null;
+      }
+
+      if (w && typeof w === "object") {
+        const obj = w as { topic?: unknown; feedback?: unknown };
+
+        const topic = cleanSentenceText(obj.topic);
+        const feedback = cleanSentenceText(obj.feedback);
+
+        if (!topic) return null;
+
+        return {
+          topic,
+          feedback,
+        };
+      }
+
+      return null;
+    })
+    .filter(Boolean) as SummaryWeakness[];
+}
+
+function stripFinalPunctuation(text: string): string {
+  return cleanSentenceText(text).replace(/[.!?。！？]+$/g, "").trim();
+}
+
+function evidenceText(text: unknown): string {
+  return stripFinalPunctuation(cleanSentenceText(text));
+}
+
+function buildExecutiveSummaryFromEvidence(
+  strengths: string[],
+  weaknesses: SummaryWeakness[],
+): string {
+  const strength = evidenceText(strengths[0]);
+  const weaknessTopic = evidenceText(weaknesses[0]?.topic);
+  const weaknessFeedback = evidenceText(weaknesses[0]?.feedback);
+
+  let summary = "";
+
+  if (strength && weaknessTopic) {
+    summary = `จากคำตอบ ผู้เรียนทำได้ดีในประเด็น${strength} แต่ยังควรพัฒนาในประเด็น${weaknessTopic}`;
+  } else if (strength) {
+    summary = `จากคำตอบ ผู้เรียนทำได้ดีในประเด็น${strength} และควรรักษาความเข้าใจนี้เมื่อนำไปใช้กับสถานการณ์ดิจิทัลอื่น`;
+  } else if (weaknessTopic) {
+    summary = `จากคำตอบ ยังไม่พบจุดเด่นเชิงความรู้ที่ชัดเจน และควรพัฒนาในประเด็น${weaknessTopic}`;
+  } else {
+    summary = "จากคำตอบ ยังไม่พบหลักฐานเชิงความรู้ที่เพียงพอสำหรับสรุปจุดเด่นหรือประเด็นที่ควรพัฒนาอย่างเฉพาะเจาะจง";
+  }
+
+  if (weaknessFeedback && weaknessTopic) {
+    summary += ` โดย${weaknessFeedback}`;
+  } else if (weaknessTopic) {
+    summary += " เพื่อให้คำตอบชัดเจนและแม่นยำขึ้น";
+  }
+
+  summary = cleanSentenceText(summary);
+
+  if (hasIncompleteEnding(summary)) {
+    summary += "ให้ชัดเจนขึ้น";
+  }
+
+  return summary;
+}
+
+function safeCompleteSummary(
+  _rawSummary: unknown,
+  strengths: string[],
+  weaknesses: SummaryWeakness[],
+  _percent: number,
+  _pass: boolean,
+): string {
+  // ไม่ใช้ summary ดิบจาก AI และไม่เลือกประโยคตามคะแนนรวม
+  // Executive Summary ต้องย่อจาก strengths/weaknesses ที่ AI วิเคราะห์จากคำตอบจริงเท่านั้น
+  return buildExecutiveSummaryFromEvidence(strengths, weaknesses);
+}
+
+function sanitizeSummary(
+  parsed: SummarySource,
+  percent: number,
+  pass: boolean,
+): SummaryJson {
   const strengths = Array.isArray(parsed.strengths)
     ? parsed.strengths
-        .filter((x) => typeof x === "string" && x.trim())
-        .map((x) => x.trim())
+        .filter((x) => typeof x === "string" && cleanSentenceText(x))
+        .map((x) => cleanSentenceText(x))
         .slice(0, 3)
     : [];
 
-  const weaknesses = Array.isArray(parsed.weaknesses)
-    ? parsed.weaknesses
-        .map((w) => {
-          if (typeof w === "string") {
-            return w.trim() ? { topic: w.trim(), feedback: "" } : null;
-          }
+  const weaknesses = normalizeWeaknesses(parsed.weaknesses).slice(0, 3);
 
-          if (w && typeof w === "object") {
-            const topic =
-              typeof (w as { topic?: unknown }).topic === "string"
-                ? ((w as { topic?: string }).topic || "").trim()
-                : "";
-
-            const feedback =
-              typeof (w as { feedback?: unknown }).feedback === "string"
-                ? ((w as { feedback?: string }).feedback || "").trim()
-                : "";
-
-            if (!topic) return null;
-            return { topic, feedback };
-          }
-
-          return null;
-        })
-        .filter(Boolean) as SummaryWeakness[]
-    : [];
+  const summary = safeCompleteSummary(
+    parsed.summary,
+    strengths,
+    weaknesses,
+    percent,
+    pass,
+  );
 
   return {
-    summary:
-      typeof parsed.summary === "string" && parsed.summary.trim()
-        ? parsed.summary.trim().slice(0, 100)
-        : "",
+    summary,
     strengths,
     weaknesses,
   };
+}
+
+function buildSummaryRowsForAi(
+  rows: AnswerRow[],
+  posttestMap: Map<string, PosttestMeta>,
+  scenarioMap: Map<string, ScenarioMeta>,
+): SummaryRowForAi[] {
+  return rows
+    .map((row) => {
+      const item = normalizeItem(row.posttest_items);
+      if (!item) return null;
+
+      const posttest = item.posttest_id
+        ? posttestMap.get(item.posttest_id)
+        : undefined;
+
+      const scenario = item.scenario_id
+        ? scenarioMap.get(item.scenario_id)
+        : undefined;
+
+      const itemMax = getItemMaxScore(item);
+      const itemScore = clamp(toNumber(row.score, 0), 0, itemMax);
+
+      let result = "ผิด/ยังทำไม่ได้";
+      if (itemScore >= itemMax) result = "ถูกครบ";
+      else if (itemScore > 0) result = "ได้บางส่วน";
+
+      return {
+        answer_id: row.id,
+        item_id: row.item_id,
+        unit: posttest?.unit ?? null,
+        unit_title: posttest?.title ?? "",
+        order_index: item.order_index ?? null,
+        scenario_title: scenario?.title ?? "",
+        scenario_context: scenario?.context ?? "",
+        question: item.prompt || "",
+        type: item.type || "",
+        objective_tags: normalizeObjectiveTags(item.objective_tags),
+        score: itemScore,
+        max_score: itemMax,
+        result,
+        feedback: row.ai_feedback || "",
+        student_answer: extractAnswerValue(row.answer),
+      };
+    })
+    .filter(Boolean) as SummaryRowForAi[];
 }
 
 async function callGeminiJson(apiKey: string, prompt: string): Promise<string> {
@@ -361,6 +561,69 @@ async function callGeminiJson(apiKey: string, prompt: string): Promise<string> {
 
   const out = await res.json();
   return out?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+}
+
+async function callGeminiSummaryOnly(
+  apiKey: string,
+  summaryRows: SummaryRowForAi[],
+  totalScore: number,
+  maxScore: number,
+  percent: number,
+  pass: boolean,
+): Promise<SummarySource> {
+  const summaryPrompt = `
+คุณคือครูผู้สรุปผลการเรียนรู้ภาษาไทย
+
+งานของคุณ:
+สรุปภาพรวมความเข้าใจของผู้เรียนจากข้อมูลคำตอบทั้งหมด โดยต้องตอบเป็น JSON เท่านั้น
+
+กติกา:
+- summary ไม่ถูกนำไปใช้เป็นผลลัพธ์สุดท้าย ให้เน้นสร้าง strengths และ weaknesses จากคำตอบจริง
+- summary ต้องเป็น 1 ประโยคที่อ่านจบสมบูรณ์
+- ห้ามจบกลางคำ ห้ามจบกลางวลี ห้ามจบด้วยคำเชื่อม เช่น และ แต่ โดย เพื่อ เพราะ ที่ ซึ่ง
+- ห้ามใส่ข้อความที่เหมือนถูกตัดตอน
+- ต้องกล่าวถึงภาพรวมที่ทำได้ดี และถ้ามีจุดอ่อนให้กล่าวถึงสิ่งที่ควรพัฒนา
+- ห้ามอ้างเลขข้อ ห้ามใช้คำว่า "ข้อที่" หรือ "รายการที่"
+- ห้ามพูดถึงพฤติกรรม เช่น ตั้งใจ ส่งครบ หรือขยัน
+- strengths ต้องเป็นจุดเด่นเชิงความรู้ 1-3 ข้อ
+- weaknesses ต้องเป็นประเด็นที่ควรพัฒนาเชิงความรู้
+- ถ้าคะแนนไม่เต็ม ต้องมี weaknesses อย่างน้อย 1 ข้อ
+- ถ้าคะแนนเต็มทุกข้อเท่านั้น จึงให้ weaknesses เป็น []
+
+คะแนนรวม:
+${totalScore} / ${maxScore}
+
+เปอร์เซ็นต์:
+${percent}
+
+สถานะผ่านเกณฑ์:
+${pass ? "ผ่าน" : "ยังไม่ผ่าน"}
+
+ข้อมูลคำตอบทั้งหมด:
+${JSON.stringify(summaryRows, null, 2)}
+
+ตอบ JSON เท่านั้นในรูปแบบนี้:
+{
+  "summary": "",
+  "strengths": [
+    "จุดเด่นเชิงความรู้แบบภาพรวม"
+  ],
+  "weaknesses": [
+    {
+      "topic": "ประเด็นที่ควรพัฒนาในภาพรวม",
+      "feedback": "คำแนะนำสั้น ๆ"
+    }
+  ]
+}
+`.trim();
+
+  const summaryText = await callGeminiJson(apiKey, summaryPrompt);
+
+  return safeParseJson<SummarySource>(summaryText, {
+    summary: "",
+    strengths: [],
+    weaknesses: [],
+  });
 }
 
 Deno.serve(async (req) => {
@@ -464,7 +727,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 1) ตรวจ objective ในโค้ดก่อน ไม่เรียก AI
     for (const row of answerRows) {
       const item = normalizeItem(row.posttest_items);
       const itemType = item?.type || "";
@@ -485,14 +747,19 @@ Deno.serve(async (req) => {
       row.ai_feedback = evaluated.feedback;
     }
 
-    // 2) เตรียมข้อมูลสำหรับ AI call เดียว
     const shortBatch = answerRows
       .map((row) => {
         const item = normalizeItem(row.posttest_items);
         if (!item || item.type !== "short") return null;
 
-        const posttest = item.posttest_id ? posttestMap.get(item.posttest_id) : undefined;
-        const scenario = item.scenario_id ? scenarioMap.get(item.scenario_id) : undefined;
+        const posttest = item.posttest_id
+          ? posttestMap.get(item.posttest_id)
+          : undefined;
+
+        const scenario = item.scenario_id
+          ? scenarioMap.get(item.scenario_id)
+          : undefined;
+
         const studentAnswer = extractStudentAnswerText(row.answer);
         const maxScore = getItemMaxScore(item);
 
@@ -549,8 +816,14 @@ Deno.serve(async (req) => {
         const item = normalizeItem(row.posttest_items);
         if (!item || item.type === "short") return null;
 
-        const posttest = item.posttest_id ? posttestMap.get(item.posttest_id) : undefined;
-        const scenario = item.scenario_id ? scenarioMap.get(item.scenario_id) : undefined;
+        const posttest = item.posttest_id
+          ? posttestMap.get(item.posttest_id)
+          : undefined;
+
+        const scenario = item.scenario_id
+          ? scenarioMap.get(item.scenario_id)
+          : undefined;
+
         const itemMax = getItemMaxScore(item);
         const itemScore = clamp(toNumber(row.score, 0), 0, itemMax);
 
@@ -578,8 +851,7 @@ Deno.serve(async (req) => {
       })
       .filter(Boolean);
 
-    // 3) ถ้ามีข้อเขียน เรียก AI ครั้งเดียว: ตรวจข้อเขียน + สรุปภาพรวมจากทุกข้อ
-    let aiSummaryFromBatch: Partial<SummaryJson> | null = null;
+    let aiSummaryFromBatch: SummarySource | null = null;
 
     if (shortBatch.length > 0) {
       const aiPrompt = `
@@ -605,7 +877,10 @@ Deno.serve(async (req) => {
 - ห้ามอ้างเป็นรายข้อ
 - ห้ามระบุเลขข้อ หรือคำว่า "ข้อที่", "รายการที่"
 - strengths และ weaknesses ต้องเป็นภาพรวมเชิงความรู้
-- summary ต้องยาวไม่เกิน 100 ตัวอักษร
+- summary ไม่ถูกนำไปใช้เป็นผลลัพธ์สุดท้าย ให้เน้นสร้าง strengths และ weaknesses จากคำตอบจริง
+- summary ต้องเป็น 1 ประโยคที่อ่านจบสมบูรณ์
+- ห้ามจบกลางคำ ห้ามจบกลางวลี ห้ามจบด้วยคำเชื่อม เช่น และ แต่ โดย เพื่อ เพราะ ที่ ซึ่ง
+- ห้ามใส่ข้อความที่เหมือนถูกตัดตอน
 - ห้ามพูดถึงพฤติกรรม เช่น ตั้งใจ ส่งครบ หรือขยัน
 - ถ้าผู้เรียนทำได้ไม่เต็มคะแนนโดยรวม หรือมีข้อใดผิด/ได้บางส่วน ต้องระบุ weaknesses อย่างน้อย 1 ข้อ
 - weaknesses ต้องอิงจากประเด็นความรู้ที่ยังอ่อนจากคำตอบรายข้อ
@@ -623,15 +898,17 @@ ${JSON.stringify(shortBatch, null, 2)}
   "results_by_id": {
     "answer_id_1": {
       "score": 0,
-      "feedback_th": "..."
+      "feedback_th": "ยังขาดการอธิบายเหตุผลสำคัญ"
     },
     "answer_id_2": {
       "score": 1,
-      "feedback_th": "..."
+      "feedback_th": "ตอบได้ถูกต้องบางส่วน แต่ควรเพิ่มรายละเอียด"
     }
   },
-  "summary": "สรุปภาพรวมความเข้าใจของผู้เรียน",
-  "strengths": ["จุดเด่นเชิงความรู้แบบภาพรวม"],
+  "summary": "",
+  "strengths": [
+    "จุดเด่นเชิงความรู้แบบภาพรวม"
+  ],
   "weaknesses": [
     {
       "topic": "ประเด็นที่ควรพัฒนาในภาพรวม",
@@ -643,6 +920,7 @@ ${JSON.stringify(shortBatch, null, 2)}
 
       try {
         const batchText = await callGeminiJson(apiKey, aiPrompt);
+
         const batchParsed = safeParseJson<ShortBatchResult>(batchText, {
           results_by_id: {},
           summary: "",
@@ -651,13 +929,15 @@ ${JSON.stringify(shortBatch, null, 2)}
         });
 
         const resultEntries = Object.entries(batchParsed.results_by_id || {});
+
         const resultMap = new Map(
           resultEntries.map(([answerId, result]) => [
             answerId,
             {
               score: clamp(Math.round(toNumber(result?.score, 0)), 0, 999),
               feedback_th:
-                typeof result?.feedback_th === "string" && result.feedback_th.trim()
+                typeof result?.feedback_th === "string" &&
+                result.feedback_th.trim()
                   ? result.feedback_th.trim()
                   : "ตรวจแล้ว",
             },
@@ -699,8 +979,12 @@ ${JSON.stringify(shortBatch, null, 2)}
 
         aiSummaryFromBatch = {
           summary: batchParsed.summary,
-          strengths: Array.isArray(batchParsed.strengths) ? batchParsed.strengths : [],
-          weaknesses: Array.isArray(batchParsed.weaknesses) ? batchParsed.weaknesses : [],
+          strengths: Array.isArray(batchParsed.strengths)
+            ? batchParsed.strengths
+            : [],
+          weaknesses: Array.isArray(batchParsed.weaknesses)
+            ? batchParsed.weaknesses
+            : [],
         };
       } catch (itemErr) {
         console.error("Short batch grading failed:", itemErr);
@@ -711,6 +995,7 @@ ${JSON.stringify(shortBatch, null, 2)}
 
           const studentAnswer = extractStudentAnswerText(row.answer);
           const fallbackScore = 0;
+
           const fallbackFeedback = studentAnswer
             ? "ระบบตรวจคำตอบอัตโนมัติขัดข้อง กรุณาตรวจทานอีกครั้ง"
             : "ไม่พบคำตอบจากนักเรียน";
@@ -729,7 +1014,6 @@ ${JSON.stringify(shortBatch, null, 2)}
       }
     }
 
-    // 4) โหลดใหม่หลังให้คะแนนเสร็จทุกข้อ
     const { data: refreshedAnswers, error: refreshErr } = await sbAdmin
       .from("posttest_answers")
       .select(`
@@ -783,15 +1067,78 @@ ${JSON.stringify(shortBatch, null, 2)}
 
     if (attemptUpdateErr) throw attemptUpdateErr;
 
-    let finalSummaryObj: SummaryJson = {
+    const summaryRowsForAi = buildSummaryRowsForAi(
+      finalAnswers,
+      posttestMap,
+      scenarioMap,
+    );
+
+    let summarySource: SummarySource = aiSummaryFromBatch || {
       summary: "",
       strengths: [],
       weaknesses: [],
     };
 
-    if (aiSummaryFromBatch) {
-      finalSummaryObj = sanitizeSummary(aiSummaryFromBatch);
+    let finalSummaryObj: SummaryJson = sanitizeSummary(
+      summarySource,
+      percent,
+      pass,
+    );
+
+    if (!looksCompleteEnough(finalSummaryObj.summary)) {
+      try {
+        console.log("⚠️ Summary incomplete, generating summary-only fallback", {
+          currentLength: finalSummaryObj.summary.length,
+          currentSummary: finalSummaryObj.summary,
+        });
+
+        const summaryOnly = await callGeminiSummaryOnly(
+          apiKey,
+          summaryRowsForAi,
+          totalScore,
+          maxScore,
+          percent,
+          pass,
+        );
+
+        summarySource = summaryOnly;
+
+        finalSummaryObj = sanitizeSummary(
+          summarySource,
+          percent,
+          pass,
+        );
+      } catch (summaryErr) {
+        console.error("Summary-only generation failed:", summaryErr);
+
+        finalSummaryObj = sanitizeSummary(
+          {
+            summary: finalSummaryObj.summary,
+            strengths: finalSummaryObj.strengths,
+            weaknesses: finalSummaryObj.weaknesses,
+          },
+          percent,
+          pass,
+        );
+      }
     }
+
+    if (!looksCompleteEnough(finalSummaryObj.summary)) {
+      finalSummaryObj = sanitizeSummary(
+        {
+          summary: "",
+          strengths: finalSummaryObj.strengths,
+          weaknesses: finalSummaryObj.weaknesses,
+        },
+        percent,
+        pass,
+      );
+    }
+
+    finalSummaryObj.summary = buildExecutiveSummaryFromEvidence(
+      finalSummaryObj.strengths,
+      finalSummaryObj.weaknesses,
+    );
 
     const finalSummary = JSON.stringify(finalSummaryObj);
 
@@ -803,7 +1150,17 @@ ${JSON.stringify(shortBatch, null, 2)}
     if (summarySaveErr) throw summarySaveErr;
 
     console.log("✅ AI grading/summarizing done");
-    console.log("✅ FINAL SCORE:", { totalScore, maxScore, percent, pass });
+    console.log("✅ SUMMARY SAVED WITH evidence-summary-from-strengths-weaknesses-v7");
+    console.log("✅ FINAL SCORE:", {
+      totalScore,
+      maxScore,
+      percent,
+      pass,
+    });
+    console.log("✅ SUMMARY SAVED:", {
+      summaryLength: finalSummaryObj.summary.length,
+      summary: finalSummaryObj.summary,
+    });
 
     return jsonResponse({
       ok: true,

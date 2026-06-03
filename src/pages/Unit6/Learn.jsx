@@ -1,5 +1,3 @@
-// LearnUnit6.jsx
-
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
@@ -19,7 +17,7 @@ import {
   FiAlertCircle,
 } from "react-icons/fi";
 
-const PASS_PERCENT = 60;
+const PASS_PERCENT = 80;
 
 const UNIT6_TOPICS = [
   {
@@ -226,58 +224,41 @@ export default function LearnUnit6() {
           console.error("Load latest score failed:", latestErr);
         }
 
-        if (mounted) {
+        if (mounted && latestSubmitted) {
           setFirstScoreText(
             firstSubmitted
               ? `${firstSubmitted.total_score} / ${firstSubmitted.max_score}`
               : ""
           );
 
-          setLatestScoreText(
-            latestSubmitted
-              ? `${latestSubmitted.total_score} / ${latestSubmitted.max_score}`
-              : ""
-          );
-
-          const latestPercent = calcPercent(
-            latestSubmitted?.total_score,
-            latestSubmitted?.max_score
-          );
-
-          setLatestPassed(latestPercent >= PASS_PERCENT);
+          setLatestScoreText(`${latestSubmitted.total_score} / ${latestSubmitted.max_score}`);
+          setLatestPassed(calcPercent(latestSubmitted.total_score, latestSubmitted.max_score) >= PASS_PERCENT);
 
           let aiParsed = { summary: "", strengths: [], weaknesses: [] };
 
           try {
-            if (
-              latestSubmitted?.ai_summary &&
-              typeof latestSubmitted.ai_summary === "string" &&
-              latestSubmitted.ai_summary.startsWith("{")
-            ) {
+            if (latestSubmitted.ai_summary && latestSubmitted.ai_summary.startsWith("{")) {
               aiParsed = JSON.parse(latestSubmitted.ai_summary);
             } else {
-              aiParsed.summary = latestSubmitted?.ai_summary || "";
+              aiParsed.summary = latestSubmitted.ai_summary || "";
             }
           } catch (e) {
-            aiParsed.summary = latestSubmitted?.ai_summary || "";
+            aiParsed.summary = latestSubmitted.ai_summary || "";
           }
 
           setAiAnalysisData({
-            summary:
-              aiParsed.summary ||
-              (latestPercent >= PASS_PERCENT
-                ? "คุณมีความเข้าใจเรื่องสุขภาวะดิจิทัลในระดับที่ดี สามารถสังเกตพฤติกรรมการใช้สื่อของตนเอง ประเมินผลกระทบ และตัดสินใจดูแลสมดุลชีวิตดิจิทัลได้เหมาะสม"
-                : "คุณเริ่มตระหนักถึงสุขภาวะดิจิทัลแล้ว แต่ยังควรทบทวนเรื่องการจัดสรรเวลา ผลกระทบของการใช้สื่อ และการตัดสินใจดูแลตนเองจากสถานการณ์จริงเพิ่มเติม"),
+            summary: aiParsed.summary,
             strengths: Array.isArray(aiParsed.strengths) ? aiParsed.strengths : [],
             weaknesses: Array.isArray(aiParsed.weaknesses)
-              ? aiParsed.weaknesses.map((w) =>
-                  typeof w === "string"
-                    ? { topic: w, feedback: "" }
-                    : {
-                        topic: w.topic || "",
-                        feedback: w.feedback || "",
-                      }
-                )
+              ? aiParsed.weaknesses.map((w) => {
+                  if (typeof w === "string") {
+                    return { topic: w, feedback: "" };
+                  }
+                  return {
+                    topic: w?.topic || "",
+                    feedback: w?.feedback || "",
+                  };
+                })
               : [],
           });
         }
@@ -294,26 +275,16 @@ export default function LearnUnit6() {
   }, [navigate]);
 
   const latestScoreTextForDisplay = useMemo(() => {
-    if (
-      posttestResult &&
-      typeof posttestResult.score === "number" &&
-      typeof posttestResult.maxScore === "number"
-    ) {
+    if (posttestResult?.score != null) {
       return `${posttestResult.score} / ${posttestResult.maxScore}`;
     }
     return latestScoreText;
   }, [latestScoreText, posttestResult]);
 
   const latestPassedForDisplay = useMemo(() => {
-    if (
-      posttestResult &&
-      typeof posttestResult.score === "number" &&
-      typeof posttestResult.maxScore === "number"
-    ) {
-      const percent = calcPercent(posttestResult.score, posttestResult.maxScore);
-      return percent >= PASS_PERCENT;
+    if (posttestResult?.score != null) {
+      return calcPercent(posttestResult.score, posttestResult.maxScore) >= PASS_PERCENT;
     }
-
     return latestPassed;
   }, [latestPassed, posttestResult]);
 
@@ -412,7 +383,7 @@ export default function LearnUnit6() {
               </div>
               <div className="edu-userchip__meta">
                 <div className="edu-userchip__name">
-                  {loading ? "กำลังโหลด..." : studentName || "ผู้เรียน"}
+                  {loading ? "กำลังโหลด..." : studentName}
                 </div>
               </div>
             </div>
@@ -493,7 +464,6 @@ export default function LearnUnit6() {
                     </div>
                   </div>
                 </div>
-
                 <FiChevronRight className="edu-lessonCard__arrow" />
               </button>
             ))}
@@ -553,6 +523,7 @@ export default function LearnUnit6() {
               <FiChevronRight className="edu-lessonCard__arrow" />
             </button>
 
+            {/* --- AI Personalized Insight --- */}
             <div className="insight-force-fullwidth cyber-insight">
               <section className="insight-outer-frame">
                 <div className="insight-header-box">
@@ -597,28 +568,24 @@ export default function LearnUnit6() {
                         </div>
                       </div>
 
-                      <div className="inner-block improve-block">
-                        <div className="block-header">
-                          <FiAlertCircle />
-                          <h3>สิ่งที่ควรพัฒนาและคำแนะนำเพิ่มเติม</h3>
-                        </div>
-                        <div className="improve-list">
-                          {aiAnalysisData.weaknesses.length > 0 ? (
-                            aiAnalysisData.weaknesses.map((w, i) => (
+                      {aiAnalysisData.weaknesses && aiAnalysisData.weaknesses.length > 0 && (
+                        <div className="inner-block improve-block">
+                          <div className="block-header">
+                            <FiAlertCircle />
+                            <h3>สิ่งที่ควรพัฒนาและคำแนะนำเพิ่มเติม</h3>
+                          </div>
+                          <div className="improve-list">
+                            {aiAnalysisData.weaknesses.map((w, i) => (
                               <div key={i} className="improve-item">
                                 <div className="topic-text">{w.topic}</div>
                                 {w.feedback && (
                                   <div className="feedback-text">💡 {w.feedback}</div>
                                 )}
                               </div>
-                            ))
-                          ) : (
-                            <div className="improve-item">
-                              <span>วิเคราะห์ข้อมูลที่ควรพัฒนา...</span>
-                            </div>
-                          )}
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -630,3 +597,4 @@ export default function LearnUnit6() {
     </div>
   );
 }
+

@@ -1863,3 +1863,25 @@ button{ font: inherit; }
     border-bottom: 1.5px solid #2f6f64;
   }
 }
+
+
+.summary-block {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.summary-text {
+  display: block !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  max-height: none !important;
+
+  -webkit-line-clamp: unset !important;
+  -webkit-box-orient: initial !important;
+
+  line-height: 1.75;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}

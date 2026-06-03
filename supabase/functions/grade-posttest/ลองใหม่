@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const PASS_PERCENT = 60;
+const PASS_PERCENT = 80;
 
 type CorrectAnswer = {
   value?: unknown;

@@ -19,7 +19,7 @@ import {
   FiAlertCircle,
 } from "react-icons/fi";
 
-const PASS_PERCENT = 60;
+const PASS_PERCENT = 80;
 
 const UNIT8_TOPICS = [
   {
@@ -69,36 +69,19 @@ function calcPercent(total, max) {
 
 function parsePassMap(raw) {
   if (!raw) return new Set();
-
   let obj = raw;
-
   if (typeof raw === "string") {
-    try {
-      obj = JSON.parse(raw);
-    } catch {
-      return new Set();
-    }
+    try { obj = JSON.parse(raw); } catch { return new Set(); }
   }
-
   if (typeof obj !== "object" || obj === null) return new Set();
-
   const passed = new Set();
-
   Object.entries(obj).forEach(([key, value]) => {
     const unitNo = Number(key);
     if (!Number.isInteger(unitNo)) return;
-
-    const isPassed =
-      value === true ||
-      value === "true" ||
-      value === 1 ||
-      value === "1";
-
-    if (isPassed) {
+    if (value === true || value === "true" || value === 1 || value === "1") {
       passed.add(unitNo);
     }
   });
-
   return passed;
 }
 
@@ -107,10 +90,8 @@ export default function LearnUnit8() {
   const navigate = useNavigate();
 
   const [posttestResult, setPosttestResult] = useState(null);
-
   const [loading, setLoading] = useState(true);
   const [studentName, setStudentName] = useState("ผู้เรียน");
-
   const [passedFromPretest, setPassedFromPretest] = useState(false);
   const [firstScoreText, setFirstScoreText] = useState("");
   const [latestScoreText, setLatestScoreText] = useState("");
@@ -119,7 +100,7 @@ export default function LearnUnit8() {
   const [aiAnalysisData, setAiAnalysisData] = useState({
     summary: "",
     strengths: [],
-    weaknesses: [],
+    weaknesses: []
   });
 
   useEffect(() => {
@@ -131,80 +112,51 @@ export default function LearnUnit8() {
 
   useEffect(() => {
     let mounted = true;
-
     const initData = async () => {
       try {
         if (!mounted) return;
         setLoading(true);
-
-        const {
-          data: { session },
-          error: sessionErr,
-        } = await supabase.auth.getSession();
-
-        if (sessionErr) console.error("getSession failed:", sessionErr);
-
+        const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
         const user = session?.user;
         if (!user) {
           navigate("/login", { replace: true });
           return;
         }
 
-        const { data: profile, error: profileErr } = await supabase
+        const { data: profile } = await supabase
           .from("student_profiles")
           .select("first_name,last_name")
           .eq("user_id", user.id)
           .maybeSingle();
 
-        if (profileErr) console.error("Load profile failed:", profileErr);
-
         if (mounted) {
-          const fullName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim();
-          setStudentName(fullName || "ผู้เรียน");
+          setStudentName(`${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "ผู้เรียน");
         }
 
-        const { data: pretestRow, error: pretestErr } = await supabase
+        const { data: pretestRow } = await supabase
           .from("pretest_results")
           .select("pass_map")
           .eq("user_id", user.id)
           .maybeSingle();
 
-        if (pretestErr) console.error("Load pretest result failed:", pretestErr);
-
-        const pretestPassedSet = parsePassMap(pretestRow?.pass_map);
-
         if (mounted) {
-          setPassedFromPretest(pretestPassedSet.has(8));
+          setPassedFromPretest(parsePassMap(pretestRow?.pass_map).has(8));
         }
 
-        const { data: activePosttest, error: ptErr } = await supabase
+        const { data: activePosttest } = await supabase
           .from("posttests")
-          .select("id, version")
+          .select("id")
           .eq("unit", 8)
           .eq("is_active", true)
           .order("version", { ascending: false })
           .limit(1)
           .maybeSingle();
 
-        if (ptErr) console.error("Load active posttest failed:", ptErr);
+        if (!activePosttest?.id) return;
 
-        if (!activePosttest?.id) {
-          if (mounted) {
-            setFirstScoreText("");
-            setLatestScoreText("");
-            setLatestPassed(false);
-            setAiAnalysisData({
-              summary: "",
-              strengths: [],
-              weaknesses: [],
-            });
-          }
-          return;
-        }
-
-        const { data: firstSubmitted, error: firstErr } = await supabase
+        const { data: firstSubmitted } = await supabase
           .from("posttest_attempts")
-          .select("total_score, max_score, pass, submitted_at")
+          .select("total_score, max_score")
           .eq("user_id", user.id)
           .eq("posttest_id", activePosttest.id)
           .not("submitted_at", "is", null)
@@ -212,11 +164,9 @@ export default function LearnUnit8() {
           .limit(1)
           .maybeSingle();
 
-        if (firstErr) console.error("Load first score failed:", firstErr);
-
-        const { data: latestSubmitted, error: latestErr } = await supabase
+        const { data: latestSubmitted } = await supabase
           .from("posttest_attempts")
-          .select("id, total_score, max_score, pass, submitted_at, ai_summary")
+          .select("id, total_score, max_score, ai_summary")
           .eq("user_id", user.id)
           .eq("posttest_id", activePosttest.id)
           .not("submitted_at", "is", null)
@@ -224,96 +174,55 @@ export default function LearnUnit8() {
           .limit(1)
           .maybeSingle();
 
-        if (latestErr) console.error("Load latest score failed:", latestErr);
-
-        if (mounted) {
-          setFirstScoreText(
-            firstSubmitted
-              ? `${firstSubmitted.total_score} / ${firstSubmitted.max_score}`
-              : ""
-          );
-
-          setLatestScoreText(
-            latestSubmitted
-              ? `${latestSubmitted.total_score} / ${latestSubmitted.max_score}`
-              : ""
-          );
-
-          const latestPercent = calcPercent(
-            latestSubmitted?.total_score,
-            latestSubmitted?.max_score
-          );
-
-          setLatestPassed(latestPercent >= PASS_PERCENT);
+        if (mounted && latestSubmitted) {
+          setFirstScoreText(firstSubmitted ? `${firstSubmitted.total_score} / ${firstSubmitted.max_score}` : "");
+          setLatestScoreText(`${latestSubmitted.total_score} / ${latestSubmitted.max_score}`);
+          setLatestPassed(calcPercent(latestSubmitted.total_score, latestSubmitted.max_score) >= PASS_PERCENT);
 
           let aiParsed = { summary: "", strengths: [], weaknesses: [] };
-
           try {
-            if (
-              latestSubmitted?.ai_summary &&
-              typeof latestSubmitted.ai_summary === "string" &&
-              latestSubmitted.ai_summary.startsWith("{")
-            ) {
+            if (latestSubmitted.ai_summary && latestSubmitted.ai_summary.startsWith('{')) {
               aiParsed = JSON.parse(latestSubmitted.ai_summary);
             } else {
-              aiParsed.summary = latestSubmitted?.ai_summary || "";
+              aiParsed.summary = latestSubmitted.ai_summary || "";
             }
           } catch (e) {
-            aiParsed.summary = latestSubmitted?.ai_summary || "";
+            aiParsed.summary = latestSubmitted.ai_summary || "";
           }
 
           setAiAnalysisData({
-            summary:
-              aiParsed.summary ||
-              (latestPercent >= PASS_PERCENT
-                ? "คุณมีความเข้าใจเรื่องสมรรถนะร่วมเชิงวิเคราะห์และจริยธรรมดิจิทัลในระดับที่ดี สามารถตั้งคำถามต่อเนื้อหาออนไลน์ วิเคราะห์อคติ คำนึงถึงผลกระทบทางสังคม และตัดสินใจใช้งานเทคโนโลยีรวมถึง AI อย่างรับผิดชอบ"
-                : "คุณเริ่มเข้าใจพื้นฐานของการคิดเชิงวิเคราะห์และจริยธรรมดิจิทัลแล้ว แต่ยังควรทบทวนเรื่องการตั้งคำถามต่อเนื้อหา การสังเกตอคติ ผลกระทบของการเผยแพร่เนื้อหา และการใช้งาน AI อย่างรับผิดชอบเพิ่มเติม"),
+            summary: aiParsed.summary || (calcPercent(latestSubmitted.total_score, latestSubmitted.max_score) >= PASS_PERCENT 
+              ? "คุณทำคะแนนได้ดีเยี่ยม! มีความเข้าใจเรื่องความปลอดภัยในระดับที่วางใจได้" 
+              : "คุณเริ่มเข้าใจพื้นฐานแล้ว แต่ยังมีจุดที่อาจเป็นช่องโหว่ด้านความปลอดภัยที่ควรระวัง"),
             strengths: Array.isArray(aiParsed.strengths) ? aiParsed.strengths : [],
             weaknesses: Array.isArray(aiParsed.weaknesses)
-              ? aiParsed.weaknesses.map((w) =>
-                  typeof w === "string"
-                    ? { topic: w, feedback: "" }
-                    : {
-                        topic: w.topic || "",
-                        feedback: w.feedback || "",
-                      }
-                )
-              : [],
+              ? aiParsed.weaknesses.map((w) => {
+                  if (typeof w === "string") {
+                    return { topic: w, feedback: "" };
+                  }
+                  return {
+                    topic: w?.topic || "",
+                    feedback: w?.feedback || "",
+                  };
+                })
+              : []
           });
         }
       } finally {
         if (mounted) setLoading(false);
       }
     };
-
     initData();
-
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [navigate]);
 
   const latestScoreTextForDisplay = useMemo(() => {
-    if (
-      posttestResult &&
-      typeof posttestResult.score === "number" &&
-      typeof posttestResult.maxScore === "number"
-    ) {
-      return `${posttestResult.score} / ${posttestResult.maxScore}`;
-    }
+    if (posttestResult?.score != null) return `${posttestResult.score} / ${posttestResult.maxScore}`;
     return latestScoreText;
   }, [latestScoreText, posttestResult]);
 
   const latestPassedForDisplay = useMemo(() => {
-    if (
-      posttestResult &&
-      typeof posttestResult.score === "number" &&
-      typeof posttestResult.maxScore === "number"
-    ) {
-      const percent = calcPercent(posttestResult.score, posttestResult.maxScore);
-      return percent >= PASS_PERCENT;
-    }
-
+    if (posttestResult?.score != null) return calcPercent(posttestResult.score, posttestResult.maxScore) >= PASS_PERCENT;
     return latestPassed;
   }, [latestPassed, posttestResult]);
 
@@ -350,24 +259,14 @@ export default function LearnUnit8() {
           grid-template-columns: 1fr 1fr;
           gap: 1rem;
         }
-        @media (max-width: 768px) {
-          .ai-grid {
-            grid-template-columns: 1fr;
-          }
-        }
+        @media (max-width: 768px) { .ai-grid { grid-template-columns: 1fr; } }
         .ai-card {
           padding: 1.25rem;
           border-radius: 16px;
           height: 100%;
         }
-        .ai-card--positive {
-          background: #f0fdf4;
-          border: 1px solid #dcfce7;
-        }
-        .ai-card--negative {
-          background: #fff7ed;
-          border: 1px solid #ffedd5;
-        }
+        .ai-card--positive { background: #f0fdf4; border: 1px solid #dcfce7; }
+        .ai-card--negative { background: #fff7ed; border: 1px solid #ffedd5; }
         .ai-card-title {
           display: flex;
           align-items: center;
@@ -383,9 +282,7 @@ export default function LearnUnit8() {
           line-height: 1.5;
           color: #374151;
         }
-        .ai-list li {
-          margin-bottom: 0.5rem;
-        }
+        .ai-list li { margin-bottom: 0.5rem; }
         .ai-empty-state {
           text-align: center;
           padding: 2rem;
@@ -407,23 +304,12 @@ export default function LearnUnit8() {
 
           <div className="edu-topbar__right">
             <div className="edu-userchip">
-              <div className="edu-userchip__avatar">
-                <FiUser />
-              </div>
+              <div className="edu-userchip__avatar"><FiUser /></div>
               <div className="edu-userchip__meta">
-                <div className="edu-userchip__name">
-                  {loading ? "กำลังโหลด..." : studentName || "ผู้เรียน"}
-                </div>
+                <div className="edu-userchip__name">{loading ? "กำลังโหลด..." : studentName}</div>
               </div>
             </div>
-
-            <button
-              className="edu-btn edu-btn--danger"
-              onClick={async () => {
-                await supabase.auth.signOut();
-                navigate("/login", { replace: true });
-              }}
-            >
+            <button className="edu-btn edu-btn--danger" onClick={async () => { await supabase.auth.signOut(); navigate("/login", { replace: true }); }}>
               <FiLogOut /> ออกจากระบบ
             </button>
           </div>
@@ -435,33 +321,16 @@ export default function LearnUnit8() {
           <div className="edu-hero__card">
             <div className="edu-hero__row">
               <div className="edu-hero__headline">
-                <div className="edu-hero__title">
-                  Unit 8: สมรรถนะร่วมเชิงวิเคราะห์และจริยธรรมดิจิทัล
-                </div>
-
+                <div className="edu-hero__title">Unit 8: สมรรถนะร่วมเชิงวิเคราะห์และจริยธรรมดิจิทัล</div>
                 <div className="edu-lessons__toolbar">
-                  <button className="edu-btn edu-btn--back" onClick={() => navigate("/lessons")}>
-                    <FiChevronLeft /> กลับ
-                  </button>
-
-                  <button
-                    className="edu-btn edu-btn--ghost"
-                    onClick={() => navigate("/main")}
-                    style={{ marginLeft: 8 }}
-                  >
-                    <FiHome /> กลับหน้าหลัก
-                  </button>
+                  <button className="edu-btn edu-btn--back" onClick={() => navigate("/lessons")}><FiChevronLeft /> กลับ</button>
+                  <button className="edu-btn edu-btn--ghost" onClick={() => navigate("/main")} style={{ marginLeft: 8 }}><FiHome /> กลับหน้าหลัก</button>
                 </div>
               </div>
-
               <div className="edu-lessons__meta">
                 <div className="edu-miniStat">
                   <div className="edu-miniStat__label">เรื่องย่อย</div>
                   <div className="edu-miniStat__value">{UNIT8_TOPICS.length}</div>
-                </div>
-                <div className="edu-miniStat">
-                  <div className="edu-miniStat__label">Posttest</div>
-                  <div className="edu-miniStat__value">1</div>
                 </div>
               </div>
             </div>
@@ -470,66 +339,36 @@ export default function LearnUnit8() {
 
         <section className="edu-panel">
           <div className="edu-panel__head">
-            <div className="edu-panel__title">
-              <FiFileText /> เรื่องย่อยของ Unit 8
-            </div>
+            <div className="edu-panel__title"><FiFileText /> เรื่องย่อยของ Unit 8</div>
           </div>
 
           <div className="edu-lessons">
-            {UNIT8_TOPICS.map((topic) => (
-              <button
-                key={topic.id}
-                type="button"
-                className="edu-lessonCard"
-                onClick={() => navigate(topic.path)}
-              >
+            {UNIT8_TOPICS.map((t) => (
+              <button key={t.id} type="button" className="edu-lessonCard" onClick={() => navigate(t.path)}>
                 <div className="edu-lessonCard__left">
-                  <div className="edu-lessonNo">{topic.id}</div>
-
+                  <div className="edu-lessonNo">{t.id}</div>
                   <div className="edu-lessonCard__meta">
-                    <div className="edu-lessonCard__title">{topic.title}</div>
-                    <div className="edu-lessonCard__desc">{topic.desc}</div>
-
-                    <div className="edu-lessonCard__tags">
-                      <span className="edu-pill edu-pill--muted">เรื่องย่อย</span>
-                    </div>
+                    <div className="edu-lessonCard__title">{t.title}</div>
+                    <div className="edu-lessonCard__desc">{t.desc}</div>
+                    <div className="edu-lessonCard__tags"><span className="edu-pill edu-pill--muted">เรื่องย่อย</span></div>
                   </div>
                 </div>
-
                 <FiChevronRight className="edu-lessonCard__arrow" />
               </button>
             ))}
 
-            <button
-              type="button"
-              className="edu-lessonCard"
-              onClick={() => navigate("/unit8/posttest")}
-            >
+            <button type="button" className="edu-lessonCard" onClick={() => navigate("/unit8/posttest")}>
               <div className="edu-lessonCard__left">
-                <div className="edu-lessonNo">
-                  <FiCheckCircle />
-                </div>
-
+                <div className="edu-lessonNo"><FiCheckCircle /></div>
                 <div className="edu-lessonCard__meta edu-lessonCard__meta--posttest">
-                  {passedFromPretest && (
-                    <div className="edu-cornerBadge">ผ่านจาก Pretest</div>
-                  )}
-
+                  {passedFromPretest && <div className="edu-cornerBadge">ผ่านจาก Pretest</div>}
                   <div className="edu-lessonCard__title">แบบฝึกหัด: Unit 8</div>
-                  <div className="edu-lessonCard__desc">
-                    ทำแบบทดสอบหลังเรียนเพื่อบันทึกผลและปลดล็อกการเรียนต่อ
-                  </div>
-
+                  <div className="edu-lessonCard__desc">ทำแบบทดสอบหลังเรียนเพื่อบันทึกผลและปลดล็อกการเรียนต่อ</div>
                   <div className="edu-lessonCard__tags" style={{ marginBottom: 10 }}>
-                    <span
-                      className={`edu-pill ${
-                        latestPassedForDisplay ? "edu-pill--pass" : "edu-pill--fail"
-                      }`}
-                    >
+                    <span className={`edu-pill ${latestPassedForDisplay ? "edu-pill--pass" : "edu-pill--fail"}`}>
                       {latestPassedForDisplay ? "ผ่าน" : "ยังไม่ผ่าน"}
                     </span>
                   </div>
-
                   {(firstScoreText || latestScoreTextForDisplay) && (
                     <div className="edu-scoreBox">
                       {firstScoreText && (
@@ -538,24 +377,21 @@ export default function LearnUnit8() {
                           <span className="edu-scoreRow__value">{firstScoreText}</span>
                         </div>
                       )}
-
                       {latestScoreTextForDisplay && (
                         <div className="edu-scoreRow">
                           <span className="edu-scoreRow__label">คะแนนล่าสุด</span>
-                          <span className="edu-scoreRow__value">
-                            {latestScoreTextForDisplay}
-                          </span>
+                          <span className="edu-scoreRow__value">{latestScoreTextForDisplay}</span>
                         </div>
                       )}
                     </div>
                   )}
                 </div>
               </div>
-
               <FiChevronRight className="edu-lessonCard__arrow" />
             </button>
 
-            <div className="insight-force-fullwidth cyber-insight">
+            {/* --- AI Personalized Insight --- */}
+            <div className="insight-force-fullwidth cyber-insight"> 
               <section className="insight-outer-frame">
                 <div className="insight-header-box">
                   <div className="insight-tag">
@@ -573,9 +409,7 @@ export default function LearnUnit8() {
                   <div className="insight-inner-stack">
                     <div className="inner-block summary-block">
                       <div className="block-label">Executive Summary</div>
-                      <p className="summary-text">
-                        {aiAnalysisData.summary || "กำลังประมวลผล..."}
-                      </p>
+                      <p className="summary-text">{aiAnalysisData.summary || "กำลังประมวลผล..."}</p>
                     </div>
 
                     <div className="side-by-side">
@@ -592,9 +426,7 @@ export default function LearnUnit8() {
                               </div>
                             ))
                           ) : (
-                            <div className="strength-item">
-                              <span>วิเคราะห์ข้อมูลจุดเด่น...</span>
-                            </div>
+                            <div className="strength-item"><span>วิเคราะห์ข้อมูลจุดเด่น...</span></div>
                           )}
                         </div>
                       </div>
@@ -609,15 +441,11 @@ export default function LearnUnit8() {
                             aiAnalysisData.weaknesses.map((w, i) => (
                               <div key={i} className="improve-item">
                                 <div className="topic-text">{w.topic}</div>
-                                {w.feedback && (
-                                  <div className="feedback-text">💡 {w.feedback}</div>
-                                )}
+                                {w.feedback && <div className="feedback-text">💡 {w.feedback}</div>}
                               </div>
                             ))
                           ) : (
-                            <div className="improve-item">
-                              <span>วิเคราะห์ข้อมูลที่ควรพัฒนา...</span>
-                            </div>
+                            <div className="improve-item"><span>วิเคราะห์ข้อมูลที่ควรพัฒนา...</span></div>
                           )}
                         </div>
                       </div>

@@ -17,7 +17,7 @@ import {
   FiAlertCircle,
 } from "react-icons/fi";
 
-const PASS_PERCENT = 60;
+const PASS_PERCENT = 80;
 
 const UNIT1_TOPICS = [
   {
@@ -171,10 +171,9 @@ export default function Learn() {
           setLatestScoreText(`${latestSubmitted.total_score} / ${latestSubmitted.max_score}`);
           setLatestPassed(calcPercent(latestSubmitted.total_score, latestSubmitted.max_score) >= PASS_PERCENT);
 
-          // ดึง JSON สรุปจาก AI ที่เราบันทึกไว้ใน ai_summary มาใช้งาน
+          // ดึง JSON สรุปจาก AI ที่เราบันทึกไว้ใน ai_summary มาใช้งานตามโครงสร้างที่ถูกต้อง
           let aiParsed = { summary: "", strengths: [], weaknesses: [] };
           try {
-            // เช็คว่า ai_summary เป็น JSON หรือไม่
             if (latestSubmitted.ai_summary && latestSubmitted.ai_summary.startsWith('{')) {
               aiParsed = JSON.parse(latestSubmitted.ai_summary);
             } else {
@@ -185,21 +184,19 @@ export default function Learn() {
           }
 
           setAiAnalysisData({
-            summary: aiParsed.summary || (calcPercent(latestSubmitted.total_score, latestSubmitted.max_score) >= PASS_PERCENT 
-              ? "คุณทำคะแนนได้ดีเยี่ยม! มีความเข้าใจเรื่องความปลอดภัยในระดับที่วางใจได้" 
-              : "คุณเริ่มเข้าใจพื้นฐานแล้ว แต่ยังมีจุดที่อาจเป็นช่องโหว่ด้านความปลอดภัยที่ควรระวัง"),
+            summary: aiParsed.summary,
             strengths: Array.isArray(aiParsed.strengths) ? aiParsed.strengths : [],
             weaknesses: Array.isArray(aiParsed.weaknesses)
-  ? aiParsed.weaknesses.map((w) => {
-      if (typeof w === "string") {
-        return { topic: w, feedback: "" };
-      }
-      return {
-        topic: w?.topic || "",
-        feedback: w?.feedback || "",
-      };
-    })
-  : []
+              ? aiParsed.weaknesses.map((w) => {
+                  if (typeof w === "string") {
+                    return { topic: w, feedback: "" };
+                  }
+                  return {
+                    topic: w?.topic || "",
+                    feedback: w?.feedback || "",
+                  };
+                })
+              : []
           });
         }
       } finally {
@@ -401,49 +398,48 @@ export default function Learn() {
                   </div>
                 ) : (
                   <div className="insight-inner-stack">
-  <div className="inner-block summary-block">
-    <div className="block-label">Executive Summary</div>
-    <p className="summary-text">{aiAnalysisData.summary || "กำลังประมวลผล..."}</p>
-  </div>
-
-<div className="side-by-side">
-                    <div className="inner-block strength-block">
-                      <div className="block-header">
-                        <FiTrendingUp />
-                        <h3>จุดที่ทำได้ดีและทักษะที่โดดเด่น</h3>
-                      </div>
-                      <div className="strength-list">
-                        {aiAnalysisData.strengths.length > 0 ? (
-                          aiAnalysisData.strengths.map((s, i) => (
-                            <div key={i} className="strength-item">
-                              <FiCheckCircle /> <span>{s}</span>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="strength-item"><span>วิเคราะห์ข้อมูลจุดเด่น...</span></div>
-                        )}
-                      </div>
+                    <div className="inner-block summary-block">
+                      <div className="block-label">Executive Summary</div>
+                      <p className="summary-text">{aiAnalysisData.summary || "กำลังประมวลผล..."}</p>
                     </div>
 
-                    <div className="inner-block improve-block">
-                      <div className="block-header">
-                        <FiAlertCircle />
-                        <h3>สิ่งที่ควรพัฒนาและคำแนะนำเพิ่มเติม</h3>
+                    <div className="side-by-side">
+                      <div className="inner-block strength-block">
+                        <div className="block-header">
+                          <FiTrendingUp />
+                          <h3>จุดที่ทำได้ดีและทักษะที่โดดเด่น</h3>
+                        </div>
+                        <div className="strength-list">
+                          {aiAnalysisData.strengths.length > 0 ? (
+                            aiAnalysisData.strengths.map((s, i) => (
+                              <div key={i} className="strength-item">
+                                <FiCheckCircle /> <span>{s}</span>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="strength-item"><span>วิเคราะห์ข้อมูลจุดเด่น...</span></div>
+                          )}
+                        </div>
                       </div>
-                      <div className="improve-list">
-                        {aiAnalysisData.weaknesses.length > 0 ? (
-                          aiAnalysisData.weaknesses.map((w, i) => (
-                            <div key={i} className="improve-item">
-                              <div className="topic-text">{w.topic}</div>
-                              {w.feedback && <div className="feedback-text">💡 {w.feedback}</div>}
-                            </div>
-                          ))
-                        ) : (
-                          <div className="improve-item"><span>วิเคราะห์ข้อมูลที่ควรพัฒนา...</span></div>
-                        )}
-                      </div>
+
+                      {/* เคลียร์ Logic ตัวแปรฟรอนต์เอนด์ออกทั้งหมด และเช็กความยาวอาร์เรย์ของ aiAnalysisData.weaknesses จาก AI ตรง ๆ ถ้าอาร์เรย์ไม่มีออบเจกต์จุดอ่อนอยู่ (กรณีทำเต็ม) กล่องสิ่งที่ควรพัฒนาจะถูกสั่งให้ซ่อนตัวหายไปทันทีครับ */}
+                      {aiAnalysisData.weaknesses && aiAnalysisData.weaknesses.length > 0 && (
+                        <div className="inner-block improve-block">
+                          <div className="block-header">
+                            <FiAlertCircle />
+                            <h3>สิ่งที่ควรพัฒนาและคำแนะนำเพิ่มเติม</h3>
+                          </div>
+                          <div className="improve-list">
+                            {aiAnalysisData.weaknesses.map((w, i) => (
+                              <div key={i} className="improve-item">
+                                <div className="topic-text">{w.topic}</div>
+                                {w.feedback && <div className="feedback-text">💡 {w.feedback}</div>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
                   </div>
                 )}
               </section>

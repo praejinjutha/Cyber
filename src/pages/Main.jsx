@@ -21,7 +21,7 @@ import {
 
 
 
-const PASS_PERCENT = 60;
+const PASS_PERCENT = 80;
 const TOTAL_UNITS = 8;
 
 function calcPercent(total, max) {

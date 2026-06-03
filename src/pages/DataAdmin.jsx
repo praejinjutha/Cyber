@@ -35,6 +35,21 @@ function sampleStdDev(arr) {
   return Math.sqrt(variance);
 }
 
+function isTestStudent(email) {
+  const local = String(email || "")
+    .trim()
+    .toLowerCase()
+    .split("@")[0];
+
+  return (
+    local === "000" ||
+    local === "user000" ||
+    local === "student000" ||
+    local.endsWith("-000") ||
+    local.endsWith("_000")
+  );
+}
+
 function formatNumber(v, digits = 2) {
   if (v == null || !Number.isFinite(v)) return "—";
   return Number(v).toFixed(digits);
@@ -284,15 +299,18 @@ export default function DataAdmin() {
           setErr(studentsErr.message || "โหลดข้อมูลผู้เรียนไม่สำเร็จ");
           setRows([]);
         } else {
-          const mapped = (studentsData || []).map((x) => ({
-            id: x.user_id,
-            user_id: x.user_id,
-            email: x.email || "—",
-            name: x.full_name || "ยังไม่ระบุชื่อ",
-            age: x.age ?? null,
-            profile_completed: !!x.profile_completed,
-          }));
-          setRows(mapped);
+          const mapped = (studentsData || [])
+  .filter((x) => !isTestStudent(x.email))
+  .map((x) => ({
+    id: x.user_id,
+    user_id: x.user_id,
+    email: x.email || "—",
+    name: x.full_name || "ยังไม่ระบุชื่อ",
+    age: x.age ?? null,
+    profile_completed: !!x.profile_completed,
+  }));
+
+setRows(mapped);
         }
 
         if (pretestsErr || finalsErr) {
@@ -381,13 +399,13 @@ export default function DataAdmin() {
   // =========================
   // Group t-test (based on current filtered list)
   // =========================
-  const filteredUserIds = useMemo(() => {
-    return new Set(filtered.map((x) => x.user_id));
-  }, [filtered]);
+const filteredUserIds = useMemo(() => {
+  return new Set(filtered.map((x) => x.user_id));
+}, [filtered]);
 
-  const visiblePairs = useMemo(() => {
-    return groupPairs.filter((x) => filteredUserIds.has(x.user_id));
-  }, [groupPairs, filteredUserIds]);
+const visiblePairs = useMemo(() => {
+  return groupPairs.filter((x) => filteredUserIds.has(x.user_id));
+}, [groupPairs, filteredUserIds]);
 
   const groupStats = useMemo(() => {
     return pairedTTest(visiblePairs);
