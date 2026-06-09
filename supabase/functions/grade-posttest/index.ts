@@ -7,6 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+
 const PASS_PERCENT = 80;
 const SUMMARY_MAX_CHARS = 500;
 
@@ -370,8 +371,6 @@ function normalizeShortPhrase(text: unknown, fallback: string): string {
   if (!clean) return fallback;
   if (hasIncompleteEnding(clean)) return fallback;
 
-  // ห้ามใช้ slice/substring กับภาษาไทยเพื่อบังคับความยาว
-  // ถ้าข้อความยาว ให้ใช้ทั้งข้อความหรือ fallback เท่านั้น เพื่อไม่ให้จบกลางคำ
   return clean;
 }
 
@@ -454,8 +453,6 @@ function safeCompleteSummary(
   _percent: number,
   _pass: boolean,
 ): string {
-  // ไม่ใช้ summary ดิบจาก AI และไม่เลือกประโยคตามคะแนนรวม
-  // Executive Summary ต้องย่อจาก strengths/weaknesses ที่ AI วิเคราะห์จากคำตอบจริงเท่านั้น
   return buildExecutiveSummaryFromEvidence(strengths, weaknesses);
 }
 
@@ -534,33 +531,214 @@ function buildSummaryRowsForAi(
     .filter(Boolean) as SummaryRowForAi[];
 }
 
-async function callGeminiJson(apiKey: string, prompt: string): Promise<string> {
-  const url =
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+class GeminiApiError extends Error {
+  status: number;
+  body: string;
+  retryAfterMs: number | null;
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [{ text: prompt }],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.2,
-        responseMimeType: "application/json",
-      },
-    }),
-  });
+  constructor(status: number, body: string, retryAfterMs: number | null = null) {
+    super(`Gemini API error ${status}: ${body}`);
+    this.status = status;
+    this.body = body;
+    this.retryAfterMs = retryAfterMs;
+  }
+}
 
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Gemini API error ${res.status}: ${errText}`);
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRetryableGeminiError(err: unknown): boolean {
+  if (err instanceof GeminiApiError) {
+    return [429, 500, 502, 503, 504].includes(err.status);
   }
 
-  const out = await res.json();
-  return out?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+  if (err instanceof Error && err.name === "AbortError") {
+    return true;
+  }
+
+  return false;
+}
+
+function shouldTryNextGeminiModel(err: unknown): boolean {
+  if (err instanceof GeminiApiError) {
+    return [404, 429, 500, 502, 503, 504].includes(err.status);
+  }
+
+  if (err instanceof Error && err.name === "AbortError") {
+    return true;
+  }
+
+  return false;
+}
+
+function getErrorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
+function envNumber(name: string, fallback: number, min: number, max: number): number {
+  const value = Deno.env.get(name);
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return clamp(Math.floor(parsed), min, max);
+}
+
+function parseRetryAfterMs(value: string | null): number | null {
+  if (!value) return null;
+
+  const seconds = Number(value);
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return seconds * 1000;
+  }
+
+  const dateMs = Date.parse(value);
+  if (Number.isFinite(dateMs)) {
+    return Math.max(0, dateMs - Date.now());
+  }
+
+  return null;
+}
+
+function getGeminiModels(): string[] {
+  const primary = Deno.env.get("GEMINI_MODEL") || "gemini-2.5-flash";
+  const fallbackModels = Deno.env.get("GEMINI_FALLBACK_MODELS") ||
+    "gemini-2.5-flash-lite";
+
+  const configured = Deno.env.get("GEMINI_MODELS") ||
+    [primary, fallbackModels].filter(Boolean).join(",");
+
+  return [
+    ...new Set(
+      configured
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean),
+    ),
+  ];
+}
+
+function getGeminiWaitMs(err: unknown, attempt: number): number {
+  const retryAfterMs = err instanceof GeminiApiError ? err.retryAfterMs : null;
+
+  const maxWaitMs = envNumber("GEMINI_RETRY_MAX_MS", 20_000, 1_000, 60_000);
+
+  if (retryAfterMs != null) {
+    return clamp(retryAfterMs, 0, maxWaitMs);
+  }
+
+  const baseMs = envNumber("GEMINI_RETRY_BASE_MS", 1_500, 250, 10_000);
+  const capMs = Math.min(maxWaitMs, baseMs * Math.pow(2, attempt));
+
+  // Equal jitter: long enough to help during high-demand spikes, but avoids all
+  // requests retrying at exactly the same time.
+  return Math.floor(capMs / 2 + Math.random() * (capMs / 2));
+}
+
+function getGeminiResponseStatus(err: unknown): number {
+  if (err instanceof GeminiApiError) {
+    if ([429, 500, 502, 503, 504].includes(err.status)) return err.status;
+  }
+
+  if (err instanceof Error && err.name === "AbortError") return 503;
+
+  return 500;
+}
+
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs = envNumber("GEMINI_TIMEOUT_MS", 30_000, 5_000, 90_000),
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function callGeminiJson(
+  apiKey: string,
+  prompt: string,
+  label = "Gemini request",
+): Promise<string> {
+  const models = getGeminiModels();
+  const maxRetries = envNumber("GEMINI_MAX_RETRIES", 6, 0, 10);
+  let lastErr: unknown;
+
+  for (const model of models) {
+    const url =
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const res = await fetchWithTimeout(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [{ text: prompt }],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.2,
+              responseMimeType: "application/json",
+            },
+          }),
+        });
+
+        if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          const retryAfterMs = parseRetryAfterMs(res.headers.get("retry-after"));
+          throw new GeminiApiError(res.status, errText, retryAfterMs);
+        }
+
+        const out = await res.json();
+        return out?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+      } catch (err) {
+        lastErr = err;
+
+        const retryable = isRetryableGeminiError(err);
+
+        if (!retryable || attempt === maxRetries) {
+          break;
+        }
+
+        const waitMs = getGeminiWaitMs(err, attempt);
+
+        console.warn("Gemini retry", {
+          label,
+          model,
+          attempt: attempt + 1,
+          maxRetries,
+          waitMs,
+          error: getErrorMessage(err),
+        });
+
+        await sleep(waitMs);
+      }
+    }
+
+    if (shouldTryNextGeminiModel(lastErr)) {
+      console.warn("Gemini switching model", {
+        label,
+        failedModel: model,
+        nextAvailable: models.filter((x) => x !== model),
+        error: getErrorMessage(lastErr),
+      });
+      continue;
+    }
+
+    throw lastErr;
+  }
+
+  throw lastErr;
 }
 
 async function callGeminiSummaryOnly(
@@ -600,7 +778,7 @@ ${percent}
 ${pass ? "ผ่าน" : "ยังไม่ผ่าน"}
 
 ข้อมูลคำตอบทั้งหมด:
-${JSON.stringify(summaryRows, null, 2)}
+${JSON.stringify(summaryRows)}
 
 ตอบ JSON เท่านั้นในรูปแบบนี้:
 {
@@ -617,7 +795,7 @@ ${JSON.stringify(summaryRows, null, 2)}
 }
 `.trim();
 
-  const summaryText = await callGeminiJson(apiKey, summaryPrompt);
+  const summaryText = await callGeminiJson(apiKey, summaryPrompt, "Summary only");
 
   return safeParseJson<SummarySource>(summaryText, {
     summary: "",
@@ -888,10 +1066,10 @@ Deno.serve(async (req) => {
 - ให้ weaknesses เป็น [] ได้เฉพาะเมื่อผู้เรียนทำได้เต็มทุกข้อเท่านั้น
 
 ข้อมูล objective_items (ตรวจแล้ว):
-${JSON.stringify(objectiveSummaryRows, null, 2)}
+${JSON.stringify(objectiveSummaryRows)}
 
 ข้อมูล short_items (ให้คุณตรวจ):
-${JSON.stringify(shortBatch, null, 2)}
+${JSON.stringify(shortBatch)}
 
 ตอบ JSON เท่านั้นในรูปแบบนี้:
 {
@@ -919,7 +1097,7 @@ ${JSON.stringify(shortBatch, null, 2)}
 `.trim();
 
       try {
-        const batchText = await callGeminiJson(apiKey, aiPrompt);
+        const batchText = await callGeminiJson(apiKey, aiPrompt, "Short batch grading");
 
         const batchParsed = safeParseJson<ShortBatchResult>(batchText, {
           results_by_id: {},
@@ -989,6 +1167,12 @@ ${JSON.stringify(shortBatch, null, 2)}
       } catch (itemErr) {
         console.error("Short batch grading failed:", itemErr);
 
+        // ถ้าเป็นปัญหา Gemini ชั่วคราว เช่น 429/503/timeout อย่าบันทึกคะแนนข้อเขียนเป็น 0
+        // เพราะจะทำให้ผลสอบผิดและซ่อนปัญหาจริง ให้ปล่อย error กลับไปให้ client/cron retry อีกครั้ง
+        if (isRetryableGeminiError(itemErr)) {
+          throw itemErr;
+        }
+
         for (const row of answerRows) {
           const item = normalizeItem(row.posttest_items);
           if (!item || item.type !== "short") continue;
@@ -997,7 +1181,7 @@ ${JSON.stringify(shortBatch, null, 2)}
           const fallbackScore = 0;
 
           const fallbackFeedback = studentAnswer
-            ? "ระบบตรวจคำตอบอัตโนมัติขัดข้อง กรุณาตรวจทานอีกครั้ง"
+            ? "ระบบประเมินคำตอบไม่สำเร็จ กรุณาตรวจทานอีกครั้ง"
             : "ไม่พบคำตอบจากนักเรียน";
 
           await sbAdmin
@@ -1150,7 +1334,7 @@ ${JSON.stringify(shortBatch, null, 2)}
     if (summarySaveErr) throw summarySaveErr;
 
     console.log("✅ AI grading/summarizing done");
-    console.log("✅ SUMMARY SAVED WITH evidence-summary-from-strengths-weaknesses-v7");
+    console.log("✅ SUMMARY SAVED WITH evidence-summary-from-strengths-weaknesses-v7-retry-gemini-only");
     console.log("✅ FINAL SCORE:", {
       totalScore,
       maxScore,
@@ -1173,7 +1357,14 @@ ${JSON.stringify(shortBatch, null, 2)}
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
+    const status = getGeminiResponseStatus(err);
     console.error("CRITICAL ERROR:", message);
-    return jsonResponse({ error: message }, 500);
+    return jsonResponse(
+      {
+        error: message,
+        retryable: isRetryableGeminiError(err),
+      },
+      status,
+    );
   }
 });

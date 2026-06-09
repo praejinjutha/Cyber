@@ -1,0 +1,33 @@
+เพิ่มใน DataAdmin.jsx
+
+1) import FiPrinter
+
+import {
+  FiEye,
+  FiMail,
+  FiUser,
+  FiClipboard,
+  FiBarChart2,
+  FiUsers,
+  FiTrendingUp,
+  FiActivity,
+  FiPrinter,
+} from "react-icons/fi";
+
+2) วางปุ่มนี้ใน <div className="edu-topbar__right"> เป็นปุ่มแรก
+
+<Link
+  to="/admin/print-report"
+  target="_blank"
+  rel="noreferrer"
+  className="edu-btn edu-btn--primary"
+  style={{
+    textDecoration: "none",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+  }}
+>
+  <FiPrinter />
+  พิมพ์ข้อมูล
+</Link>

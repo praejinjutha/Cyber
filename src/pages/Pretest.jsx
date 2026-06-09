@@ -655,9 +655,57 @@ export default function Pretest() {
     }
   };
 
-  const handleStartExam = () => {
-    setShowRulesModal(false);
-    setExamStarted(true);
+  const handleStartExam = async () => {
+    if (!attemptId) {
+      setMsg("ยังไม่พบ attempt กรุณารอสักครู่หรือรีเฟรชหน้า");
+      return;
+    }
+
+    const nowIso = new Date().toISOString();
+
+    try {
+      const { data: attemptRow, error: readErr } = await supabase
+        .from("pretest_attempts")
+        .select("meta, unit_started_at")
+        .eq("id", attemptId)
+        .single();
+
+      if (readErr) throw readErr;
+
+      const prevMeta = attemptRow?.meta || {};
+      const alreadyStartedAt = prevMeta.exam_started_at;
+
+      if (alreadyStartedAt) {
+        const existingStart = attemptRow.unit_started_at || alreadyStartedAt;
+
+        setUnitStartedAt(existingStart);
+        setTimeLeft(calculateRemainingSeconds(existingStart, safeCurrentUnit));
+        setShowRulesModal(false);
+        setExamStarted(true);
+        return;
+      }
+
+      const { error: updateErr } = await supabase
+        .from("pretest_attempts")
+        .update({
+          unit_started_at: nowIso,
+          meta: {
+            ...prevMeta,
+            exam_started_at: nowIso,
+          },
+        })
+        .eq("id", attemptId);
+
+      if (updateErr) throw updateErr;
+
+      setUnitStartedAt(nowIso);
+      setTimeLeft(getUnitTimeSeconds(safeCurrentUnit));
+      setShowRulesModal(false);
+      setExamStarted(true);
+    } catch (error) {
+      console.error("handleStartExam error:", error);
+      setMsg(`เริ่มทำข้อสอบไม่สำเร็จ: ${error.message || ""}`);
+    }
   };
 
   useEffect(() => {
@@ -729,28 +777,36 @@ export default function Pretest() {
           .from("pretests")
           .select("id, title, version")
           .eq("is_active", true)
-          .single();
-
-        if (pretestErr || !pretest) {
-          console.error(pretestErr);
-          if (alive) setMsg("ไม่พบชุดข้อสอบ Pretest");
-          return;
-        }
-
-        const { data: existingAttempt, error: existingAttemptErr } = await supabase
-          .from("pretest_attempts")
-          .select("id, status, current_unit, unit_started_at, meta")
-          .eq("user_id", user.id)
-          .eq("pretest_id", pretest.id)
+          .limit(1)
           .maybeSingle();
 
-        if (existingAttemptErr) {
-          console.error(existingAttemptErr);
-          if (alive) setMsg("โหลดสถานะการทำข้อสอบไม่สำเร็จ");
+        if (pretestErr || !pretest) {
+          console.error("pretestErr:", pretestErr);
+          if (alive) {
+            setMsg(
+              pretestErr
+                ? `โหลดชุดข้อสอบ Pretest ไม่สำเร็จ: ${pretestErr.message}`
+                : "ไม่พบชุดข้อสอบ Pretest ที่เปิดใช้งาน"
+            );
+          }
           return;
         }
 
-        let currentAttempt = existingAttempt ?? null;
+        const getExistingPretestAttempt = async () => {
+          const { data, error } = await supabase
+            .from("pretest_attempts")
+            .select("id, status, current_unit, unit_started_at, meta, attempt_no, started_at")
+            .eq("user_id", user.id)
+            .eq("pretest_id", pretest.id)
+            .order("started_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (error) throw error;
+          return data ?? null;
+        };
+
+        let currentAttempt = await getExistingPretestAttempt();
 
         if (!currentAttempt) {
           const nowIso = new Date().toISOString();
@@ -758,31 +814,47 @@ export default function Pretest() {
           const { data: createdAttempt, error: createAttemptErr } = await supabase
             .from("pretest_attempts")
             .insert({
-              pretest_id: pretest.id,
-              user_id: user.id,
-              attempt_no: 1,
-              status: "in_progress",
-              current_unit: 1,
-              unit_started_at: nowIso,
-              started_at: nowIso,
-              meta: { source: "frontend", locked_units: [] },
-            })
-            .select("id, status, current_unit, unit_started_at, meta")
+  pretest_id: pretest.id,
+  user_id: user.id,
+  attempt_no: 1,
+  status: "in_progress",
+  current_unit: 1,
+  unit_started_at: nowIso,
+  started_at: nowIso,
+  meta: {
+    source: "frontend",
+    locked_units: [],
+    exam_started_at: null,
+  },
+})
+            .select("id, status, current_unit, unit_started_at, meta, attempt_no, started_at")
             .single();
 
           if (createAttemptErr || !createdAttempt) {
-            console.error(createAttemptErr);
-            if (alive) {
-              setMsg(
-                `สร้าง attempt ไม่สำเร็จ: ${
-                  createAttemptErr?.message || "unknown error"
-                }`
-              );
-            }
-            return;
-          }
+            console.warn("createAttemptErr, trying to recover existing attempt:", createAttemptErr);
 
-          currentAttempt = createdAttempt;
+            if (createAttemptErr?.status === 409 || createAttemptErr?.code === "23505") {
+              currentAttempt = await getExistingPretestAttempt();
+
+              if (!currentAttempt) {
+                if (alive) {
+                  setMsg("สร้าง attempt ซ้ำชนกัน และไม่พบ attempt ล่าสุด กรุณารีเฟรชอีกครั้ง");
+                }
+                return;
+              }
+            } else {
+              if (alive) {
+                setMsg(
+                  `สร้าง attempt ไม่สำเร็จ: ${
+                    createAttemptErr?.message || "unknown error"
+                  }`
+                );
+              }
+              return;
+            }
+          } else {
+            currentAttempt = createdAttempt;
+          }
         }
 
         const { data: itemsData, error: itemsErr } = await supabase
@@ -809,10 +881,15 @@ export default function Pretest() {
           initialAnswers[it.id] = initAnswerByType(it.type);
         });
 
-        const { data: savedAnswers } = await supabase
+        const { data: savedAnswers, error: savedAnswersErr } = await supabase
           .from("pretest_answers")
           .select("item_id, answer")
           .eq("attempt_id", currentAttempt.id);
+
+        if (savedAnswersErr) {
+          console.error("savedAnswersErr:", savedAnswersErr);
+          throw savedAnswersErr;
+        }
 
         (savedAnswers || []).forEach((row) => {
           const item = normalizedItems.find((it) => it.id === row.item_id);
@@ -829,18 +906,34 @@ export default function Pretest() {
           TOTAL_UNITS
         );
 
+        const hasStarted = !!currentAttempt.meta?.exam_started_at;
+const timerStartedAt = hasStarted
+  ? currentAttempt.unit_started_at || currentAttempt.meta?.exam_started_at || null
+  : null;
+
         setPretestId(pretest.id);
         setAttemptId(currentAttempt.id);
         setItems(normalizedItems);
         setAnswers(initialAnswers);
         setCurrentUnit(loadedUnit);
-        setUnitStartedAt(currentAttempt.unit_started_at || new Date().toISOString());
+        setUnitStartedAt(timerStartedAt);
         setTimeLeft(
-  calculateRemainingSeconds(
-    currentAttempt.unit_started_at,
-    loadedUnit
-  )
-);
+          timerStartedAt
+            ? calculateRemainingSeconds(timerStartedAt, loadedUnit)
+            : getUnitTimeSeconds(loadedUnit)
+        );
+        setExamStarted(hasStarted);
+        setShowRulesModal(!hasStarted);
+      } catch (error) {
+        console.error("LOAD PRETEST ERROR:", error);
+
+        if (alive) {
+          setMsg(
+            `โหลด Pretest ไม่สำเร็จ: ${
+              error?.message || JSON.stringify(error) || "unknown error"
+            }`
+          );
+        }
       } finally {
         if (alive) setLoading(false);
       }
@@ -1180,7 +1273,9 @@ export default function Pretest() {
           </div>
 
           {items.length === 0 ? (
-            <div style={{ padding: 20 }}>ไม่พบข้อสอบ</div>
+            <div style={{ padding: 20 }}>
+              {msg ? <div className="alert">{msg}</div> : "ไม่พบข้อสอบ"}
+            </div>
           ) : (
             <form
               className="form"

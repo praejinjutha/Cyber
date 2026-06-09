@@ -102,6 +102,7 @@ export default function Final() {
   const autoMovingRef = useRef(false);
   const finalizingRef = useRef(false);
   const processingRef = useRef(false);
+  const mountedRef = useRef(false);
 
   const openProcessingPopup = (title, description) => {
     processingRef.current = true;
@@ -728,13 +729,64 @@ export default function Final() {
     }
   };
 
-  const handleStartExam = () => {
+  const handleStartExam = async () => {
+  if (!attemptId) {
+    setMsg("ยังไม่พบ attempt กรุณารอสักครู่หรือรีเฟรชหน้า");
+    return;
+  }
+
+  const nowIso = new Date().toISOString();
+
+  try {
+    const { data: attemptRow, error: readErr } = await supabase
+      .from("final_test_attempts")
+      .select("meta, unit_started_at")
+      .eq("id", attemptId)
+      .single();
+
+    if (readErr) throw readErr;
+
+    const prevMeta = attemptRow?.meta || {};
+    const alreadyStartedAt = prevMeta.exam_started_at;
+
+    if (alreadyStartedAt) {
+      const existingStart = attemptRow.unit_started_at || alreadyStartedAt;
+
+      setUnitStartedAt(existingStart);
+      setTimeLeft(calculateRemainingSeconds(existingStart, safeCurrentUnit));
+      setShowRulesModal(false);
+      setExamStarted(true);
+      return;
+    }
+
+    const { error: updateErr } = await supabase
+      .from("final_test_attempts")
+      .update({
+        unit_started_at: nowIso,
+        meta: {
+          ...prevMeta,
+          exam_started_at: nowIso,
+        },
+      })
+      .eq("id", attemptId);
+
+    if (updateErr) throw updateErr;
+
+    setUnitStartedAt(nowIso);
+    setTimeLeft(getUnitTimeSeconds(safeCurrentUnit));
     setShowRulesModal(false);
     setExamStarted(true);
-  };
+  } catch (error) {
+    console.error("handleStartExam error:", error);
+    setMsg(`เริ่มทำข้อสอบไม่สำเร็จ: ${error.message || ""}`);
+  }
+};
 
   useEffect(() => {
-    let alive = true;
+    mountedRef.current = true;
+
+    const isMounted = () => mountedRef.current;
+    const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
     (async () => {
       try {
@@ -747,7 +799,7 @@ export default function Final() {
         } = await supabase.auth.getUser();
 
         if (userErr) {
-          console.error(userErr);
+          console.error("userErr:", userErr);
           navigate("/login", { replace: true });
           return;
         }
@@ -757,7 +809,7 @@ export default function Final() {
           return;
         }
 
-        setUserId(user.id);
+        if (isMounted()) setUserId(user.id);
 
         const { data: profile, error: profileErr } = await supabase
           .from("student_profiles")
@@ -766,7 +818,7 @@ export default function Final() {
           .maybeSingle();
 
         if (profileErr) {
-          console.error(profileErr);
+          console.error("profileErr:", profileErr);
           navigate("/profile", { replace: true });
           return;
         }
@@ -785,84 +837,176 @@ export default function Final() {
           .from("final_tests")
           .select("id, title, version")
           .eq("is_active", true)
-          .single();
+          .order("version", { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
         if (finalTestErr || !finalTest) {
-          console.error(finalTestErr);
-          if (alive) setMsg("ไม่พบชุดข้อสอบ Final");
+          console.error("finalTestErr:", finalTestErr);
+          if (isMounted()) {
+            setMsg(
+              finalTestErr
+                ? `โหลดชุดข้อสอบ Final ไม่สำเร็จ: ${finalTestErr.message}`
+                : "ไม่พบชุดข้อสอบ Final ที่เปิดใช้งาน หรือสิทธิ์ RLS ยังอ่านไม่ได้"
+            );
+          }
           return;
         }
 
         const snapshot = await loadFinalScoreSnapshot(user.id, finalTest.id);
 
-        const { data: inProgressAttempts, error: inProgressErr } = await supabase
-          .from("final_test_attempts")
-          .select("id, status, current_unit, unit_started_at, meta, attempt_no, started_at")
-          .eq("user_id", user.id)
-          .eq("final_test_id", finalTest.id)
-          .eq("status", "in_progress")
-          .order("started_at", { ascending: false })
-          .limit(1);
-
-        if (inProgressErr) {
-          console.error(inProgressErr);
-          if (alive) setMsg("โหลดสถานะการทำข้อสอบไม่สำเร็จ");
-          return;
-        }
-
-        let currentAttempt =
-          Array.isArray(inProgressAttempts) && inProgressAttempts.length > 0
-            ? inProgressAttempts[0]
-            : null;
-
-        if (!currentAttempt) {
-          const { data: latestAttempt, error: latestAttemptErr } = await supabase
+        const getLatestInProgressAttempt = async () => {
+          const { data, error } = await supabase
             .from("final_test_attempts")
-            .select("attempt_no")
+            .select("id, status, current_unit, unit_started_at, meta, attempt_no, started_at")
             .eq("user_id", user.id)
             .eq("final_test_id", finalTest.id)
-            .order("attempt_no", { ascending: false })
+            .eq("status", "in_progress")
+            .order("started_at", { ascending: false })
             .limit(1)
             .maybeSingle();
 
-          if (latestAttemptErr) {
-            console.error(latestAttemptErr);
-            if (alive) setMsg("โหลดข้อมูลการทำ Final ไม่สำเร็จ");
-            return;
+          if (error) throw error;
+          return data ?? null;
+        };
+
+        const getLatestInProgressAttemptWithRetry = async () => {
+          for (let i = 0; i < 8; i += 1) {
+            const attempt = await getLatestInProgressAttempt();
+            if (attempt) return attempt;
+            await sleep(120);
           }
+          return null;
+        };
 
-          const nextAttemptNo = Number(latestAttempt?.attempt_no || 0) + 1;
-          const nowIso = new Date().toISOString();
+        let currentAttempt = await getLatestInProgressAttempt();
 
-          const { data: createdAttempt, error: createAttemptErr } = await supabase
-            .from("final_test_attempts")
-            .insert({
-              final_test_id: finalTest.id,
-              user_id: user.id,
-              attempt_no: nextAttemptNo,
-              status: "in_progress",
-              current_unit: 1,
-              unit_started_at: nowIso,
-              started_at: nowIso,
-              flag_count: 0,
-              meta: { source: "frontend", locked_units: [] },
-            })
-            .select("id, status, current_unit, unit_started_at, meta, attempt_no, started_at")
-            .single();
+        if (!currentAttempt) {
+          // กันเคส React StrictMode / Fast Refresh ยิง useEffect ซ้อน:
+          // รอสั้น ๆ แล้วเช็กอีกครั้งก่อน insert เพื่อหลีกเลี่ยง 409 ให้มากที่สุด
+          await sleep(80);
+          currentAttempt = await getLatestInProgressAttempt();
+        }
 
-          if (createAttemptErr || !createdAttempt) {
-            console.error(createAttemptErr);
-            if (alive) {
-              setMsg(
-                `สร้าง attempt ไม่สำเร็จ: ${
-                  createAttemptErr?.message || "unknown error"
-                }`
-              );
+        if (!currentAttempt) {
+          const lockKey = `final-test-attempt-lock:${user.id}:${finalTest.id}`;
+          const lockValue = `${Date.now()}:${Math.random()}`;
+          const lockMaxAgeMs = 5000;
+
+          const getFreshLock = () => {
+            try {
+              const raw = window.localStorage.getItem(lockKey);
+              if (!raw) return null;
+
+              const ts = Number(String(raw).split(":")[0]);
+              if (!Number.isFinite(ts)) return null;
+
+              if (Date.now() - ts > lockMaxAgeMs) {
+                window.localStorage.removeItem(lockKey);
+                return null;
+              }
+
+              return raw;
+            } catch {
+              return null;
             }
-            return;
+          };
+
+          const setOwnLock = () => {
+            try {
+              window.localStorage.setItem(lockKey, lockValue);
+            } catch {
+              // ignore localStorage errors
+            }
+          };
+
+          const removeOwnLock = () => {
+            try {
+              if (window.localStorage.getItem(lockKey) === lockValue) {
+                window.localStorage.removeItem(lockKey);
+              }
+            } catch {
+              // ignore localStorage errors
+            }
+          };
+
+          const existingLock = getFreshLock();
+          if (existingLock) {
+            currentAttempt = await getLatestInProgressAttemptWithRetry();
           }
 
-          currentAttempt = createdAttempt;
+          if (!currentAttempt) {
+            setOwnLock();
+            await sleep(60);
+
+            // ถ้าระหว่างรอมีอีก effect/tab แย่ง lock ไป ให้รอ attempt ที่มันสร้างแทน
+            if (getFreshLock() !== lockValue) {
+              currentAttempt = await getLatestInProgressAttemptWithRetry();
+            }
+          }
+
+          if (!currentAttempt) {
+            try {
+              const { data: latestAttempt, error: latestAttemptErr } = await supabase
+                .from("final_test_attempts")
+                .select("attempt_no")
+                .eq("user_id", user.id)
+                .eq("final_test_id", finalTest.id)
+                .order("attempt_no", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+              if (latestAttemptErr) {
+                console.error("latestAttemptErr:", latestAttemptErr);
+                if (isMounted()) setMsg("โหลดข้อมูลการทำ Final ไม่สำเร็จ");
+                return;
+              }
+
+              const nextAttemptNo = Number(latestAttempt?.attempt_no || 0) + 1;
+              const nowIso = new Date().toISOString();
+
+              const { data: createdAttempt, error: createAttemptErr } = await supabase
+                .from("final_test_attempts")
+                .insert({
+                  final_test_id: finalTest.id,
+                  user_id: user.id,
+                  attempt_no: nextAttemptNo,
+                  status: "in_progress",
+                  current_unit: 1,
+                  unit_started_at: null,
+                  started_at: nowIso,
+                  flag_count: 0,
+                  meta: {
+                    source: "frontend",
+                    locked_units: [],
+                    exam_started_at: null,
+                  },
+                })
+                .select("id, status, current_unit, unit_started_at, meta, attempt_no, started_at")
+                .single();
+
+              if (createAttemptErr || !createdAttempt) {
+                console.warn("createAttemptErr, trying to recover existing attempt:", createAttemptErr);
+
+                currentAttempt = await getLatestInProgressAttemptWithRetry();
+
+                if (!currentAttempt) {
+                  if (isMounted()) {
+                    setMsg(
+                      `สร้าง attempt ไม่สำเร็จ: ${
+                        createAttemptErr?.message || JSON.stringify(createAttemptErr) || "unknown error"
+                      }`
+                    );
+                  }
+                  return;
+                }
+              } else {
+                currentAttempt = createdAttempt;
+              }
+            } finally {
+              removeOwnLock();
+            }
+          }
         }
 
         const { data: itemsData, error: itemsErr } = await supabase
@@ -872,8 +1016,8 @@ export default function Final() {
           .order("order_index", { ascending: true });
 
         if (itemsErr) {
-          console.error(itemsErr);
-          if (alive) setMsg("โหลดข้อสอบไม่สำเร็จ");
+          console.error("itemsErr:", itemsErr);
+          if (isMounted()) setMsg(`โหลดข้อสอบไม่สำเร็จ: ${itemsErr.message || ""}`);
           return;
         }
 
@@ -884,15 +1028,25 @@ export default function Final() {
           choices: Array.isArray(it.choices) ? it.choices : [],
         }));
 
+        if (normalizedItems.length === 0) {
+          if (isMounted()) setMsg("โหลดชุด Final สำเร็จ แต่ไม่พบรายการข้อสอบใน final_test_items");
+          return;
+        }
+
         const initialAnswers = {};
         normalizedItems.forEach((it) => {
           initialAnswers[it.id] = initAnswerByType(it.type);
         });
 
-        const { data: savedAnswers } = await supabase
+        const { data: savedAnswers, error: savedAnswersErr } = await supabase
           .from("final_test_answers")
           .select("item_id, answer")
           .eq("attempt_id", currentAttempt.id);
+
+        if (savedAnswersErr) {
+          console.error("savedAnswersErr:", savedAnswersErr);
+          throw savedAnswersErr;
+        }
 
         (savedAnswers || []).forEach((row) => {
           const item = normalizedItems.find((it) => it.id === row.item_id);
@@ -902,26 +1056,29 @@ export default function Final() {
           initialAnswers[row.item_id] = savedValue ?? "";
         });
 
-        if (!alive) return;
+        if (!isMounted()) return;
 
         const loadedUnit = Math.min(
           Math.max(Number(currentAttempt.current_unit || 1) || 1, 1),
           TOTAL_UNITS
         );
 
+        const hasStarted = !!currentAttempt.meta?.exam_started_at;
+        const timerStartedAt = hasStarted ? currentAttempt.unit_started_at : null;
+
         setFinalTestId(finalTest.id);
         setAttemptId(currentAttempt.id);
         setItems(normalizedItems);
         setAnswers(initialAnswers);
         setCurrentUnit(loadedUnit);
-        setUnitStartedAt(currentAttempt.unit_started_at || new Date().toISOString());
+        setUnitStartedAt(timerStartedAt);
         setTimeLeft(
-          calculateRemainingSeconds(
-            currentAttempt.unit_started_at,
-            loadedUnit
-          )
+          timerStartedAt
+            ? calculateRemainingSeconds(timerStartedAt, loadedUnit)
+            : getUnitTimeSeconds(loadedUnit)
         );
-
+        setExamStarted(hasStarted);
+        setShowRulesModal(!hasStarted);
         setScoreSnapshot({
           firstTotalScore: snapshot?.firstTotalScore ?? null,
           latestTotalScore: snapshot?.latestTotalScore ?? null,
@@ -929,13 +1086,23 @@ export default function Final() {
           firstSubmittedAt: snapshot?.firstSubmittedAt ?? null,
           latestSubmittedAt: snapshot?.latestSubmittedAt ?? null,
         });
+      } catch (error) {
+        console.error("LOAD FINAL ERROR:", error);
+
+        if (isMounted()) {
+          setMsg(
+            `โหลด Final ไม่สำเร็จ: ${
+              error?.message || JSON.stringify(error) || "unknown error"
+            }`
+          );
+        }
       } finally {
-        if (alive) setLoading(false);
+        if (isMounted()) setLoading(false);
       }
     })();
 
     return () => {
-      alive = false;
+      mountedRef.current = false;
     };
   }, [navigate]);
 
@@ -1287,7 +1454,9 @@ export default function Final() {
           </div>
 
           {items.length === 0 ? (
-            <div style={{ padding: 20 }}>ไม่พบข้อสอบ</div>
+            <div style={{ padding: 20 }}>
+              {msg ? <div className="alert">{msg}</div> : "ไม่พบข้อสอบ"}
+            </div>
           ) : (
             <form
               className="form"

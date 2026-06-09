@@ -10,6 +10,7 @@ import {
   FiUsers,
   FiTrendingUp,
   FiActivity,
+  FiPrinter,
 } from "react-icons/fi";
 import { supabase } from "../lib/supabase";
 
@@ -621,6 +622,19 @@ const visiblePairs = useMemo(() => {
           </div>
 
           <div className="edu-topbar__right">
+           <Link
+  to="/adminPrintReport"
+  className="edu-btn edu-btn--primary"
+  style={{
+    textDecoration: "none",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+  }}
+>
+  <FiPrinter />
+  พิมพ์ข้อมูล
+</Link>
             <Link to="/admin/login" className="edu-btn" style={{ textDecoration: "none" }}>
               ออกจากหน้า Admin
             </Link>

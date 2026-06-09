@@ -1,0 +1,5 @@
+เพิ่มใน App.js
+
+import AdminPrintReport from "./pages/AdminPrintReport";
+
+<Route path="/admin/print-report" element={<AdminPrintReport />} />

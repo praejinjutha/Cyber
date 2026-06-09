@@ -24,6 +24,7 @@ import LessonLinear from "./pages/LessonLinear";
 
 import Dashboard from "./pages/Dashboard";
 import DashScore from "./pages/DashScore";
+import AdminPrintReport from "./pages/AdminPrintReport";
 import Survey from "./pages/Survey";
 import LoginAdmin from "./pages/LoginAdmin";
 import DataAdmin from "./pages/DataAdmin";
@@ -319,9 +320,10 @@ export default function App() {
         <Route path="/admin/login" element={<LoginAdmin />} />
 
         {/* Admin */}
-        <Route element={<AdminRoute session={session} />}>
-          <Route path="/admin/data" element={<DataAdmin />} />
-        </Route>
+<Route element={<AdminRoute session={session} />}>
+  <Route path="/admin/data" element={<DataAdmin />} />
+  <Route path="/adminPrintReport" element={<AdminPrintReport />} />
+</Route>
 
         {/* Student */}
         <Route element={<ProtectedRoute session={session} />}>
