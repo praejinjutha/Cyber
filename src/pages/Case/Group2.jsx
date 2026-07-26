@@ -11,6 +11,14 @@ import {
   FiAlertTriangle, FiInfo, FiShield, FiTarget, FiMaximize2, FiX
 } from "react-icons/fi";
 
+const caseImages = import.meta.glob(
+  "../../assets/case/*.{png,jpg,jpeg,webp}",
+  {
+    eager: true,
+    import: "default",
+  }
+);
+
 export default function Group2() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -65,6 +73,9 @@ export default function Group2() {
 
   const currentData = caseStudies[currentStep];
 
+  const getCaseImage = (filename) =>
+  caseImages[`../../assets/case/${filename}`];
+
   return (
     <div className="edu-app">
       {/* --- MODAL POPUP --- */}
@@ -73,7 +84,7 @@ export default function Group2() {
           <button style={{ position: 'absolute', top: '30px', right: '30px', background: 'white', border: 'none', borderRadius: '50%', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             <FiX size={24} />
           </button>
-          <img src={`/src/assets/case/${selectedImg}`} alt="Large" style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain', borderRadius: '8px' }} onClick={(e) => e.stopPropagation()} />
+          <img src={getCaseImage(selectedImg)} alt="Large" style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain', borderRadius: '8px' }} onClick={(e) => e.stopPropagation()} />
         </div>
       )}
 
@@ -148,7 +159,7 @@ export default function Group2() {
                       display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative' 
                     }}
                   >
-                    <img src={`/src/assets/case/${imgName}`} alt="Case" style={{ maxWidth: '95%', maxHeight: '95%', objectFit: 'contain' }} />
+                    <img src={getCaseImage(imgName)} alt="Case" style={{ maxWidth: '95%', maxHeight: '95%', objectFit: 'contain' }} />
                     <div style={{ position: 'absolute', bottom: '15px', right: '15px', backgroundColor: 'rgba(15, 23, 42, 0.7)', color: 'white', padding: '8px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem' }}>
                       <FiMaximize2 /> ขยาย
                     </div>

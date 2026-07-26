@@ -11,6 +11,14 @@ import {
   FiInfo, FiShield, FiTarget, FiMaximize2, FiX, FiPlayCircle, FiYoutube
 } from "react-icons/fi";
 
+const caseAssets = import.meta.glob(
+  "../../assets/case/*.{png,jpg,jpeg,webp,mp4}",
+  {
+    eager: true,
+    import: "default",
+  }
+);
+
 export default function Group3() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -53,13 +61,16 @@ export default function Group3() {
 
   const currentData = caseStudies[currentStep];
 
+  const getCaseAsset = (filename) =>
+  caseAssets[`../../assets/case/${filename}`];
+
   return (
     <div className="edu-app">
       {/* --- MODAL POPUP (รูปภาพ) --- */}
       {selectedImg && (
         <div onClick={() => setSelectedImg(null)} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(15, 23, 42, 0.95)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', cursor: 'zoom-out' }}>
           <button style={{ position: 'absolute', top: '30px', right: '30px', background: 'white', border: 'none', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><FiX size={24} /></button>
-          <img src={`/src/assets/case/${selectedImg}`} alt="Large" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain', borderRadius: '12px' }} onClick={(e) => e.stopPropagation()} />
+          <img src={getCaseAsset(selectedImg)} alt="Large" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain', borderRadius: '12px' }} onClick={(e) => e.stopPropagation()} />
         </div>
       )}
 
@@ -86,7 +97,7 @@ export default function Group3() {
         <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${activeVideo}?autoplay=1`} frameBorder="0" allowFullScreen style={{ borderRadius: '16px' }}></iframe>
       ) : ( 
         <video 
-          src={`/src/assets/case/${activeVideo}`} 
+          src={getCaseAsset(activeVideo)} 
           controls 
           autoPlay 
           style={{ 
@@ -152,7 +163,7 @@ export default function Group3() {
                   /* เคส 11: รูปคู่ปุ่มวิดีโอ */
                   <div style={{ width: '100%', height: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
                     <div onClick={() => setSelectedImg(currentData.image)} style={{ borderRight: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-in' }}>
-                      <img src={`/src/assets/case/${currentData.image}`} alt="Evidence" style={{ maxWidth: '90%', maxHeight: '90%' }} />
+                      <img src={getCaseAsset(currentData.image)} alt="Evidence" style={{ maxWidth: '90%', maxHeight: '90%' }} />
                     </div>
                     <div onClick={() => setActiveVideo(currentData.video)} style={{ background: '#000', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                       <FiPlayCircle size={60} color="white" />

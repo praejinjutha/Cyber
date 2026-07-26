@@ -151,7 +151,7 @@ const categories = [
         <section className="edu-panel1">
           <div className="edu-panel1__head">
             <div className="edu-panel1__title">
-              <FiAlertTriangle aria-hidden="true" /> รวม 21 กรณีศึกษาและแนวทางป้องกัน
+              <FiAlertTriangle aria-hidden="true" /> รวมกรณีศึกษาและแนวทางป้องกัน
             </div>
           </div>
 

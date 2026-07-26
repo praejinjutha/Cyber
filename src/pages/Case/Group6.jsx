@@ -11,6 +11,14 @@ import {
   FiInfo, FiShield, FiTarget, FiMaximize2, FiX, FiCpu, FiMail, FiAlertOctagon
 } from "react-icons/fi";
 
+const caseImages = import.meta.glob(
+  "../../assets/case/*.{png,jpg,jpeg,webp}",
+  {
+    eager: true,
+    import: "default",
+  }
+);
+
 export default function Group6() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -51,13 +59,16 @@ export default function Group6() {
 
   const currentData = caseStudies[currentStep];
 
+  const getCaseImage = (filename) =>
+  caseImages[`../../assets/case/${filename}`];
+
   return (
     <div className="edu-app">
       {/* --- MODAL POPUP --- */}
       {selectedImg && (
         <div onClick={() => setSelectedImg(null)} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(15, 23, 42, 0.95)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', cursor: 'zoom-out', padding: '20px' }}>
           <button style={{ position: 'absolute', top: '30px', right: '30px', background: 'white', border: 'none', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiX size={24} /></button>
-          <img src={`/src/assets/case/${selectedImg}`} alt="Evidence" style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain', borderRadius: '12px' }} onClick={(e) => e.stopPropagation()} />
+          <img src={getCaseImage(selectedImg)} alt="Evidence" style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain', borderRadius: '12px' }} onClick={(e) => e.stopPropagation()} />
         </div>
       )}
 
@@ -105,12 +116,12 @@ export default function Group6() {
 
           <div className="cb-panel-body" style={{ padding: '40px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '40px', alignItems: 'center' }}>
-              
+
               {/* --- โซนหลักฐาน (รองรับ 1 หรือ 2 รูป) --- */}
               <div style={{ display: 'grid', gridTemplateColumns: currentData.images.length > 1 ? '1fr 1fr' : '1fr', gap: '15px' }}>
                 {currentData.images.map((img, idx) => (
                   <div key={idx} onClick={() => setSelectedImg(img)} style={{ background: '#f8fafc', borderRadius: '24px', border: '2px solid #e2e8f0', height: '380px', overflow: 'hidden', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                    <img src={`/src/assets/case/${img}`} alt="Evidence" style={{ maxWidth: '95%', maxHeight: '95%', objectFit: 'contain' }} />
+                    <img src={getCaseImage(img)} alt="Evidence" style={{ maxWidth: '95%', maxHeight: '95%', objectFit: 'contain' }} />
                     <div style={{ position: 'absolute', bottom: '15px', backgroundColor: 'rgba(15, 23, 42, 0.7)', color: 'white', padding: '8px 15px', borderRadius: '20px', fontSize: '0.8rem' }}><FiMaximize2 /> ขยาย</div>
                   </div>
                 ))}
