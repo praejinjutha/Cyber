@@ -11,6 +11,14 @@ import {
   FiAlertTriangle, FiInfo, FiShield, FiTarget, FiMaximize2, FiX
 } from "react-icons/fi";
 
+const caseImages = import.meta.glob(
+  "../../assets/case/*.{png,jpg,jpeg,webp}",
+  {
+    eager: true,
+    import: "default",
+  }
+);
+
 export default function Group1() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -85,7 +93,8 @@ export default function Group1() {
   }, [navigate]);
 
   const currentData = caseStudies[currentStep];
-
+const getCaseImage = (filename) =>
+  caseImages[`../../assets/case/${filename}`];
   return (
     <div className="edu-app">
       {/* --- MODAL POPUP --- */}
@@ -106,7 +115,7 @@ export default function Group1() {
             <FiX size={24} color="#0f172a" />
           </button>
           <img 
-            src={`/src/assets/case/${currentData.image}`} 
+            src={getCaseImage(currentData.image)} 
             alt="Large View" 
             style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}
             onClick={(e) => e.stopPropagation()} 
@@ -180,7 +189,7 @@ export default function Group1() {
                   onClick={() => setIsModalOpen(true)}
                 >
                   <img 
-                    src={`/src/assets/case/${currentData.image}`} 
+                    src={getCaseImage(currentData.image)} 
                     alt="Case Evidence" 
                     style={{ maxWidth: '95%', maxHeight: '95%', objectFit: 'contain' }}
                   />
@@ -251,4 +260,7 @@ export default function Group1() {
       </main>
     </div>
   );
+
+
+
 }

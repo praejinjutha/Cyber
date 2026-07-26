@@ -1885,3 +1885,69 @@ button{ font: inherit; }
   word-break: break-word;
   overflow-wrap: anywhere;
 }
+
+.posttestBtn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  font-weight: 800;
+  font-size: 15px;
+
+  background: linear-gradient(
+    135deg,
+    #166534 0%,   /* เขียวเข้ม */
+    #064e3b 100%  /* เขียวเข้มมาก */
+  );
+
+  color: #ffffff;
+  border: none;
+
+  box-shadow: 0 16px 34px rgba(6, 78, 59, 0.55);
+
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* hover */
+.posttestBtn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 22px 50px rgba(6, 78, 59, 0.7);
+  filter: brightness(1.1);
+}
+
+/* active click */
+.posttestBtn:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+/* glow animation */
+.posttestBtn::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(25deg);
+  transition: all 0.6s ease;
+}
+
+.posttestBtn:hover::after {
+  left: 120%;
+}
+
+/* icon alignment */
+.posttestBtn svg {
+  width: 18px;
+  height: 18px;
+}

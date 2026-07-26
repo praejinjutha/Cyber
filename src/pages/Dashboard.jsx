@@ -421,7 +421,7 @@ const bannerConfig = useMemo(() => {
                   </Link>
                 </div>
 
-                {/* <div className="dashList__row">
+                <div className="dashList__row">
                   <div>
                     <div className="dashList__title">ความพึงพอใจต่อระบบ</div>
                     <div className="dashList__desc">
@@ -433,7 +433,7 @@ const bannerConfig = useMemo(() => {
                   <Link className="dashBtn dashBtn--solid" to="/survey">
                     <FiEdit />
                   </Link>
-                </div> */}
+                </div> 
               </div>
             </section>
 

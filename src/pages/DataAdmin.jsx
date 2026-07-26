@@ -10,7 +10,7 @@ import {
   FiUsers,
   FiTrendingUp,
   FiActivity,
-  FiPrinter,
+  FiPrinter,FiChevronDown, FiChevronUp
 } from "react-icons/fi";
 import { supabase } from "../lib/supabase";
 
@@ -54,6 +54,16 @@ function isTestStudent(email) {
 function formatNumber(v, digits = 2) {
   if (v == null || !Number.isFinite(v)) return "—";
   return Number(v).toFixed(digits);
+}
+
+function formatPValue(v) {
+  if (v == null || !Number.isFinite(v)) return "—";
+
+  if (v < 0.000001) {
+    return Number(v).toExponential(3);
+  }
+
+  return Number(v).toFixed(6);
 }
 
 /* =========================
@@ -222,6 +232,7 @@ export default function DataAdmin() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const [surveyRows, setSurveyRows] = useState([]);
 
   // =========================
   // Group analysis states
@@ -255,6 +266,7 @@ export default function DataAdmin() {
   // Pagination
   // =========================
   const [page, setPage] = useState(1);
+  const [showSurvey, setShowSurvey] = useState(false);
 
   // =========================
   // Load student list + group paired scores
@@ -273,6 +285,7 @@ export default function DataAdmin() {
           studentsRes,
           pretestsRes,
           finalsRes,
+           surveyRes,
         ] = await Promise.all([
           supabase
             .from("v_admin_students")
@@ -288,6 +301,10 @@ export default function DataAdmin() {
           supabase
             .from("final_test_results")
             .select("user_id, first_total_score"),
+
+            supabase
+  .from("v_admin_survey_summary")
+  .select("*"),
         ]);
 
         if (!alive) return;
@@ -295,6 +312,8 @@ export default function DataAdmin() {
         const { data: studentsData, error: studentsErr } = studentsRes;
         const { data: pretestsData, error: pretestsErr } = pretestsRes;
         const { data: finalsData, error: finalsErr } = finalsRes;
+        const { data: surveyData, error: surveyErr } = surveyRes;
+        setSurveyRows(surveyData || []);
 
         if (studentsErr) {
           setErr(studentsErr.message || "โหลดข้อมูลผู้เรียนไม่สำเร็จ");
@@ -355,6 +374,11 @@ setRows(mapped);
           }
 
           setGroupPairs(pairs);
+          if (!surveyErr) {
+  setSurveyRows(surveyData || []);
+} else {
+  console.error("survey error:", surveyErr);
+}
         }
       } catch (e) {
         if (!alive) return;
@@ -875,22 +899,22 @@ const visiblePairs = useMemo(() => {
                 <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a" }}>…</div>
               ) : groupStats.hasEnoughData ? (
                 <>
-                  <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a" }}>
-                    {formatNumber(groupStats.p, 6)}
-                  </div>
+                    <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a" }}>
+    {formatPValue(groupStats.p)}
+  </div>
 
-                  <div style={{ marginTop: 10 }}>
-                    <span
-                      className={`edu-badge ${
-                        groupStats.significant ? "edu-badge--success" : ""
-                      }`}
-                      style={{ fontSize: 12 }}
-                    >
-                      {groupStats.significant
-                        ? "มีนัยสำคัญทางสถิติ (p < .05)"
-                        : "ไม่มีนัยสำคัญทางสถิติ"}
-                    </span>
-                  </div>
+  <div style={{ marginTop: 10 }}>
+    <span
+      className={`edu-badge ${
+        groupStats.significant ? "edu-badge--success" : ""
+      }`}
+      style={{ fontSize: 12 }}
+    >
+      {groupStats.significant
+  ? "มีนัยสำคัญทางสถิติ"
+  : "ไม่มีนัยสำคัญทางสถิติ"}
+    </span>
+  </div>
                 </>
               ) : (
                 <>
@@ -909,6 +933,48 @@ const visiblePairs = useMemo(() => {
             * ระบบนี้ใช้ paired t-test จากคะแนนก่อนเรียนและหลังเรียนของผู้เรียนคนเดิม
             และจะคำนวณตามข้อมูลที่กำลังแสดงจาก filter ปัจจุบัน
           </div>
+
+
+<div className="survey-card">
+  <div
+    className="survey-header"
+    onClick={() => setShowSurvey(!showSurvey)}
+  >
+    <h3>Survey Summary</h3>
+
+    {showSurvey ? (
+      <FiChevronUp className="icon" />
+    ) : (
+      <FiChevronDown className="icon" />
+    )}
+  </div>
+
+  {showSurvey && (
+    <table className="survey-table">
+      <thead>
+        <tr>
+          <th>ข้อ</th>
+          <th>คำถาม</th>
+          <th>คนตอบ</th>
+          <th>ค่าเฉลี่ย</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {surveyRows.map((q) => (
+          <tr key={q.question_id}>
+            <td>{q.order_index}</td>
+            <td>{q.question_text}</td>
+            <td>{q.total_responses}</td>
+            <td className={q.avg_score < 3 ? "low-score" : ""}>
+              {Number(q.avg_score).toFixed(2)}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+</div>
         </div>
 
         <div className="edu-panel">

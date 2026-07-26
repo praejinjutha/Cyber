@@ -804,6 +804,18 @@ export default function Final() {
           return;
         }
 
+        // ================= SURVEY GATE =================
+const { data: surveyCheck, error: surveyErr } = await supabase
+  .from("survey_answers")
+  .select("id")
+  .eq("user_id", user.id)
+  .limit(1);
+
+if (!surveyErr && (!surveyCheck || surveyCheck.length === 0)) {
+  navigate("/survey", { replace: true });
+  return;
+}
+
         if (!user) {
           navigate("/login", { replace: true });
           return;

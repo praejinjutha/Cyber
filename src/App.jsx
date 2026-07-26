@@ -23,9 +23,9 @@ import Cybercases from "./pages/Cybercases";
 import LessonLinear from "./pages/LessonLinear";
 
 import Dashboard from "./pages/Dashboard";
+import SurveyPage from "./pages/SurveyPage";
 import DashScore from "./pages/DashScore";
 import AdminPrintReport from "./pages/AdminPrintReport";
-import Survey from "./pages/Survey";
 import LoginAdmin from "./pages/LoginAdmin";
 import DataAdmin from "./pages/DataAdmin";
 import Feedback from "./pages/Feedback";
@@ -441,9 +441,9 @@ export default function App() {
             <Route path="/case/group7" element={<Group7 />} />
 
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/survey" element={<SurveyPage />} />
             <Route path="/dashScore" element={<DashScore />} />
             <Route path="/feedback" element={<Feedback />} />
-            <Route path="/survey" element={<Survey />} />
           </Route>
         </Route>
 

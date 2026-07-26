@@ -401,7 +401,7 @@ export default function LearnUnit2() {
             <div className="edu-hero__row">
               <div className="edu-hero__headline">
                 <div className="edu-hero__title">
-                  Unit 2: การปฏิบัติความปลอดภัยทางเทคนิคพื้นฐาน
+                  Unit 2: การปฏิบัติตามหลักความปลอดภัยทางเทคนิคพื้นฐาน
                 </div>
 
                 <div className="edu-lessons__toolbar">
