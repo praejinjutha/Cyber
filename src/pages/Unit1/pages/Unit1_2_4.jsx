@@ -197,7 +197,7 @@ export default function Unit1_2_4({ onNext, initialProgress, onComplete }) {
       <div className="u13">
         <div className="u13-panel">
           <div className="u13-topline">
-            กิจกรรม 2.4: เลือก Public/Group/Private แล้วอ่าน feedback จากระบบ (ไม่ต้องพิมพ์เหตุผล)
+            กิจกรรม : เลือก Public/Group/Private แล้วอ่าน feedback จากระบบ (ไม่ต้องพิมพ์เหตุผล)
           </div>
 
           <div className="u13-layout">

@@ -30,11 +30,17 @@ function mean(arr) {
 
 function sampleStdDev(arr) {
   if (arr.length < 2) return null;
+
   const m = mean(arr);
+
   const variance =
-    arr.reduce((s, x) => s + Math.pow(x - m, 2), 0) / (arr.length - 1);
+    arr.reduce((s, x) => s + Math.pow(x - m, 2), 0)
+    / (arr.length - 1);
+
   return Math.sqrt(variance);
 }
+
+
 
 function isTestStudent(email) {
   const local = String(email || "")
@@ -42,15 +48,42 @@ function isTestStudent(email) {
     .toLowerCase()
     .split("@")[0];
 
-  return (
-    local === "000" ||
-    local === "user000" ||
-    local === "student000" ||
-    local.endsWith("-000") ||
-    local.endsWith("_000")
-  );
-}
+  const testUsers = [
+    "000",
+    "user000",
+    "student000",
 
+    "100",
+    "user100",
+    "student100",
+
+    "101",
+    "user101",
+    "student101",
+
+    "102",
+    "user102",
+    "student102",
+
+    "103",
+    "user103",
+    "student103",
+
+    "104",
+    "user104",
+    "student104",
+
+    "105",
+    "user105",
+    "student105",
+
+    "106",
+    "user106",
+    "student106",
+  ];
+
+  return testUsers.includes(local);
+}
 function formatNumber(v, digits = 2) {
   if (v == null || !Number.isFinite(v)) return "—";
   return Number(v).toFixed(digits);
@@ -187,19 +220,23 @@ function pairedTTest(rows) {
   const postMean = mean(posts);
   const gainMean = mean(diffs);
   const sdDiff = sampleStdDev(diffs);
+  const preSD = sampleStdDev(pres);
+const postSD = sampleStdDev(posts);
+
   const n = diffs.length;
   const df = n - 1;
 
   if (sdDiff == null || sdDiff === 0) {
     return {
-      n,
-      preMean,
-      postMean,
-      gainMean,
-      sdDiff,
-      t: null,
-      df,
-      p: null,
+          n,
+    preMean,
+    preSD,
+    postMean,
+    postSD,
+    gainMean,
+    sdDiff,
+    t: null,
+    df,
       significant: false,
       hasEnoughData: false,
     };
@@ -210,14 +247,16 @@ function pairedTTest(rows) {
   const p = 2 * (1 - cdf);
 
   return {
-    n,
-    preMean,
-    postMean,
-    gainMean,
-    sdDiff,
-    t,
-    df,
-    p,
+  n,
+ preMean,
+ preSD,
+ postMean,
+ postSD,
+ gainMean,
+ sdDiff,
+ t,
+ df,
+ p,
     significant: Number.isFinite(p) ? p < 0.05 : false,
     hasEnoughData: true,
   };
@@ -319,8 +358,26 @@ export default function DataAdmin() {
           setErr(studentsErr.message || "โหลดข้อมูลผู้เรียนไม่สำเร็จ");
           setRows([]);
         } else {
-          const mapped = (studentsData || [])
-  .filter((x) => !isTestStudent(x.email))
+         const mapped = (studentsData || [])
+  .filter((x) => {
+    const email = String(x.email || "")
+      .trim()
+      .toLowerCase();
+
+    const isTest =
+      email === "user000@local.app" ||
+      email === "user100@local.app" ||
+      email === "user101@local.app" ||
+      email === "user102@local.app" ||
+      email === "user103@local.app" ||
+      email === "user104@local.app" ||
+      email === "user105@local.app" ||
+      email === "user106@local.app";
+
+    console.log("ADMIN USER:", email, "TEST =", isTest);
+
+    return !isTest;
+  })
   .map((x) => ({
     id: x.user_id,
     user_id: x.user_id,
@@ -663,13 +720,7 @@ const visiblePairs = useMemo(() => {
               ออกจากหน้า Admin
             </Link>
 
-            <Link
-              to="/login"
-              className="edu-btn edu-btn--ghost"
-              style={{ textDecoration: "none" }}
-            >
-              ไปหน้า Student
-            </Link>
+
           </div>
         </div>
       </div>
@@ -705,7 +756,7 @@ const visiblePairs = useMemo(() => {
 
         <div className="edu-panel" style={{ marginBottom: 20 }}>
           <div className="edu-panel__head">
-            <div className="edu-panel__title">วิเคราะห์ผลรวมผู้เรียน (Paired t-test)</div>
+            <div className="edu-panel__title">วิเคราะห์ผลรวมผู้เรียน (Dependent Samples t-test)</div>
           </div>
 
           <div
@@ -716,7 +767,7 @@ const visiblePairs = useMemo(() => {
               gap: 14,
             }}
           >
-            <div
+            {/* <div
               className="edu-emptyBox"
               style={{
                 padding: "14px 16px",
@@ -745,7 +796,7 @@ const visiblePairs = useMemo(() => {
               <div style={{ marginTop: 6, fontSize: 12, color: "#94a3b8" }}>
                 เฉพาะคนที่มีคะแนน pretest และ posttest ครบ
               </div>
-            </div>
+            </div> */}
 
             <div
               className="edu-emptyBox"
@@ -779,6 +830,39 @@ const visiblePairs = useMemo(() => {
             </div>
 
             <div
+  className="edu-emptyBox"
+  style={{
+    padding: "14px 16px",
+    textAlign: "left",
+    background: "#f8fafc",
+    borderRadius: 12,
+    border: "1px solid #e2e8f0",
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      color: "#475569",
+      fontSize: 13,
+      marginBottom: 8,
+    }}
+  >
+    <FiActivity />
+    S.D. ก่อนเรียน
+  </div>
+
+  <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a" }}>
+    {groupLoading ? "…" : formatNumber(groupStats.preSD, 2)}
+  </div>
+
+  <div style={{ marginTop: 6, fontSize: 12, color: "#94a3b8" }}>
+    SD Pretest
+  </div>
+</div>
+
+            <div
               className="edu-emptyBox"
               style={{
                 padding: "14px 16px",
@@ -808,6 +892,39 @@ const visiblePairs = useMemo(() => {
                 Mean Posttest
               </div>
             </div>
+
+            <div
+  className="edu-emptyBox"
+  style={{
+    padding: "14px 16px",
+    textAlign: "left",
+    background: "#f8fafc",
+    borderRadius: 12,
+    border: "1px solid #e2e8f0",
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      color: "#475569",
+      fontSize: 13,
+      marginBottom: 8,
+    }}
+  >
+    <FiActivity />
+    S.D. หลังเรียน
+  </div>
+
+  <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a" }}>
+    {groupLoading ? "…" : formatNumber(groupStats.postSD, 2)}
+  </div>
+
+  <div style={{ marginTop: 6, fontSize: 12, color: "#94a3b8" }}>
+    SD Posttest
+  </div>
+</div>
 
             <div
               className="edu-emptyBox"
@@ -930,7 +1047,7 @@ const visiblePairs = useMemo(() => {
           </div>
 
           <div style={{ padding: "0 20px 18px", fontSize: 12, color: "#94a3b8" }}>
-            * ระบบนี้ใช้ paired t-test จากคะแนนก่อนเรียนและหลังเรียนของผู้เรียนคนเดิม
+            * ระบบนี้ใช้ Dependent Samples t-test จากคะแนนก่อนเรียนและหลังเรียนของผู้เรียนคนเดิม
             และจะคำนวณตามข้อมูลที่กำลังแสดงจาก filter ปัจจุบัน
           </div>
 
@@ -957,6 +1074,7 @@ const visiblePairs = useMemo(() => {
           <th>คำถาม</th>
           <th>คนตอบ</th>
           <th>ค่าเฉลี่ย</th>
+          <th>S.D.</th>
         </tr>
       </thead>
 
@@ -969,6 +1087,9 @@ const visiblePairs = useMemo(() => {
             <td className={q.avg_score < 3 ? "low-score" : ""}>
               {Number(q.avg_score).toFixed(2)}
             </td>
+<td>
+  {Number(q.sd_score).toFixed(2)}
+</td>
           </tr>
         ))}
       </tbody>

@@ -25,10 +25,12 @@ export default function PosttestRunner({
   const [attemptId, setAttemptId] = useState(null);
   const [items, setItems] = useState([]);
 
-  const [answers, setAnswers] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-  const [result, setResult] = useState(null);
-  const [showSolutions] = useState(true);
+const [answers, setAnswers] = useState({});
+const [submitted, setSubmitted] = useState(false);
+const [tabWarning, setTabWarning] = useState(false);
+const [gradingFailed, setGradingFailed] = useState(false);
+const [result, setResult] = useState(null);
+const [showSolutions] = useState(true);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -188,6 +190,36 @@ export default function PosttestRunner({
     };
   }, [previewImage]);
 
+
+  // ===== Exercise Security: Prevent Copy / Paste / Text Selection =====
+useEffect(() => {
+
+  const preventCopy = (e) => {
+    e.preventDefault();
+  };
+
+  const preventPaste = (e) => {
+    e.preventDefault();
+  };
+
+  const preventContext = (e) => {
+    e.preventDefault();
+  };
+
+  document.addEventListener("copy", preventCopy);
+  document.addEventListener("cut", preventCopy);
+  document.addEventListener("paste", preventPaste);
+  document.addEventListener("contextmenu", preventContext);
+
+  return () => {
+    document.removeEventListener("copy", preventCopy);
+    document.removeEventListener("cut", preventCopy);
+    document.removeEventListener("paste", preventPaste);
+    document.removeEventListener("contextmenu", preventContext);
+  };
+
+}, []);
+
   useEffect(() => {
     let alive = true;
 
@@ -282,6 +314,36 @@ export default function PosttestRunner({
       alive = false;
     };
   }, [navigate, unit]);
+
+// ===== Exercise Security: Tab Switching Detection =====
+useEffect(() => {
+
+  const handleVisibility = () => {
+
+    if (document.hidden && !submitted) {
+
+      setTabWarning(true);
+
+    }
+
+  };
+
+
+  document.addEventListener(
+    "visibilitychange",
+    handleVisibility
+  );
+
+
+  return () => {
+    document.removeEventListener(
+      "visibilitychange",
+      handleVisibility
+    );
+  };
+
+}, [submitted]);
+
 
   const totalQuestions = useMemo(() => items.length, [items]);
 
@@ -469,6 +531,7 @@ const cleanupOldAttempts = async () => {
 
 scrollToTop();
 setSubmitting(true);
+setGradingFailed(false);
 
 try {
   const rows = items.map((it) => {
@@ -545,13 +608,104 @@ try {
   });
 
   setSubmitted(true);
-} catch (e) {
-  console.error("submit error:", e);
-  alert("เกิดข้อผิดพลาดในการส่งข้อสอบ กรุณาลองใหม่อีกครั้ง");
-} finally {
-  setSubmitting(false);
-}
+  } catch (e) {
+    console.error("submit/grade error:", e);
+
+    setGradingFailed(true);
+
+    alert(
+      "ระบบบันทึกคำตอบของคุณแล้ว แต่ยังไม่สามารถประเมินผลได้ กรุณากด “ประเมินคำตอบอีกครั้ง”"
+    );
+  } finally {
+    setSubmitting(false);
+  }
   };
+
+  // ===== แทรกตั้งแต่ตรงนี้ =====
+
+  const retryGrade = async () => {
+    if (!attemptId) return;
+
+    scrollToTop();
+    setSubmitting(true);
+    setGradingFailed(false);
+
+    try {
+      const gradeData = await runGradePosttest(attemptId);
+
+      const { error: submitMarkError } = await supabase
+        .from("posttest_attempts")
+        .update({
+          submitted_at: new Date().toISOString(),
+        })
+        .eq("id", attemptId);
+
+      if (submitMarkError) throw submitMarkError;
+
+      await cleanupOldAttempts();
+
+      const gradedRows = await fetchAnswersAfterGrade(attemptId);
+
+      const aiSummary = includeAiSummary
+        ? await fetchAttemptSummary(attemptId)
+        : "";
+
+      const scoreMap = {};
+
+      gradedRows.forEach((r) => {
+        scoreMap[r.item_id] = {
+          score: Number(r.score) || 0,
+          feedback: r.ai_feedback || "",
+        };
+      });
+
+      const perItem = {};
+
+      items.forEach((it) => {
+        const maxScore =
+          Number(it.points) > 0 ? Number(it.points) : 1;
+
+        const graded = scoreMap[it.id];
+
+        const itemScore = Math.max(
+          0,
+          Math.min(maxScore, Number(graded?.score) || 0)
+        );
+
+        perItem[it.id] = {
+          type: it.type,
+          score: itemScore,
+          maxScore,
+          isCorrect: itemScore >= maxScore,
+          feedback: graded?.feedback || "",
+        };
+      });
+
+      setResult({
+        score: Number(gradeData?.total_score) || 0,
+        total: Number(gradeData?.max_score) || totalMaxScore,
+        perItem,
+        aiSummary,
+      });
+
+      setSubmitted(true);
+      setGradingFailed(false);
+
+    } catch (e) {
+      console.error("retry grade error:", e);
+
+      setGradingFailed(true);
+
+      alert(
+        "ระบบยังไม่สามารถประเมินคำตอบได้ในขณะนี้ คำตอบเดิมของคุณยังถูกเก็บไว้ กรุณาลองประเมินอีกครั้ง"
+      );
+
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // ===== จบส่วนที่แทรก =====
 
   const backToLearnWithScore = () => {
     navigate(learnPath, {
@@ -565,6 +719,10 @@ try {
       },
     });
   };
+
+  const confirmTabViolation = () => {
+  window.location.reload();
+};
 
   return (
     <>
@@ -650,7 +808,52 @@ try {
         </div>
       )}
 
-      <div className="pt-page">
+      <div
+  className="pt-page"
+  style={{
+    userSelect: "none",
+    WebkitUserSelect: "none",
+    MozUserSelect: "none",
+    msUserSelect: "none",
+  }}
+>
+{tabWarning && (
+  <div
+    className="pt-popupOverlay"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div className="pt-popup">
+
+      <div className="pt-popup__title">
+        ⚠️ ตรวจพบการสลับหน้าต่าง
+      </div>
+
+      <div className="pt-popup__desc">
+        เพื่อป้องกันการทุจริตในการทำแบบฝึกหัด
+        ระบบกำหนดให้ผู้เรียนต้องเริ่มทำแบบฝึกหัดใหม่
+        ทุกครั้งเมื่อมีการสลับออกจากหน้าต่างการสอบ
+      </div>
+
+     <div style={{ 
+  display: "flex", 
+  justifyContent: "center",
+  marginTop: "16px"
+}}>
+  <button
+    className="pt-btn pt-btn--primary"
+    type="button"
+    onClick={confirmTabViolation}
+  >
+    เริ่มทำใหม่
+  </button>
+</div>
+
+    </div>
+  </div>
+)}
+
+
         {submitting && (
           <div className="pt-popupOverlay" role="dialog" aria-modal="true" aria-label="กำลังประมวลผลคะแนน">
             <div className="pt-popup">
@@ -925,25 +1128,43 @@ try {
             </section>
           )}
 
+          
+
           {!loading && items.length > 0 && (
             <footer className="pt-footer">
               <div className="pt-footer__inner">
                 <div className="pt-footer__note">
-                  {!submitted ? "กดส่งทีเดียว ระบบจะบันทึกคำตอบทั้งหมดลงฐานข้อมูล" : "ตรวจคำตอบเสร็จแล้ว กดถัดไปเพื่อกลับหน้าเรียน"}
+                  {submitted
+  ? "ตรวจคำตอบเสร็จแล้ว กดถัดไปเพื่อกลับหน้าเรียน"
+  : gradingFailed
+  ? "คำตอบของคุณถูกบันทึกไว้แล้ว กรุณากดประเมินคำตอบอีกครั้ง"
+  : "กดส่งทีเดียว ระบบจะบันทึกคำตอบทั้งหมดลงฐานข้อมูล"}
                 </div>
 
                 <button
-                  className="pt-btn pt-btn--primary"
-                  type="button"
-                  onClick={() => {
-                    if (!submitted) submitAll();
-                    else backToLearnWithScore();
-                  }}
-                  disabled={submitting}
-                >
-                  <FiSend aria-hidden="true" />
-                  {submitting ? "กำลังส่ง..." : submitted ? "ถัดไป" : "ส่งข้อสอบ"}
-                </button>
+  className="pt-btn pt-btn--primary"
+  type="button"
+  onClick={() => {
+    if (submitted) {
+      backToLearnWithScore();
+    } else if (gradingFailed) {
+      retryGrade();
+    } else {
+      submitAll();
+    }
+  }}
+  disabled={submitting}
+>
+  <FiSend aria-hidden="true" />
+
+  {submitting
+    ? "กำลังประเมิน..."
+    : submitted
+    ? "ถัดไป"
+    : gradingFailed
+    ? "ประเมินคำตอบอีกครั้ง"
+    : "ส่งข้อสอบ"}
+</button>
               </div>
             </footer>
           )}

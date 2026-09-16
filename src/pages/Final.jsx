@@ -891,14 +891,8 @@ if (!surveyErr && (!surveyCheck || surveyCheck.length === 0)) {
           return null;
         };
 
-        let currentAttempt = await getLatestInProgressAttempt();
+        let currentAttempt = null;
 
-        if (!currentAttempt) {
-          // กันเคส React StrictMode / Fast Refresh ยิง useEffect ซ้อน:
-          // รอสั้น ๆ แล้วเช็กอีกครั้งก่อน insert เพื่อหลีกเลี่ยง 409 ให้มากที่สุด
-          await sleep(80);
-          currentAttempt = await getLatestInProgressAttempt();
-        }
 
         if (!currentAttempt) {
           const lockKey = `final-test-attempt-lock:${user.id}:${finalTest.id}`;
@@ -1033,12 +1027,25 @@ if (!surveyErr && (!surveyCheck || surveyCheck.length === 0)) {
           return;
         }
 
-        const normalizedItems = (itemsData || []).map((it) => ({
-          ...it,
-          unit: Number(it.unit),
-          order_index: Number(it.order_index),
-          choices: Array.isArray(it.choices) ? it.choices : [],
-        }));
+const shuffleArray = (arr) => {
+  const copy = [...arr];
+
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+
+  return copy;
+};
+
+const normalizedItems = (itemsData || []).map((it) => ({
+  ...it,
+  unit: Number(it.unit),
+  order_index: Number(it.order_index),
+  choices: shuffleArray(
+    Array.isArray(it.choices) ? it.choices : []
+  ),
+}));
 
         if (normalizedItems.length === 0) {
           if (isMounted()) setMsg("โหลดชุด Final สำเร็จ แต่ไม่พบรายการข้อสอบใน final_test_items");
@@ -1487,13 +1494,19 @@ if (!surveyErr && (!surveyCheck || surveyCheck.length === 0)) {
                         ข้อ {idx + 1} <span style={{ opacity: 0.7 }}>• หน่วย {q.unit}</span>
                       </div>
                       <div
-                        className="qText"
-                        onCopy={(e) => e.preventDefault()}
-                        onCut={(e) => e.preventDefault()}
-                        onContextMenu={(e) => e.preventDefault()}
-                      >
-                        {q.prompt}
-                      </div>
+  className="qText"
+  style={{
+    userSelect: "none",
+    WebkitUserSelect: "none",
+    MozUserSelect: "none",
+    msUserSelect: "none",
+  }}
+  onCopy={(e) => e.preventDefault()}
+  onCut={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+>
+  {q.prompt}
+</div>
                     </div>
 
                     {qImage && (
@@ -1521,13 +1534,17 @@ if (!surveyErr && (!surveyCheck || surveyCheck.length === 0)) {
                       <div className="choices">
                         {q.choices.map((c) => (
                           <label
-                            key={c.id}
-                            className={`choice ${answers[q.id] === c.id ? "active" : ""}`}
-                            style={{
-                              opacity: submitting || redirecting ? 0.7 : 1,
-                              pointerEvents: submitting || redirecting ? "none" : "auto",
-                            }}
-                          >
+  key={c.id}
+  className={`choice ${answers[q.id] === c.id ? "active" : ""}`}
+  style={{
+    opacity: submitting || redirecting ? 0.7 : 1,
+    pointerEvents: submitting || redirecting ? "none" : "auto",
+    userSelect: "none",
+    WebkitUserSelect: "none",
+    MozUserSelect: "none",
+    msUserSelect: "none",
+  }}
+>
                             <input
                               type="radio"
                               name={q.id}

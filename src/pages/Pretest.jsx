@@ -869,12 +869,25 @@ export default function Pretest() {
           return;
         }
 
-        const normalizedItems = (itemsData || []).map((it) => ({
-          ...it,
-          unit: Number(it.unit),
-          order_index: Number(it.order_index),
-          choices: Array.isArray(it.choices) ? it.choices : [],
-        }));
+const shuffleArray = (arr) => {
+  const copy = [...arr];
+
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+
+  return copy;
+};
+
+const normalizedItems = (itemsData || []).map((it) => ({
+  ...it,
+  unit: Number(it.unit),
+  order_index: Number(it.order_index),
+  choices: shuffleArray(
+    Array.isArray(it.choices) ? it.choices : []
+  ),
+}));
 
         const initialAnswers = {};
         normalizedItems.forEach((it) => {
@@ -1294,13 +1307,19 @@ const timerStartedAt = hasStarted
                         ข้อ {idx + 1} <span style={{ opacity: 0.7 }}>• หน่วย {q.unit}</span>
                       </div>
                       <div
-                        className="qText"
-                        onCopy={(e) => e.preventDefault()}
-                        onCut={(e) => e.preventDefault()}
-                        onContextMenu={(e) => e.preventDefault()}
-                      >
-                        {q.prompt}
-                      </div>
+  className="qText"
+  style={{
+    userSelect: "none",
+    WebkitUserSelect: "none",
+    MozUserSelect: "none",
+    msUserSelect: "none",
+  }}
+  onCopy={(e) => e.preventDefault()}
+  onCut={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+>
+  {q.prompt}
+</div>
                     </div>
 
                     {qImage && (
@@ -1328,13 +1347,17 @@ const timerStartedAt = hasStarted
                       <div className="choices">
                         {q.choices.map((c) => (
                           <label
-                            key={c.id}
-                            className={`choice ${answers[q.id] === c.id ? "active" : ""}`}
-                            style={{
-                              opacity: submitting || redirecting ? 0.7 : 1,
-                              pointerEvents: submitting || redirecting ? "none" : "auto",
-                            }}
-                          >
+  key={c.id}
+  className={`choice ${answers[q.id] === c.id ? "active" : ""}`}
+  style={{
+    opacity: submitting || redirecting ? 0.7 : 1,
+    pointerEvents: submitting || redirecting ? "none" : "auto",
+    userSelect: "none",
+    WebkitUserSelect: "none",
+    MozUserSelect: "none",
+    msUserSelect: "none",
+  }}
+>
                             <input
                               type="radio"
                               name={q.id}

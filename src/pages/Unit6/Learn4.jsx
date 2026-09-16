@@ -345,7 +345,7 @@ export default function Learn4Unit6() {
             <div className="edu-hero__row">
               <div className="edu-hero__headline">
                 <div className="edu-hero__title">
-                  Unit 6 : การตระหนักรู้ถึงสุขภาวะดิจิทัลและความปลอดภัย
+                  Unit 6 : การตระหนักรู้ถึงสุขภาวะดิจิทัล
                 </div>
                 <div className="edu-hero__sub">
                   เรื่องที่ 4 : การตัดสินใจดูแลสุขภาวะดิจิทัลจากสถานการณ์จริง

@@ -568,7 +568,7 @@ const Learn2Unit2 = () => {
           <div className="edu-hero__card">
             <div className="edu-hero__row">
               <div className="edu-hero__headline">
-                <div className="edu-hero__title">Unit 2: การปฏิบัติตามหลักความปลอดภัยทางเทคนิคพื้นฐาน</div>
+                <div className="edu-hero__title">Unit 2: การรับรู้ภัยคุกคามและการรักษาความปลอดภัยอุปกรณ์</div>
 <div className="edu-hero__sub">เรื่องที่ 2	การวิเคราะห์สถานการณ์และสัญญาณเตือน
 </div>
 

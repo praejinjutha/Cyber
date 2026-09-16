@@ -1045,9 +1045,8 @@ Deno.serve(async (req) => {
 - ห้ามให้เกิน max_score ของข้อนั้น
 - feedback_th ต้องสั้น ชัดเจน ว่าขาดหรือครบอะไร
 - ถ้า student_answer ว่าง ให้ score = 0 และ feedback_th = "ไม่พบคำตอบจากนักเรียน"
-- ต้องประเมินคำตอบตาม rubric ที่กำหนดเท่านั้น และให้คะแนนตามหลักฐานที่ปรากฏในคำตอบของผู้เรียน
-- หากคำตอบมีสาระถูกต้องบางส่วน ให้ให้คะแนนบางส่วนตาม rubric ห้ามลดเป็น 0 เพียงเพราะถ้อยคำแตกต่างจากตัวอย่าง
-- ห้ามข้าม answer_id ใด ๆ
+- ถ้าไม่แน่ใจ ให้ใส่ score = 0 และ feedback_th ที่อธิบายสั้น ๆ
+- ห้ามข้ามข้อ
 
 ส่วนที่ 2: สรุปภาพรวมความเข้าใจของผู้เรียนจาก "ทุกข้อ" ใน attempt นี้
 กติกา:
@@ -1132,19 +1131,17 @@ ${JSON.stringify(shortBatch)}
           const aiRow = resultMap.get(row.id);
 
           let finalScore = 0;
-let finalFeedback = "ไม่พบคำตอบจากนักเรียน";
+          let finalFeedback = "ไม่พบคำตอบจากนักเรียน";
 
-if (studentAnswer) {
-  if (!aiRow) {
-    throw new Error(
-      `AI_GRADING_INCOMPLETE: Missing grading result for answer_id=${row.id}`
-    );
-  }
-
-  finalScore = clamp(aiRow.score, 0, maxScore);
-  finalFeedback = aiRow.feedback_th;
-}
-
+          if (studentAnswer) {
+            if (aiRow) {
+              finalScore = clamp(aiRow.score, 0, maxScore);
+              finalFeedback = aiRow.feedback_th;
+            } else {
+              finalScore = 0;
+              finalFeedback = "ระบบประเมินคำตอบไม่สำเร็จ";
+            }
+          }
 
           await sbAdmin
             .from("posttest_answers")
@@ -1167,14 +1164,39 @@ if (studentAnswer) {
             ? batchParsed.weaknesses
             : [],
         };
-} catch (itemErr) {
-  console.error("Short batch grading failed:", itemErr);
+      } catch (itemErr) {
+        console.error("Short batch grading failed:", itemErr);
 
-  // ความล้มเหลวของระบบ/AI ต้องไม่ถูกตีความเป็นคะแนน 0
-  // ให้ส่ง error กลับไป frontend เพื่อประเมิน attempt เดิมอีกครั้ง
-  throw itemErr;
-}
-  }  
+        // ถ้าเป็นปัญหา Gemini ชั่วคราว เช่น 429/503/timeout อย่าบันทึกคะแนนข้อเขียนเป็น 0
+        // เพราะจะทำให้ผลสอบผิดและซ่อนปัญหาจริง ให้ปล่อย error กลับไปให้ client/cron retry อีกครั้ง
+        if (isRetryableGeminiError(itemErr)) {
+          throw itemErr;
+        }
+
+        for (const row of answerRows) {
+          const item = normalizeItem(row.posttest_items);
+          if (!item || item.type !== "short") continue;
+
+          const studentAnswer = extractStudentAnswerText(row.answer);
+          const fallbackScore = 0;
+
+          const fallbackFeedback = studentAnswer
+            ? "ระบบประเมินคำตอบไม่สำเร็จ กรุณาตรวจทานอีกครั้ง"
+            : "ไม่พบคำตอบจากนักเรียน";
+
+          await sbAdmin
+            .from("posttest_answers")
+            .update({
+              score: fallbackScore,
+              ai_feedback: fallbackFeedback,
+            })
+            .eq("id", row.id);
+
+          row.score = fallbackScore;
+          row.ai_feedback = fallbackFeedback;
+        }
+      }
+    }
 
     const { data: refreshedAnswers, error: refreshErr } = await sbAdmin
       .from("posttest_answers")
@@ -1202,26 +1224,6 @@ if (studentAnswer) {
     if (refreshErr) throw refreshErr;
 
     const finalAnswers: AnswerRow[] = refreshedAnswers || [];
-
-    const ungradedShortAnswers = finalAnswers.filter((row) => {
-  const item = normalizeItem(row.posttest_items);
-
-  if (!item || item.type !== "short") return false;
-
-  const studentAnswer = extractStudentAnswerText(row.answer);
-
-  // ถ้าไม่ได้ตอบ ถือว่า 0 ได้ตามเกณฑ์ ไม่ใช่ technical failure
-  if (!studentAnswer) return false;
-
-  // ตอบแล้ว แต่ยังไม่มี score = grading ยังไม่สมบูรณ์
-  return row.score === null || row.score === undefined;
-});
-
-if (ungradedShortAnswers.length > 0) {
-  throw new Error(
-    `AI_GRADING_INCOMPLETE: ${ungradedShortAnswers.length} short answer(s) have not been graded`
-  );
-}
 
     let totalScore = 0;
     let maxScore = 0;

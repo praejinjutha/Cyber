@@ -18,17 +18,19 @@ const PRETEST_MAX_SCORE = 48;
 const POSTTEST_MAX_SCORE = 48;
 
 function isTestStudent(email) {
-  const local = String(email || "")
+  const emailText = String(email || "")
     .trim()
-    .toLowerCase()
-    .split("@")[0];
+    .toLowerCase();
 
   return (
-    local === "000" ||
-    local === "user000" ||
-    local === "student000" ||
-    local.endsWith("-000") ||
-    local.endsWith("_000")
+    emailText === "user000@local.app" ||
+    emailText === "user100@local.app" ||
+    emailText === "user101@local.app" ||
+    emailText === "user102@local.app" ||
+    emailText === "user103@local.app" ||
+    emailText === "user104@local.app" ||
+    emailText === "user105@local.app" ||
+    emailText === "user106@local.app"
   );
 }
 
@@ -340,7 +342,7 @@ export default function AdminPrintReport() {
               </div>
 
               <div className="print-summary-grid">
-                <SummaryCard label="จำนวนผู้เรียนในรายงาน" value={rows.length} />
+                {/* <SummaryCard label="จำนวนผู้เรียนในรายงาน" value={rows.length} /> */}
                 <SummaryCard label="จำนวนคู่ข้อมูลที่ใช้คำนวณ" value={stats.n} />
                 <SummaryCard label="ค่าเฉลี่ยก่อนเรียน" value={formatNumber(stats.preMean, 2)} />
                 <SummaryCard label="ค่าเฉลี่ยหลังเรียน" value={formatNumber(stats.postMean, 2)} />

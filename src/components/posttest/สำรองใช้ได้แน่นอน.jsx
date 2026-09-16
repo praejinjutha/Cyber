@@ -403,51 +403,59 @@ export default function PosttestRunner({
     return data?.ai_summary || "";
   };
 
-  const cleanupOldAttempts = async () => {
-    if (!keepFirstAndLatest) return;
-    if (!userId || !posttestId || !attemptId) return;
+const cleanupOldAttempts = async () => {
+  if (!keepFirstAndLatest) return;
+  if (!userId || !posttestId || !attemptId) return;
 
-    const { data: history, error: historyError } = await supabase
-      .from("posttest_attempts")
-      .select("id, submitted_at")
-      .eq("user_id", userId)
-      .eq("posttest_id", posttestId)
-      .order("submitted_at", { ascending: true, nullsFirst: true });
+  // เอาเฉพาะ attempt ที่ submit แล้วจริง ๆ
+  const { data: history, error: historyError } = await supabase
+    .from("posttest_attempts")
+    .select("id, submitted_at")
+    .eq("user_id", userId)
+    .eq("posttest_id", posttestId)
+    .not("submitted_at", "is", null)
+    .order("submitted_at", { ascending: true });
 
-    if (historyError) {
-      console.error("history load error:", historyError);
-      return;
-    }
+  if (historyError) {
+    console.error("history load error:", historyError);
+    return;
+  }
 
-    if (!history || history.length <= 1) return;
+  if (!history || history.length <= 2) return;
 
-    const idsToDelete = history
-      .slice(1)
-      .map((h) => h.id)
-      .filter((id) => id !== attemptId);
+  const firstId = history[0]?.id;
+  const latestId = history[history.length - 1]?.id;
 
-    if (idsToDelete.length === 0) return;
+  const idsToDelete = history
+    .filter((h) => h.id !== firstId && h.id !== latestId)
+    .map((h) => h.id);
 
-    console.log("Cleaning old attempts, keeping first and current latest:", idsToDelete);
+  if (idsToDelete.length === 0) return;
 
-    const { error: ansDeleteError } = await supabase
-      .from("posttest_answers")
-      .delete()
-      .in("attempt_id", idsToDelete);
+  console.log("Cleaning old submitted attempts, keeping first and latest:", {
+    firstId,
+    latestId,
+    idsToDelete,
+  });
 
-    if (ansDeleteError) {
-      console.error("delete old answers error:", ansDeleteError);
-    }
+  const { error: ansDeleteError } = await supabase
+    .from("posttest_answers")
+    .delete()
+    .in("attempt_id", idsToDelete);
 
-    const { error: attemptDeleteError } = await supabase
-      .from("posttest_attempts")
-      .delete()
-      .in("id", idsToDelete);
+  if (ansDeleteError) {
+    console.error("delete old answers error:", ansDeleteError);
+  }
 
-    if (attemptDeleteError) {
-      console.error("delete old attempts error:", attemptDeleteError);
-    }
-  };
+  const { error: attemptDeleteError } = await supabase
+    .from("posttest_attempts")
+    .delete()
+    .in("id", idsToDelete);
+
+  if (attemptDeleteError) {
+    console.error("delete old attempts error:", attemptDeleteError);
+  }
+};
 
   const submitAll = async () => {
     if (!attemptId || !posttestId || items.length === 0) {
@@ -459,89 +467,90 @@ export default function PosttestRunner({
       return;
     }
 
-    scrollToTop();
-    setSubmitting(true);
+scrollToTop();
+setSubmitting(true);
 
-    try {
-      await cleanupOldAttempts();
+try {
+  const rows = items.map((it) => {
+    const currentAns = answers[it.id];
+    let safeValue = currentAns?.value;
 
-      const rows = items.map((it) => {
-        const currentAns = answers[it.id];
-        let safeValue = currentAns?.value;
-
-        if (it.type === "multi" || it.type === "ordering") {
-          safeValue = Array.isArray(safeValue) ? safeValue : [];
-        } else {
-          safeValue = safeValue == null ? "" : safeValue;
-        }
-
-        return {
-          attempt_id: attemptId,
-          item_id: it.id,
-          answer: {
-            type: it.type,
-            value: safeValue,
-          },
-        };
-      });
-
-      const { error: upsertError } = await supabase
-        .from("posttest_answers")
-        .upsert(rows, { onConflict: "attempt_id,item_id" });
-
-      if (upsertError) throw upsertError;
-
-      const gradeData = await runGradePosttest(attemptId);
-
-      const { error: submitMarkError } = await supabase
-        .from("posttest_attempts")
-        .update({
-          submitted_at: new Date().toISOString(),
-        })
-        .eq("id", attemptId);
-
-      if (submitMarkError) throw submitMarkError;
-
-      const gradedRows = await fetchAnswersAfterGrade(attemptId);
-      const aiSummary = includeAiSummary ? await fetchAttemptSummary(attemptId) : "";
-
-      const scoreMap = {};
-      gradedRows.forEach((r) => {
-        scoreMap[r.item_id] = {
-          score: Number(r.score) || 0,
-          feedback: r.ai_feedback || "",
-        };
-      });
-
-      const perItem = {};
-      items.forEach((it) => {
-        const maxScore = Number(it.points) > 0 ? Number(it.points) : 1;
-        const graded = scoreMap[it.id];
-        const itemScore = Math.max(0, Math.min(maxScore, Number(graded?.score) || 0));
-
-        perItem[it.id] = {
-          type: it.type,
-          score: itemScore,
-          maxScore,
-          isCorrect: itemScore >= maxScore,
-          feedback: graded?.feedback || "",
-        };
-      });
-
-      setResult({
-        score: Number(gradeData?.total_score) || 0,
-        total: Number(gradeData?.max_score) || totalMaxScore,
-        perItem,
-        aiSummary,
-      });
-
-      setSubmitted(true);
-    } catch (e) {
-      console.error("submit error:", e);
-      alert("เกิดข้อผิดพลาดในการส่งข้อสอบ กรุณาลองใหม่อีกครั้ง");
-    } finally {
-      setSubmitting(false);
+    if (it.type === "multi" || it.type === "ordering") {
+      safeValue = Array.isArray(safeValue) ? safeValue : [];
+    } else {
+      safeValue = safeValue == null ? "" : safeValue;
     }
+
+    return {
+      attempt_id: attemptId,
+      item_id: it.id,
+      answer: {
+        type: it.type,
+        value: safeValue,
+      },
+    };
+  });
+
+  const { error: upsertError } = await supabase
+    .from("posttest_answers")
+    .upsert(rows, { onConflict: "attempt_id,item_id" });
+
+  if (upsertError) throw upsertError;
+
+  const gradeData = await runGradePosttest(attemptId);
+
+  const { error: submitMarkError } = await supabase
+    .from("posttest_attempts")
+    .update({
+      submitted_at: new Date().toISOString(),
+    })
+    .eq("id", attemptId);
+
+  if (submitMarkError) throw submitMarkError;
+
+  // ค่อย cleanup หลัง submit สำเร็จ
+  await cleanupOldAttempts();
+
+  const gradedRows = await fetchAnswersAfterGrade(attemptId);
+  const aiSummary = includeAiSummary ? await fetchAttemptSummary(attemptId) : "";
+
+  const scoreMap = {};
+  gradedRows.forEach((r) => {
+    scoreMap[r.item_id] = {
+      score: Number(r.score) || 0,
+      feedback: r.ai_feedback || "",
+    };
+  });
+
+  const perItem = {};
+  items.forEach((it) => {
+    const maxScore = Number(it.points) > 0 ? Number(it.points) : 1;
+    const graded = scoreMap[it.id];
+    const itemScore = Math.max(0, Math.min(maxScore, Number(graded?.score) || 0));
+
+    perItem[it.id] = {
+      type: it.type,
+      score: itemScore,
+      maxScore,
+      isCorrect: itemScore >= maxScore,
+      feedback: graded?.feedback || "",
+    };
+  });
+
+  setResult({
+    score: Number(gradeData?.total_score) || 0,
+    total: Number(gradeData?.max_score) || totalMaxScore,
+    perItem,
+    aiSummary,
+  });
+
+  setSubmitted(true);
+} catch (e) {
+  console.error("submit error:", e);
+  alert("เกิดข้อผิดพลาดในการส่งข้อสอบ กรุณาลองใหม่อีกครั้ง");
+} finally {
+  setSubmitting(false);
+}
   };
 
   const backToLearnWithScore = () => {

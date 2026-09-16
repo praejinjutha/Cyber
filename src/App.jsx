@@ -255,6 +255,373 @@ function RequirePretestDone({ session }) {
   return <Outlet />;
 }
 
+
+// ====================
+// Gate: Survey allowed
+// ต้องมีสิทธิ์ Final และยังไม่เคยตอบ Survey
+// ====================
+function RequireSurveyEligible({ session }) {
+  const [status, setStatus] = useState({
+    loading: true,
+    allowed: false,
+  });
+
+  useEffect(() => {
+    let alive = true;
+
+    async function checkSurveyAccess() {
+      const userId = session?.user?.id;
+
+      if (!userId) {
+        if (alive) {
+          setStatus({
+            loading: false,
+            allowed: false,
+          });
+        }
+        return;
+      }
+
+      try {
+        // 1) เช็กว่าเคยตอบ Survey แล้วหรือยัง
+        const { data: existingAnswer, error: surveyErr } = await supabase
+          .from("survey_answers")
+          .select("id")
+          .eq("user_id", userId)
+          .limit(1)
+          .maybeSingle();
+
+        if (surveyErr) throw surveyErr;
+
+        // มีคำตอบแล้ว = ห้ามเข้าซ้ำ
+        if (existingAnswer) {
+          if (alive) {
+            setStatus({
+              loading: false,
+              allowed: false,
+            });
+          }
+          return;
+        }
+
+        // 2) ดู pass_map จาก Pretest
+        const { data: pretest, error: pretestErr } = await supabase
+          .from("pretest_results")
+          .select("pass_map")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (pretestErr) throw pretestErr;
+
+        // 3) ดู Posttest ของแต่ละหน่วย
+        const { data: attempts, error: attemptErr } = await supabase
+          .from("posttest_attempts")
+          .select(`
+            total_score,
+            max_score,
+            submitted_at,
+            posttests!inner (
+              unit,
+              is_active
+            )
+          `)
+          .eq("user_id", userId)
+          .not("submitted_at", "is", null)
+          .eq("posttests.is_active", true);
+
+        if (attemptErr) throw attemptErr;
+
+        const passedUnits = new Set();
+
+        // -------------------------
+        // ผ่านจาก Pretest
+        // -------------------------
+        let passMap = pretest?.pass_map;
+
+        if (typeof passMap === "string") {
+          try {
+            passMap = JSON.parse(passMap);
+          } catch {
+            passMap = {};
+          }
+        }
+
+        if (passMap && typeof passMap === "object") {
+          Object.entries(passMap).forEach(([unit, passed]) => {
+            if (
+              passed === true ||
+              passed === "true" ||
+              passed === 1 ||
+              passed === "1"
+            ) {
+              passedUnits.add(Number(unit));
+            }
+          });
+        }
+
+        // -------------------------
+        // หา Posttest ล่าสุดแต่ละ Unit
+        // -------------------------
+        const latestByUnit = new Map();
+
+        for (const row of attempts || []) {
+          const related = row?.posttests;
+
+          const unit = Array.isArray(related)
+            ? related[0]?.unit
+            : related?.unit;
+
+          const unitNo = Number(unit);
+
+          if (!Number.isInteger(unitNo) || !row.submitted_at) continue;
+
+          const prev = latestByUnit.get(unitNo);
+
+          if (
+            !prev ||
+            new Date(row.submitted_at).getTime() >
+              new Date(prev.submitted_at).getTime()
+          ) {
+            latestByUnit.set(unitNo, row);
+          }
+        }
+
+        // -------------------------
+        // ผ่าน Posttest >= 80%
+        // -------------------------
+        for (const [unitNo, row] of latestByUnit.entries()) {
+          const score = Number(row.total_score) || 0;
+          const max = Number(row.max_score) || 0;
+
+          const percent = max > 0 ? (score / max) * 100 : 0;
+
+          if (percent >= 80) {
+            passedUnits.add(unitNo);
+          }
+        }
+
+        const allowed = passedUnits.size >= 8;
+
+        if (alive) {
+          setStatus({
+            loading: false,
+            allowed,
+          });
+        }
+      } catch (error) {
+        console.error("Survey access check error:", error);
+
+        if (alive) {
+          setStatus({
+            loading: false,
+            allowed: false,
+          });
+        }
+      }
+    }
+
+    checkSurveyAccess();
+
+    return () => {
+      alive = false;
+    };
+  }, [session?.user?.id]);
+
+  if (status.loading) {
+    return (
+      <div style={{ padding: 24, color: "white" }}>
+        Checking Survey Permission...
+      </div>
+    );
+  }
+
+  if (!status.allowed) {
+    return <Navigate to="/main" replace />;
+  }
+
+  return <Outlet />;
+}
+
+// ====================
+// Gate: Final allowed
+// ต้องผ่านครบ 8 หน่วย และยังไม่เคยทำ Final
+// ====================
+function RequireFinalEligible({ session }) {
+  const [status, setStatus] = useState({
+    loading: true,
+    allowed: false,
+  });
+
+  useEffect(() => {
+    let alive = true;
+
+    async function checkFinalAccess() {
+      const userId = session?.user?.id;
+
+      if (!userId) {
+        if (alive) {
+          setStatus({
+            loading: false,
+            allowed: false,
+          });
+        }
+        return;
+      }
+
+      try {
+        // 1) ดู pass_map จาก Pretest
+        const { data: pretest, error: pretestErr } = await supabase
+          .from("pretest_results")
+          .select("pass_map")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (pretestErr) throw pretestErr;
+
+        // 2) เช็กว่าเคยทำ Final แล้วหรือยัง
+        const { data: finalResult, error: finalErr } = await supabase
+          .from("final_test_results")
+          .select("first_total_score")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (finalErr) throw finalErr;
+
+
+
+        // 3) โหลดคะแนนแบบฝึกหัดท้ายบท
+        const { data: attempts, error: attemptErr } = await supabase
+          .from("posttest_attempts")
+          .select(`
+            total_score,
+            max_score,
+            submitted_at,
+            posttests!inner (
+              unit,
+              is_active
+            )
+          `)
+          .eq("user_id", userId)
+          .not("submitted_at", "is", null)
+          .eq("posttests.is_active", true);
+
+        if (attemptErr) throw attemptErr;
+
+        // -------------------------
+        // หน่วยที่ผ่านจาก Pretest
+        // -------------------------
+        const passedUnits = new Set();
+
+        let passMap = pretest?.pass_map;
+
+        if (typeof passMap === "string") {
+          try {
+            passMap = JSON.parse(passMap);
+          } catch {
+            passMap = {};
+          }
+        }
+
+        if (passMap && typeof passMap === "object") {
+          Object.entries(passMap).forEach(([unit, passed]) => {
+            if (
+              passed === true ||
+              passed === "true" ||
+              passed === 1 ||
+              passed === "1"
+            ) {
+              passedUnits.add(Number(unit));
+            }
+          });
+        }
+
+        // -------------------------
+        // หา attempt ล่าสุดของแต่ละ Unit
+        // -------------------------
+        const latestByUnit = new Map();
+
+        for (const row of attempts || []) {
+          const related = row?.posttests;
+
+          const unit = Array.isArray(related)
+            ? related[0]?.unit
+            : related?.unit;
+
+          const unitNo = Number(unit);
+
+          if (!Number.isInteger(unitNo) || !row.submitted_at) {
+            continue;
+          }
+
+          const prev = latestByUnit.get(unitNo);
+
+          if (
+            !prev ||
+            new Date(row.submitted_at).getTime() >
+              new Date(prev.submitted_at).getTime()
+          ) {
+            latestByUnit.set(unitNo, row);
+          }
+        }
+
+        // -------------------------
+        // หน่วยที่ผ่าน Posttest >= 80%
+        // -------------------------
+        for (const [unitNo, row] of latestByUnit.entries()) {
+          const score = Number(row.total_score) || 0;
+          const max = Number(row.max_score) || 0;
+
+          const percent =
+            max > 0 ? (score / max) * 100 : 0;
+
+          if (percent >= 80) {
+            passedUnits.add(unitNo);
+          }
+        }
+
+        // ต้องครบ 8 หน่วย
+        const allowed = passedUnits.size >= 8;
+
+        if (alive) {
+          setStatus({
+            loading: false,
+            allowed,
+          });
+        }
+      } catch (error) {
+        console.error("Final access check error:", error);
+
+        if (alive) {
+          setStatus({
+            loading: false,
+            allowed: false,
+          });
+        }
+      }
+    }
+
+    checkFinalAccess();
+
+    return () => {
+      alive = false;
+    };
+  }, [session?.user?.id]);
+
+  if (status.loading) {
+    return (
+      <div style={{ padding: 24, color: "white" }}>
+        Checking Final Permission...
+      </div>
+    );
+  }
+
+  if (!status.allowed) {
+    return <Navigate to="/main" replace />;
+  }
+
+  return <Outlet />;
+}
+
 // ====================
 // Wrapper สำหรับ Unit 1.3
 // ====================
@@ -337,7 +704,9 @@ export default function App() {
             <Route path="/main" element={<Main />} />
             <Route path="/lessons" element={<Lessons />} />
             <Route path="/cybercases" element={<Cybercases />} />
-            <Route path="/final" element={<Final />} />
+            <Route element={<RequireFinalEligible session={session} />}>
+  <Route path="/final" element={<Final />} />
+</Route>
             <Route path="/LessonLinear" element={<LessonLinear />} />
 
             {/* Unit 1 */}
@@ -441,7 +810,9 @@ export default function App() {
             <Route path="/case/group7" element={<Group7 />} />
 
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/survey" element={<SurveyPage />} />
+            <Route element={<RequireSurveyEligible session={session} />}>
+  <Route path="/survey" element={<SurveyPage />} />
+</Route>
             <Route path="/dashScore" element={<DashScore />} />
             <Route path="/feedback" element={<Feedback />} />
           </Route>

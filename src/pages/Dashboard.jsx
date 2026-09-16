@@ -28,6 +28,7 @@ export default function DashScore() {
   // ✅ เก็บคะแนน posttest “ครั้งแรกที่ submit” ของแต่ละหน่วย (1-8)
   // รูปแบบ: { 1: { score, max }, 2: { score, max }, ... }
   const [scoresByUnit, setScoresByUnit] = useState({});
+  const [canTakeFinal, setCanTakeFinal] = useState(false);
 
   // ✅ คะแนน Pretest รวม
   const [programPre, setProgramPre] = useState({
@@ -66,6 +67,111 @@ export default function DashScore() {
         }
 
         const userId = session.user.id;
+
+
+        // -------------------------
+// ตรวจสอบสิทธิ์ Final / Survey
+// ใช้ logic เดียวกับหน้า Home
+// -------------------------
+const { data: eligibilityPretest, error: eligibilityPretestErr } =
+  await supabase
+    .from("pretest_results")
+    .select("pass_map")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+if (eligibilityPretestErr) {
+  console.error("eligibility pretest error:", eligibilityPretestErr);
+}
+
+const { data: eligibilityAttempts, error: eligibilityAttemptsErr } =
+  await supabase
+    .from("posttest_attempts")
+    .select(`
+      total_score,
+      max_score,
+      submitted_at,
+      posttests!inner (
+        unit,
+        is_active
+      )
+    `)
+    .eq("user_id", userId)
+    .not("submitted_at", "is", null)
+    .eq("posttests.is_active", true);
+
+if (eligibilityAttemptsErr) {
+  console.error("eligibility attempts error:", eligibilityAttemptsErr);
+}
+
+
+const passedUnits = new Set();
+
+// หน่วยที่ผ่านจาก Pretest
+let passMap = eligibilityPretest?.pass_map;
+
+if (typeof passMap === "string") {
+  try {
+    passMap = JSON.parse(passMap);
+  } catch {
+    passMap = {};
+  }
+}
+
+if (passMap && typeof passMap === "object") {
+  Object.entries(passMap).forEach(([unit, passed]) => {
+    if (
+      passed === true ||
+      passed === "true" ||
+      passed === 1 ||
+      passed === "1"
+    ) {
+      passedUnits.add(Number(unit));
+    }
+  });
+}
+
+// หา Posttest ล่าสุดของแต่ละ Unit
+const latestByUnit = new Map();
+
+for (const row of eligibilityAttempts || []) {
+  const related = row?.posttests;
+  const unit = Array.isArray(related)
+    ? related[0]?.unit
+    : related?.unit;
+
+  const unitNo = Number(unit);
+
+  if (!Number.isInteger(unitNo) || !row.submitted_at) continue;
+
+  const previous = latestByUnit.get(unitNo);
+
+  if (
+    !previous ||
+    new Date(row.submitted_at).getTime() >
+      new Date(previous.submitted_at).getTime()
+  ) {
+    latestByUnit.set(unitNo, row);
+  }
+}
+
+// หน่วยที่ผ่าน Posttest >= 80%
+for (const [unitNo, row] of latestByUnit.entries()) {
+  const score = Number(row.total_score) || 0;
+  const max = Number(row.max_score) || 0;
+
+  const percent = max > 0 ? (score / max) * 100 : 0;
+
+  if (percent >= 80) {
+    passedUnits.add(unitNo);
+  }
+}
+
+const eligible = passedUnits.size >= 8;
+
+if (mounted) {
+  setCanTakeFinal(eligible);
+}
 
         // -------------------------
         // 1) ดึง Profile
@@ -416,9 +522,21 @@ const bannerConfig = useMemo(() => {
                     </div>
                   </div>
 
-                  <Link className="dashMiniLink" to="/final">
-                    <FiEdit />
-                  </Link>
+                  {canTakeFinal ? (
+  <Link className="dashMiniLink" to="/final">
+    <FiEdit />
+  </Link>
+) : (
+  <button
+    type="button"
+    className="dashMiniLink"
+    disabled
+    title="ต้องผ่านการเรียนครบทุกหน่วยก่อน"
+    style={{ opacity: 0.45, cursor: "not-allowed" }}
+  >
+    <FiLock />
+  </button>
+)}
                 </div>
 
                 <div className="dashList__row">
@@ -430,9 +548,21 @@ const bannerConfig = useMemo(() => {
                     </div>
                   </div>
 
-                  <Link className="dashBtn dashBtn--solid" to="/survey">
-                    <FiEdit />
-                  </Link>
+                  {canTakeFinal ? (
+  <Link className="dashBtn dashBtn--solid" to="/survey">
+    <FiEdit />
+  </Link>
+) : (
+  <button
+    type="button"
+    className="dashBtn dashBtn--solid"
+    disabled
+    title="ต้องผ่านการเรียนครบทุกหน่วยก่อน"
+    style={{ opacity: 0.45, cursor: "not-allowed" }}
+  >
+    <FiLock />
+  </button>
+)}
                 </div> 
               </div>
             </section>
