@@ -489,7 +489,7 @@ function RequireFinalEligible({ session }) {
 
 
 
-        // 3) โหลดคะแนนแบบฝึกหัดท้ายบท
+        // 3) โหลดคะแนนกิจกรรมหลังบทเรียน
         const { data: attempts, error: attemptErr } = await supabase
           .from("posttest_attempts")
           .select(`

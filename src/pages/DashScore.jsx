@@ -196,7 +196,7 @@ export default function DashScore() {
             {/* 2) Posttest รายหน่วย */}
             <section className="dashCard dashCard--post">
               <div className="dashCard__head">
-                <h2 className="dashCard__title">2) แบบฝึกหัดท้ายบท</h2>
+                <h2 className="dashCard__title">2) กิจกรรมหลังบทเรียน</h2>
                 <span className="dashHint">ทำแล้ว {doneUnits}/8 บท</span>
               </div>
               <ol className="dashSteps">

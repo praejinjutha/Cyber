@@ -480,7 +480,7 @@ export default function LearnUnit2() {
                     <div className="edu-cornerBadge">ผ่านจาก Pretest</div>
                   )}
 
-                  <div className="edu-lessonCard__title">แบบฝึกหัด: Unit 2</div>
+                  <div className="edu-lessonCard__title">กิจกรรมหลังบทเรียน: Unit 2</div>
                   <div className="edu-lessonCard__desc">
                     ทำแบบทดสอบหลังเรียนเพื่อบันทึกผลและปลดล็อกการเรียนต่อ
                   </div>

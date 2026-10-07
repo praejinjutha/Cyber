@@ -397,7 +397,7 @@ export default function Lessons() {
               <div className="edu-hero__text">
                 <h1>เส้นทางการเรียนรู้</h1>
                 <p>
-                  ระบบจะใช้ผล Pretest ร่วมกับคะแนนแบบฝึกหัดรายบท
+                  ระบบจะใช้ผล Pretest ร่วมกับคะแนนกิจกรรมหลังบทเรียน
                   โดยใช้คะแนนล่าสุดของแต่ละบทในการตัดสินว่าปลดล็อกบทถัดไปได้หรือไม่
                 </p>
               </div>
@@ -490,7 +490,7 @@ export default function Lessons() {
 
                     {!u.latest && !u.passedFromPretest && u.status !== "locked" && (
                       <div className="unit-tooltip__desc" style={{ marginTop: 8, opacity: 0.95 }}>
-                        ยังไม่มีคะแนนล่าสุดของแบบฝึกหัด
+                        ยังไม่มีคะแนนล่าสุดของกิจกรรมหลังบทเรียน
                       </div>
                     )}
 

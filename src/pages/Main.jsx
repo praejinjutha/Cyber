@@ -190,7 +190,7 @@ export default function Main() {
           return;
         }
 
-        // 3) โหลดผลแบบฝึกหัดท้ายบทล่าสุดของแต่ละหน่วย
+        // 3) โหลดผลกิจกรรมหลังบทเรียนล่าสุดของแต่ละหน่วย
         const { data: attemptRows, error: postErr } = await supabase
           .from("posttest_attempts")
           .select(`
@@ -380,7 +380,7 @@ export default function Main() {
               <p className="homehero__desc" style={{ marginTop: 12 }}>
                 ผู้เรียนจะสามารถเข้าสู่
                 <b> แบบทดสอบหลังเรียน </b>
-                ได้เมื่อเรียนและผ่านแบบฝึกหัดท้ายบทครบทุกหน่วยการเรียนรู้
+                ได้เมื่อเรียนและผ่านกิจกรรมหลังบทเรียนครบทุกหน่วยการเรียนรู้
               </p>
             )}
 

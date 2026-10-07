@@ -139,7 +139,7 @@ const Learn4Unit5 = () => {
   /**
    * ✅ step flow (ใหม่)
    * - "micro"       : สอนก่อน
-   * - "interactive" : ทำแบบฝึกหัด
+   * - "interactive" : ทำกิจกรรมหลังบทเรียน
    * - "summary"     : สรุปคะแนน (ออกได้จากหน้านี้)
    */
   const [step, setStep] = useState("micro");
@@ -186,7 +186,7 @@ const Learn4Unit5 = () => {
 
   // ✅ title
   const panelTitle = useMemo(() => {
-    if (step === "micro") return "สรุปก่อนเริ่มทำแบบฝึกหัด";
+    if (step === "micro") return "สรุปก่อนเริ่มทำกิจกรรมหลังบทเรียน";
     if (step === "interactive") return "Interactive: จำแนกประเภทข้อมูล + เฉลยทันที";
     return "สรุปผลคะแนนกิจกรรม";
   }, [step]);
@@ -416,9 +416,9 @@ const Learn4Unit5 = () => {
                     className="edu-btn edu-btn--primary"
                     type="button"
                     onClick={startInteractive}
-                    title="เริ่มทำแบบฝึกหัด"
+                    title="เริ่มทำกิจกรรมหลังบทเรียน"
                   >
-                    เริ่มทำแบบฝึกหัด <FiChevronRight aria-hidden="true" />
+                    เริ่มทำกิจกรรมหลังบทเรียน <FiChevronRight aria-hidden="true" />
                   </button>
 
                   
@@ -643,7 +643,7 @@ const Learn4Unit5 = () => {
                     </button>
 
                     <button className="edu-btn edu-btn--primary" type="button" onClick={redoPractice}>
-                      ทำแบบฝึกหัดอีกครั้ง <FiChevronRight aria-hidden="true" />
+                      ทำกิจกรรมหลังบทเรียนอีกครั้ง <FiChevronRight aria-hidden="true" />
                     </button>
 
                     <button className="edu-btn edu-btn--ghost" type="button" onClick={goBackUnit}>

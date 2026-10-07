@@ -353,7 +353,7 @@ export default function Learn() {
                 <div className="edu-lessonNo"><FiCheckCircle /></div>
                 <div className="edu-lessonCard__meta edu-lessonCard__meta--posttest">
                   {passedFromPretest && <div className="edu-cornerBadge">ผ่านจาก Pretest</div>}
-                  <div className="edu-lessonCard__title">แบบฝึกหัด: Unit 1</div>
+                  <div className="edu-lessonCard__title">กิจกรรมหลังบทเรียน: Unit 1</div>
                   <div className="edu-lessonCard__desc">ทำแบบทดสอบหลังเรียนเพื่อบันทึกผลและปลดล็อกการเรียนต่อ</div>
                   <div className="edu-lessonCard__tags" style={{ marginBottom: 10 }}>
                     <span className={`edu-pill ${latestPassedForDisplay ? "edu-pill--pass" : "edu-pill--fail"}`}>
